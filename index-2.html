@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>FAB · Entrenamiento</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0A1628;--bg2:#111f38;--bg3:#192d4e;
+  --cel:#6BB8F5;--white:#F0F6FF;--muted:#7A8FA8;
+  --green:#22C98A;--green-bg:rgba(34,201,138,0.12);
+  --amber:#F5A623;--amber-bg:rgba(245,166,35,0.12);
+  --red:#F5524A;--red-bg:rgba(245,82,74,0.1);
+  --border:rgba(107,184,245,0.12);--border2:rgba(107,184,245,0.22);
+  --text:#F0F6FF;--text2:#B8CCDF;
+  --mono:'JetBrains Mono',monospace;
+  --display:'Bebas Neue',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;overflow-x:hidden}
+
+/* ── PANTALLAS ── */
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.on{display:flex}
+
+/* ── PANTALLA 1: ELEGIR NOMBRE ── */
+#s-inicio{align-items:stretch;padding:0}
+.inicio-hero{background:var(--bg2);padding:36px 24px 28px;text-align:center;border-bottom:1px solid var(--border)}
+.fab-logo{font-family:var(--display);font-size:52px;color:var(--cel);letter-spacing:6px;line-height:1;margin-bottom:6px}
+.fab-sub{font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.pre-badge{display:inline-block;background:var(--green-bg);border:1px solid rgba(34,201,138,0.3);color:var(--green);font-size:11px;font-weight:600;padding:4px 12px;border-radius:99px;margin-top:12px;letter-spacing:.04em}
+.search-wrap{padding:20px 20px 12px}
+.search-input{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:14px 16px;font-size:16px;color:var(--white);font-family:'Inter',sans-serif;outline:none;-webkit-appearance:none}
+.search-input::placeholder{color:var(--muted)}
+.search-input:focus{border-color:var(--cel)}
+.atletas-list{flex:1;overflow-y:auto;padding:0 20px 24px}
+.atleta-item{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.atleta-item:active{transform:scale(.98);border-color:var(--cel)}
+.ai-nombre{font-size:15px;font-weight:600;color:var(--white)}
+.ai-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.ai-arrow{font-size:18px;color:var(--muted)}
+
+/* ── PANTALLA 2: ENTRENAMIENTO ── */
+#s-entreno{background:var(--bg)}
+.entreno-header{background:var(--bg2);border-bottom:1px solid var(--border);padding:0}
+.header-top{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 0}
+.btn-back{background:transparent;border:none;color:var(--muted);font-size:22px;cursor:pointer;padding:4px;line-height:1}
+.header-nombre{font-family:var(--display);font-size:28px;color:var(--cel);letter-spacing:2px;text-align:center;flex:1}
+.header-fase{font-size:10px;color:var(--muted);text-align:center;text-transform:uppercase;letter-spacing:.08em;padding:4px 0 14px}
+.dia-tabs{display:flex;border-top:1px solid var(--border)}
+.dia-tab{flex:1;padding:12px 6px;text-align:center;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;background:none;border-left:none;border-right:none;border-top:none;font-family:'Inter',sans-serif}
+.dia-tab.on{color:var(--cel);border-bottom-color:var(--cel)}
+
+/* DÍA HOY badge */
+.hoy-badge{font-size:9px;background:var(--green-bg);color:var(--green);padding:1px 5px;border-radius:99px;display:block;margin-top:2px}
+
+.dia-content{display:none;flex:1;overflow-y:auto;padding-bottom:100px}
+.dia-content.on{display:block}
+
+.bloque-hdr{padding:10px 20px;background:rgba(107,184,245,0.06);font-size:10px;font-weight:600;color:var(--cel);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border);border-top:1px solid var(--border);margin-top:4px}
+.bloque-hdr:first-child{margin-top:0;border-top:none}
+
+.ej-row{display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid rgba(107,184,245,0.06);gap:12px}
+.ej-row:active{background:rgba(107,184,245,0.04)}
+.ej-info{flex:1}
+.ej-nombre{font-size:14px;font-weight:600;color:var(--white);margin-bottom:3px}
+.ej-meta{font-size:12px;color:var(--muted)}
+.ej-input-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0}
+.ej-input{width:72px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:8px 6px;font-family:var(--mono);font-size:16px;font-weight:500;color:var(--amber);text-align:center;outline:none;-webkit-appearance:none}
+.ej-input:focus{border-color:var(--amber);background:rgba(245,166,35,0.08)}
+.ej-input::placeholder{color:var(--muted);font-size:13px}
+.ej-input-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.rec-val{font-family:var(--mono);font-size:10px;color:var(--green);margin-top:2px}
+
+.nota-bloque{padding:14px 20px;background:var(--bg2);margin:8px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.nota-title{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.nota-text{font-size:13px;color:var(--text2);line-height:1.6;font-style:italic}
+
+/* ── BARRA GUARDAR ── */
+.save-bar{position:fixed;bottom:0;left:0;right:0;padding:14px 20px 24px;background:var(--bg);border-top:1px solid var(--border);display:none}
+.save-bar.on{display:flex;gap:10px}
+.btn-guardar{flex:1;background:var(--cel);color:var(--bg);border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;letter-spacing:.02em}
+.btn-guardar:active{opacity:.85;transform:scale(.98)}
+
+/* ── PANTALLA 3: CONFIRMACIÓN ── */
+#s-ok{align-items:center;justify-content:center;padding:32px 24px;text-align:center}
+.ok-icon{font-size:64px;margin-bottom:20px}
+.ok-title{font-family:var(--display);font-size:44px;color:var(--green);letter-spacing:3px;margin-bottom:8px}
+.ok-sub{font-size:15px;color:var(--text2);line-height:1.6;margin-bottom:6px}
+.ok-muted{font-size:12px;color:var(--muted);margin-bottom:32px}
+.btn-nuevo{background:var(--bg2);border:1px solid var(--border2);color:var(--text2);border-radius:12px;padding:14px 28px;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer}
+</style>
+</head>
+<body>
+
+<!-- ── PANTALLA 1: ELEGIR NOMBRE ── -->
+<div class="screen on" id="s-inicio">
+  <div class="inicio-hero">
+    <div class="fab-logo">FAB</div>
+    <div class="fab-sub">Federación Argentina · Béisbol</div>
+    <div class="pre-badge">Pre-temporada · 7 jul – 27 ago 2026</div>
+  </div>
+  <div class="search-wrap">
+    <input class="search-input" id="search-input" type="text" placeholder="Buscá tu apellido..." oninput="filtrarAtletas(this.value)" autocomplete="off" autocorrect="off" spellcheck="false">
+  </div>
+  <div class="atletas-list" id="atletas-list"></div>
+</div>
+
+<!-- ── PANTALLA 2: ENTRENAMIENTO ── -->
+<div class="screen" id="s-entreno">
+  <div class="entreno-header">
+    <div class="header-top">
+      <button class="btn-back" onclick="volver()">←</button>
+      <div class="header-nombre" id="h-nombre">—</div>
+      <div style="width:36px"></div>
+    </div>
+    <div class="header-fase">Pre-temporada · <span id="h-fecha"></span></div>
+    <div class="dia-tabs">
+      <button class="dia-tab" id="tab-0" onclick="selDia(0)">Día 1<span class="hoy-badge" id="hoy-0" style="display:none">HOY</span></button>
+      <button class="dia-tab" id="tab-1" onclick="selDia(1)">Día 2<span class="hoy-badge" id="hoy-1" style="display:none">HOY</span></button>
+      <button class="dia-tab" id="tab-2" onclick="selDia(2)">Día 3<span class="hoy-badge" id="hoy-2" style="display:none">HOY</span></button>
+      <button class="dia-tab" id="tab-3" onclick="selDia(3)">Recovery<span class="hoy-badge" id="hoy-3" style="display:none">HOY</span></button>
+    </div>
+  </div>
+
+  <div id="dia-0" class="dia-content">
+    <div class="bloque-hdr">Bloque 1 · Movilidad 10'</div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Movilidad general</div><div class="ej-meta">10 minutos</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="✓" data-ej="mov-d1" style="width:56px;font-size:20px"><div class="ej-input-lbl">ok</div></div></div>
+    <div class="bloque-hdr">Bloque 2 · Abs</div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Abdominales</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="abs-d1" inputmode="numeric"><div class="ej-input-lbl">reps</div></div></div>
+    <div class="bloque-hdr">Bloque 3 · Tren superior</div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Press banca</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="press-banca" inputmode="decimal"><div class="ej-input-lbl">kg</div><div class="rec-val" id="rec-pb"></div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Press uni lat</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="press-uni" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Apertura</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="apertura" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Dominadas</div><div class="ej-meta">Series · máx reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="dominadas-d1" inputmode="numeric"><div class="ej-input-lbl">reps</div></div></div>
+    <div class="bloque-hdr">Bloque 4 · Tren inferior</div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Sentadilla</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="sentadilla" inputmode="decimal"><div class="ej-input-lbl">kg</div><div class="rec-val" id="rec-sq"></div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Estocada con mancuerna</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="estocada-db" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Prensa</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="prensa" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Gemelos</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="gemelos-d1" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="nota-bloque"><div class="nota-title">Nota del DT</div><div class="nota-text">Fase concéntrica explosiva en compuestos. Bajar lento 2 segundos. Serie de entrada antes de cargar.</div></div>
+  </div>
+
+  <div id="dia-1" class="dia-content">
+    <div class="bloque-hdr">Bloque 1 · Movilidad 10'</div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Movilidad general</div><div class="ej-meta">10 minutos</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="✓" data-ej="mov-d2" style="width:56px;font-size:20px"><div class="ej-input-lbl">ok</div></div></div>
+    <div class="bloque-hdr">Bloque 2 · Abs</div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Abdominales</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="abs-d2" inputmode="numeric"><div class="ej-input-lbl">reps</div></div></div>
+    <div class="bloque-hdr">Bloque 3 · Tren superior</div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Dorsalera</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="dorsalera" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Remo DB</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="remo-db" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Dominadas abiertas</div><div class="ej-meta">Series · máx reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="dom-abiertas" inputmode="numeric"><div class="ej-input-lbl">reps</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Curl bíceps</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="curl-biceps" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Tríceps en polea</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="triceps-polea" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="bloque-hdr">Bloque 4 · Cadena posterior</div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Peso muerto</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="peso-muerto" inputmode="decimal"><div class="ej-input-lbl">kg</div><div class="rec-val" id="rec-pm"></div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Búlgara</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="bulgara" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Sentadilla barra hex.</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="sent-hex" inputmode="decimal"><div class="ej-input-lbl">kg</div><div class="rec-val" id="rec-hex"></div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Gemelos</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="gemelos-d2" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="nota-bloque"><div class="nota-title">Nota del DT</div><div class="nota-text">Balance con Día 1. Foco en espalda, isquios y glúteos. Serie de entrada antes de cada ejercicio compuesto.</div></div>
+  </div>
+
+  <div id="dia-2" class="dia-content">
+    <div class="bloque-hdr">Bloque 1 · Movilidad 10'</div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Movilidad general</div><div class="ej-meta">10 minutos</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="✓" data-ej="mov-d3" style="width:56px;font-size:20px"><div class="ej-input-lbl">ok</div></div></div>
+    <div class="bloque-hdr">Bloque 2 · Abs rotacional</div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Twist ruso</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="twist-ruso" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Anti-rotación con polea</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="anti-rot" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Espinales</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="espinales" inputmode="numeric"><div class="ej-input-lbl">reps</div></div></div>
+    <div class="bloque-hdr">Bloque 3 · Hombro + estabilidad</div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Press de hombro</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="press-hombro" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Vuelos laterales</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="vuelos-lat" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Press inclinado DB</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="press-inc" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Antebrazos</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="antebrazos" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="bloque-hdr">Bloque 4 · Tren inferior</div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Hip thrust</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="hip-thrust" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Sentadilla front DB</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="sent-front" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Gemelos</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="gemelos-d3" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="nota-bloque"><div class="nota-title">Nota del DT — Fuerza sarcoplasmática</div><div class="nota-text">Volumen alto, cargas moderadas, tiempo bajo tensión. Series largas. Foco en hombro y cadena posterior.</div></div>
+  </div>
+
+  <div id="dia-3" class="dia-content">
+    <div class="bloque-hdr" style="color:var(--green)">Movilidad articular</div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Hombros</div><div class="ej-meta">Rotación completa</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="✓" data-ej="mov-hom" style="width:56px;font-size:20px"><div class="ej-input-lbl">ok</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Cadera</div><div class="ej-meta">Apertura y flexión</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="✓" data-ej="mov-cad" style="width:56px;font-size:20px"><div class="ej-input-lbl">ok</div></div></div>
+    <div class="bloque-hdr" style="color:var(--green)">Bloque abs · carga baja</div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Abdominales</div><div class="ej-meta">Carga baja</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="abs-rec" inputmode="numeric"><div class="ej-input-lbl">reps</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Espinales</div><div class="ej-meta">Activación suave</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="esp-rec" inputmode="numeric"><div class="ej-input-lbl">reps</div></div></div>
+    <div class="bloque-hdr" style="color:var(--green)">Cardio zona 2</div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Zona 2 · trote / bici</div><div class="ej-meta">15 minutos · ritmo conversacional</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="fc-z2" inputmode="numeric"><div class="ej-input-lbl">FC prom</div></div></div>
+    <div class="bloque-hdr" style="color:var(--green)">Velocidad</div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Sprint 200m × 6</div><div class="ej-meta">Recuperación completa entre sprints</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="sprint-200" inputmode="decimal"><div class="ej-input-lbl">mejor seg</div></div></div>
+    <div class="nota-bloque"><div class="nota-title">Recovery — no competir con el propio cuerpo</div><div class="nota-text">Es día de regenerar. El esfuerzo máximo va en los Días 1, 2 y 3.</div></div>
+  </div>
+
+  <div class="save-bar on" id="save-bar">
+    <button class="btn-guardar" onclick="guardarSesion()">Guardar sesión →</button>
+  </div>
+</div>
+
+<!-- ── PANTALLA 3: OK ── -->
+<div class="screen" id="s-ok">
+  <div class="ok-icon">✅</div>
+  <div class="ok-title">GUARDADO</div>
+  <div class="ok-sub" id="ok-msg">Sesión registrada correctamente.</div>
+  <div class="ok-muted">Los datos van directo al staff técnico.</div>
+  <button class="btn-nuevo" onclick="volver()">← Volver al inicio</button>
+</div>
+
+<script>
+// ── DATOS DE ATLETAS ──────────────────────────────────────────────────────────
+const ATLETAS = [
+  {ap:"Kramer",       nom:"Agustín",      pressMax:"—", sentMax:"—", pmMax:"—"},
+  {ap:"Nakandakare",  nom:"Lucas Martín", pressMax:"—", sentMax:"—", pmMax:"—"},
+  {ap:"Zapata",       nom:"Ezequiel",     pressMax:"80kg", sentMax:"150kg", pmMax:"—"},
+  {ap:"Palazzo",      nom:"Marco",        pressMax:"90kg", sentMax:"100kg", pmMax:"—"},
+  {ap:"Prince",       nom:"Jackson",      pressMax:"75kg", sentMax:"125kg", pmMax:"—"},
+  {ap:"Hiki",         nom:"Nicolas E.",   pressMax:"—",  sentMax:"—",   pmMax:"—"},
+  {ap:"Riello",       nom:"Kevin L.",     pressMax:"—",  sentMax:"—",   pmMax:"—"},
+  {ap:"Cipriota",     nom:"Jacinto I.",   pressMax:"110kg",sentMax:"—", pmMax:"—"},
+  {ap:"Abarca Lugo",  nom:"Jose D.",      pressMax:"110kg",sentMax:"175kg",pmMax:"—"},
+  {ap:"Alfonso",      nom:"Manuel",       pressMax:"75kg", sentMax:"110kg",pmMax:"—"},
+  {ap:"Garcia",       nom:"Sebastian A.", pressMax:"—",  sentMax:"—",   pmMax:"—"},
+  {ap:"Villasanti",   nom:"Felipe",       pressMax:"—",  sentMax:"—",   pmMax:"—"},
+  {ap:"Braccini",     nom:"Luca",         pressMax:"85kg", sentMax:"130kg",pmMax:"—"},
+  {ap:"Rendon",       nom:"Gabriel",      pressMax:"—",  sentMax:"150kg",pmMax:"—"},
+  {ap:"Padrón Silva", nom:"Diego J.",     pressMax:"85kg", sentMax:"120kg",pmMax:"—"},
+  {ap:"Baldovi Cagnin",nom:"Matias",      pressMax:"90kg", sentMax:"—", pmMax:"—"},
+  {ap:"Gutiérrez",    nom:"Donavon",      pressMax:"70kg", sentMax:"70kg",pmMax:"—"},
+  {ap:"Pérez",        nom:"Franco",       pressMax:"—",  sentMax:"—",   pmMax:"—"},
+  {ap:"Uzal",         nom:"Lucas",        pressMax:"85kg", sentMax:"150kg",pmMax:"150kg"},
+  {ap:"Garcia Rozada",nom:"Mateo V.",     pressMax:"90kg", sentMax:"125kg",pmMax:"—"},
+  {ap:"Carroll",      nom:"Julian O.",    pressMax:"85kg", sentMax:"80kg",pmMax:"—"},
+  {ap:"Tesouro",      nom:"Iñaki",        pressMax:"22kg", sentMax:"100kg",pmMax:"—"},
+  {ap:"Perdomo",      nom:"Alejandro",    pressMax:"90kg", sentMax:"—",   pmMax:"—"},
+  {ap:"Ramón Armayo", nom:"Lucas",        pressMax:"—",  sentMax:"—",   pmMax:"—"},
+  {ap:"Figueras",     nom:"Pedro",        pressMax:"85kg", sentMax:"—", pmMax:"—"},
+  {ap:"Amma",         nom:"Pedro",        pressMax:"105kg",sentMax:"180kg",pmMax:"—"},
+  {ap:"Brahim",       nom:"Shahir",       pressMax:"—",  sentMax:"—",   pmMax:"—"},
+  {ap:"Fontana",      nom:"Sebastian",    pressMax:"—",  sentMax:"—",   pmMax:"—"},
+  {ap:"Cadiz",        nom:"Mannuk",       pressMax:"—",  sentMax:"—",   pmMax:"—"},
+  {ap:"Cadiz",        nom:"Zimba",        pressMax:"—",  sentMax:"—",   pmMax:"—"},
+  {ap:"Riha",         nom:"Matías",       pressMax:"—",  sentMax:"—",   pmMax:"—"},
+  {ap:"Arguinchona",  nom:"Tiago",        pressMax:"65kg", sentMax:"—", pmMax:"—"},
+  {ap:"Rodriguez",    nom:"Ezequiel",     pressMax:"85kg", sentMax:"135kg",pmMax:"—"},
+  {ap:"Aló",          nom:"Juan Cruz",    pressMax:"90kg", sentMax:"120kg",pmMax:"—"},
+  {ap:"Morales",      nom:"Aramis",       pressMax:"70kg", sentMax:"110kg",pmMax:"—"},
+  {ap:"Contreras",    nom:"Emilio",       pressMax:"—",  sentMax:"—",   pmMax:"—"},
+  {ap:"Gimenez",      nom:"Carlos (DT)",  pressMax:"—",  sentMax:"—",   pmMax:"—"},
+];
+
+// ── URL DEL GOOGLE SCRIPT (completar después) ─────────────────────────────────
+// Para conectar con Google Sheets: Tools → Script Editor → publicar como Web App
+// Pegá la URL aquí:
+const GOOGLE_SCRIPT_URL = 'TU_GOOGLE_SCRIPT_URL_AQUI';
+
+// ── ESTADO ────────────────────────────────────────────────────────────────────
+let atletaActual = null;
+let diaActual = 0;
+
+// ── DETECTAR DÍA AUTOMÁTICO ──────────────────────────────────────────────────
+function diaDeHoy() {
+  const d = new Date().getDay(); // 0=dom, 1=lun, 2=mar, 3=mié, 4=jue, 5=vie, 6=sáb
+  if (d === 2) return 0;  // martes → Día 1
+  if (d === 4) return 1;  // jueves → Día 2
+  return -1; // no es día de entrenamiento fijo
+}
+
+function fechaHoy() {
+  return new Date().toLocaleDateString('es-AR', {weekday:'long', day:'numeric', month:'long'});
+}
+
+// ── RENDER LISTA DE ATLETAS ──────────────────────────────────────────────────
+function renderAtletas(lista) {
+  const el = document.getElementById('atletas-list');
+  if (!lista.length) {
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:14px">No encontrado</div>';
+    return;
+  }
+  el.innerHTML = lista.map(a => `
+    <div class="atleta-item" onclick="entrar('${a.ap}')">
+      <div>
+        <div class="ai-nombre">${a.ap}, ${a.nom}</div>
+        <div class="ai-sub">Pre-temporada 2026</div>
+      </div>
+      <div class="ai-arrow">›</div>
+    </div>
+  `).join('');
+}
+
+function filtrarAtletas(q) {
+  const q2 = q.toLowerCase().trim();
+  const filtrados = !q2 ? ATLETAS : ATLETAS.filter(a =>
+    a.ap.toLowerCase().includes(q2) || a.nom.toLowerCase().includes(q2)
+  );
+  renderAtletas(filtrados);
+}
+
+// ── ENTRAR AL ENTRENAMIENTO ──────────────────────────────────────────────────
+function entrar(ap) {
+  atletaActual = ATLETAS.find(a => a.ap === ap);
+  if (!atletaActual) return;
+
+  // Header
+  document.getElementById('h-nombre').textContent = atletaActual.ap.toUpperCase();
+  document.getElementById('h-fecha').textContent = fechaHoy();
+
+  // Récords
+  const pb = document.getElementById('rec-pb');
+  const sq = document.getElementById('rec-sq');
+  const pm = document.getElementById('rec-pm');
+  const hx = document.getElementById('rec-hex');
+  if (pb && atletaActual.pressMax !== '—') pb.textContent = '↑ ' + atletaActual.pressMax;
+  if (sq && atletaActual.sentMax !== '—') sq.textContent = '↑ ' + atletaActual.sentMax;
+  if (pm && atletaActual.pmMax !== '—')   pm.textContent = '↑ ' + atletaActual.pmMax;
+  if (hx && atletaActual.sentMax !== '—') hx.textContent = '↑ ' + atletaActual.sentMax;
+
+  // Detectar día de hoy
+  const diaHoy = diaDeHoy();
+  for (let i = 0; i < 4; i++) {
+    const hoyEl = document.getElementById('hoy-' + i);
+    if (hoyEl) hoyEl.style.display = (i === diaHoy) ? 'block' : 'none';
+  }
+
+  // Limpiar inputs
+  document.querySelectorAll('.ej-input').forEach(inp => inp.value = '');
+
+  // Ir al día de hoy o al 0
+  selDia(diaHoy >= 0 ? diaHoy : 0);
+
+  // Mostrar pantalla
+  showScreen('s-entreno');
+}
+
+// ── SELECCIONAR DÍA ──────────────────────────────────────────────────────────
+function selDia(idx) {
+  diaActual = idx;
+  document.querySelectorAll('.dia-tab').forEach((t, i) => {
+    t.classList.toggle('on', i === idx);
+  });
+  document.querySelectorAll('.dia-content').forEach((d, i) => {
+    d.classList.toggle('on', i === idx);
+  });
+  // Scroll arriba
+  const content = document.getElementById('dia-' + idx);
+  if (content) content.scrollTop = 0;
+  window.scrollTo(0, 0);
+}
+
+// ── GUARDAR SESIÓN ────────────────────────────────────────────────────────────
+function guardarSesion() {
+  if (!atletaActual) return;
+
+  const diaNames = ['Día 1 · Empuje', 'Día 2 · Tracción', 'Día 3 · Sarcoplasmática', 'Recovery'];
+  const fecha = new Date().toLocaleDateString('es-AR');
+  const hora  = new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'});
+
+  // Recolectar datos del día activo
+  const diaEl = document.getElementById('dia-' + diaActual);
+  const inputs = diaEl ? diaEl.querySelectorAll('.ej-input') : [];
+  const registros = {};
+  inputs.forEach(inp => {
+    const key = inp.dataset.ej;
+    const val = inp.value.trim();
+    if (val && val !== '') registros[key] = val;
+  });
+
+  const payload = {
+    atleta:   atletaActual.ap + ', ' + atletaActual.nom,
+    dia:      diaNames[diaActual],
+    fecha:    fecha,
+    hora:     hora,
+    datos:    JSON.stringify(registros)
+  };
+
+  // Actualizar mensaje
+  document.getElementById('ok-msg').textContent =
+    `${atletaActual.ap} · ${diaNames[diaActual]} · ${fecha}`;
+
+  // Enviar a Google Sheets si URL está configurada
+  if (GOOGLE_SCRIPT_URL !== 'TU_GOOGLE_SCRIPT_URL_AQUI') {
+    const params = new URLSearchParams(payload);
+    fetch(GOOGLE_SCRIPT_URL + '?' + params.toString(), { method: 'GET', mode: 'no-cors' })
+      .catch(() => {}); // silencioso — no-cors no lanza error manejable
+  }
+
+  showScreen('s-ok');
+}
+
+// ── NAVEGACIÓN ────────────────────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  window.scrollTo(0, 0);
+}
+
+function volver() {
+  atletaActual = null;
+  document.getElementById('search-input').value = '';
+  renderAtletas(ATLETAS);
+  showScreen('s-inicio');
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+renderAtletas(ATLETAS);
+</script>
+</body>
+</html>
