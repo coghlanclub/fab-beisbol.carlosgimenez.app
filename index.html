@@ -84,7 +84,26 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .btn-guardar{flex:1;background:var(--cel);color:var(--bg);border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;letter-spacing:.02em}
 .btn-guardar:active{opacity:.85;transform:scale(.98)}
 
-/* ── PANTALLA 3: CONFIRMACIÓN ── */
+/* ── PANTALLA FICHA ── */
+#s-ficha{align-items:stretch;padding:0}
+.ficha-hero{background:var(--bg2);padding:24px 20px;text-align:center;border-bottom:1px solid var(--border)}
+.ficha-title{font-family:var(--display);font-size:28px;color:var(--cel);letter-spacing:3px;margin-bottom:4px}
+.ficha-sub{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.ficha-form{padding:20px;flex:1;overflow-y:auto;padding-bottom:100px}
+.ficha-group{margin-bottom:14px}
+.ficha-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px}
+.ficha-input{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:12px 14px;font-size:15px;color:var(--white);font-family:'Inter',sans-serif;outline:none;-webkit-appearance:none}
+.ficha-input:focus{border-color:var(--cel)}
+.ficha-input::placeholder{color:var(--muted)}
+select.ficha-input option{background:var(--bg2)}
+.ficha-section{font-size:11px;font-weight:600;color:var(--cel);text-transform:uppercase;letter-spacing:.08em;margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+
+/* ── PANTALLA ASISTENCIA (DT view en Sheets) ── */
+.btn-ficha{display:flex;align-items:center;gap:10px;padding:14px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;margin:0 20px 8px;cursor:pointer;text-decoration:none}
+.btn-ficha:active{border-color:var(--cel)}
+.btn-ficha-icon{font-size:22px;flex-shrink:0}
+.btn-ficha-text{font-size:14px;font-weight:600;color:var(--white)}
+.btn-ficha-sub{font-size:11px;color:var(--muted);margin-top:2px}
 #s-ok{align-items:center;justify-content:center;padding:32px 24px;text-align:center}
 .ok-icon{font-size:64px;margin-bottom:20px}
 .ok-title{font-family:var(--display);font-size:44px;color:var(--green);letter-spacing:3px;margin-bottom:8px}
@@ -106,6 +125,105 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
     <input class="search-input" id="search-input" type="text" placeholder="Buscá tu apellido..." oninput="filtrarAtletas(this.value)" autocomplete="off" autocorrect="off" spellcheck="false">
   </div>
   <div class="atletas-list" id="atletas-list"></div>
+  <div style="padding:0 20px 12px">
+    <button onclick="showScreen('s-ficha')" style="width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;margin-bottom:8px">
+      <span style="font-size:20px">📋</span>
+      <div style="text-align:left">
+        <div style="font-size:13px;font-weight:600;color:var(--white)">Completar mi ficha</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Peso · altura · posición · provincia</div>
+      </div>
+      <span style="font-size:18px;color:var(--muted);margin-left:auto">›</span>
+    </button>
+  </div>
+</div>
+
+<!-- ── PANTALLA FICHA DEL ATLETA ── -->
+<div class="screen" id="s-ficha">
+  <div class="ficha-hero">
+    <div class="ficha-title">MI FICHA</div>
+    <div class="ficha-sub">Pre-temporada 2026 · FAB</div>
+  </div>
+  <div class="ficha-form">
+    <div class="ficha-section">Datos personales</div>
+    <div class="ficha-group">
+      <label class="ficha-label">Apellido y nombre</label>
+      <input class="ficha-input" id="f-nombre" placeholder="Ej: Kramer, Agustín">
+    </div>
+    <div class="ficha-group">
+      <label class="ficha-label">DNI</label>
+      <input class="ficha-input" id="f-dni" placeholder="Número de DNI" inputmode="numeric">
+    </div>
+    <div class="ficha-group">
+      <label class="ficha-label">Teléfono</label>
+      <input class="ficha-input" id="f-tel" placeholder="Número de WhatsApp" inputmode="tel">
+    </div>
+    <div class="ficha-group">
+      <label class="ficha-label">Provincia</label>
+      <select class="ficha-input" id="f-prov">
+        <option value="">Seleccionar...</option>
+        <option>Buenos Aires</option>
+        <option>Salta</option>
+        <option>Córdoba</option>
+        <option>Tucumán</option>
+        <option>Santa Fe</option>
+        <option>Otra</option>
+      </select>
+    </div>
+
+    <div class="ficha-section">Datos deportivos</div>
+    <div class="ficha-group">
+      <label class="ficha-label">Posición</label>
+      <select class="ficha-input" id="f-pos">
+        <option value="">Seleccionar...</option>
+        <option>Pitcher</option><option>Catcher</option>
+        <option>1B</option><option>2B</option><option>3B</option>
+        <option>SS</option><option>OF</option><option>DH</option>
+        <option>Utilidad</option>
+      </select>
+    </div>
+    <div class="ficha-group">
+      <label class="ficha-label">Lateralidad (lanzamiento)</label>
+      <select class="ficha-input" id="f-lat">
+        <option value="">Seleccionar...</option>
+        <option>Derecho</option><option>Zurdo</option><option>Ambidiestro</option>
+      </select>
+    </div>
+    <div class="ficha-group">
+      <label class="ficha-label">Número de camiseta</label>
+      <input class="ficha-input" id="f-num" placeholder="Ej: 14" inputmode="numeric">
+    </div>
+
+    <div class="ficha-section">Datos físicos</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="ficha-group">
+        <label class="ficha-label">Peso actual (kg)</label>
+        <input class="ficha-input" id="f-peso" placeholder="Ej: 82" inputmode="decimal">
+      </div>
+      <div class="ficha-group">
+        <label class="ficha-label">Altura (cm)</label>
+        <input class="ficha-input" id="f-altura" placeholder="Ej: 180" inputmode="numeric">
+      </div>
+    </div>
+
+    <div class="ficha-section">Cobertura médica</div>
+    <div class="ficha-group">
+      <select class="ficha-input" id="f-cob">
+        <option value="">Seleccionar...</option>
+        <option>No tengo</option>
+        <option>Si por SSDN</option>
+        <option>Obra social propia</option>
+      </select>
+    </div>
+
+    <div class="ficha-group" style="margin-top:8px">
+      <label class="ficha-label">Observaciones o lesiones previas</label>
+      <textarea class="ficha-input" id="f-obs" placeholder="Contale al DT algo importante sobre tu estado físico..." style="min-height:80px;resize:none"></textarea>
+    </div>
+  </div>
+  <div class="save-bar on">
+    <button class="btn-guardar" style="background:var(--bg3);color:var(--text2);border:1px solid var(--border)" onclick="showScreen('s-inicio')">← Volver</button>
+    <button class="btn-guardar" onclick="guardarFicha()">Enviar ficha →</button>
+  </div>
 </div>
 
 <!-- ── PANTALLA 2: ENTRENAMIENTO ── -->
@@ -129,17 +247,17 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
     <div class="bloque-hdr">Bloque 1 · Movilidad 10'</div>
     <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Movilidad general</div><div class="ej-meta">10 minutos</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="✓" data-ej="mov-d1" style="width:56px;font-size:20px"><div class="ej-input-lbl">ok</div></div></div>
     <div class="bloque-hdr">Bloque 2 · Abs</div>
-    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Abdominales</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="abs-d1" inputmode="numeric"><div class="ej-input-lbl">reps</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Abdominales</div><div class="ej-meta">6–12 ej · 30seg trabajo · 10seg descanso</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="abs-d1" inputmode="numeric"><div class="ej-input-lbl">reps</div></div></div>
     <div class="bloque-hdr">Bloque 3 · Tren superior</div>
-    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Press banca</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="press-banca" inputmode="decimal"><div class="ej-input-lbl">kg</div><div class="rec-val" id="rec-pb"></div></div></div>
-    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Press uni lat</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="press-uni" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
-    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Apertura</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="apertura" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
-    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Dominadas</div><div class="ej-meta">Series · máx reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="dominadas-d1" inputmode="numeric"><div class="ej-input-lbl">reps</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Press banca</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="press-banca" inputmode="decimal"><div class="ej-input-lbl">kg</div><div class="rec-val" id="rec-pb"></div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Press uni lat</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="press-uni" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Apertura</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="apertura" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Dominadas</div><div class="ej-meta">3 × máx reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="dominadas-d1" inputmode="numeric"><div class="ej-input-lbl">reps</div></div></div>
     <div class="bloque-hdr">Bloque 4 · Tren inferior</div>
-    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Sentadilla</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="sentadilla" inputmode="decimal"><div class="ej-input-lbl">kg</div><div class="rec-val" id="rec-sq"></div></div></div>
-    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Estocada con mancuerna</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="estocada-db" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
-    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Prensa</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="prensa" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
-    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Gemelos</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="gemelos-d1" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Sentadilla</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="sentadilla" inputmode="decimal"><div class="ej-input-lbl">kg</div><div class="rec-val" id="rec-sq"></div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Estocada con mancuerna</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="estocada-db" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Prensa</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="prensa" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Gemelos</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="gemelos-d1" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
     <div class="nota-bloque"><div class="nota-title">Nota del DT</div><div class="nota-text">Fase concéntrica explosiva en compuestos. Bajar lento 2 segundos. Serie de entrada antes de cargar.</div></div>
   </div>
 
@@ -147,18 +265,18 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
     <div class="bloque-hdr">Bloque 1 · Movilidad 10'</div>
     <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Movilidad general</div><div class="ej-meta">10 minutos</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="✓" data-ej="mov-d2" style="width:56px;font-size:20px"><div class="ej-input-lbl">ok</div></div></div>
     <div class="bloque-hdr">Bloque 2 · Abs</div>
-    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Abdominales</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="abs-d2" inputmode="numeric"><div class="ej-input-lbl">reps</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Abdominales</div><div class="ej-meta">6–12 ej · 30seg trabajo · 10seg descanso</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="abs-d2" inputmode="numeric"><div class="ej-input-lbl">reps</div></div></div>
     <div class="bloque-hdr">Bloque 3 · Tren superior</div>
-    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Dorsalera</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="dorsalera" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
-    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Remo DB</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="remo-db" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
-    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Dominadas abiertas</div><div class="ej-meta">Series · máx reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="dom-abiertas" inputmode="numeric"><div class="ej-input-lbl">reps</div></div></div>
-    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Curl bíceps</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="curl-biceps" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
-    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Tríceps en polea</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="triceps-polea" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Dorsalera</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="dorsalera" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Remo DB</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="remo-db" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Dominadas abiertas</div><div class="ej-meta">3 × máx reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="dom-abiertas" inputmode="numeric"><div class="ej-input-lbl">reps</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Curl bíceps</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="curl-biceps" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Tríceps en polea</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="triceps-polea" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
     <div class="bloque-hdr">Bloque 4 · Cadena posterior</div>
-    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Peso muerto</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="peso-muerto" inputmode="decimal"><div class="ej-input-lbl">kg</div><div class="rec-val" id="rec-pm"></div></div></div>
-    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Búlgara</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="bulgara" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
-    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Sentadilla barra hex.</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="sent-hex" inputmode="decimal"><div class="ej-input-lbl">kg</div><div class="rec-val" id="rec-hex"></div></div></div>
-    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Gemelos</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="gemelos-d2" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Peso muerto</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="peso-muerto" inputmode="decimal"><div class="ej-input-lbl">kg</div><div class="rec-val" id="rec-pm"></div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Búlgara</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="bulgara" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Sentadilla barra hex.</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="sent-hex" inputmode="decimal"><div class="ej-input-lbl">kg</div><div class="rec-val" id="rec-hex"></div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Gemelos</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="gemelos-d2" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
     <div class="nota-bloque"><div class="nota-title">Nota del DT</div><div class="nota-text">Balance con Día 1. Foco en espalda, isquios y glúteos. Serie de entrada antes de cada ejercicio compuesto.</div></div>
   </div>
 
@@ -166,18 +284,18 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
     <div class="bloque-hdr">Bloque 1 · Movilidad 10'</div>
     <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Movilidad general</div><div class="ej-meta">10 minutos</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="✓" data-ej="mov-d3" style="width:56px;font-size:20px"><div class="ej-input-lbl">ok</div></div></div>
     <div class="bloque-hdr">Bloque 2 · Abs rotacional</div>
-    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Twist ruso</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="twist-ruso" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
-    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Anti-rotación con polea</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="anti-rot" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
-    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Espinales</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="espinales" inputmode="numeric"><div class="ej-input-lbl">reps</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Twist ruso</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="twist-ruso" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Anti-rotación con polea</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="anti-rot" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Espinales</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="espinales" inputmode="numeric"><div class="ej-input-lbl">reps</div></div></div>
     <div class="bloque-hdr">Bloque 3 · Hombro + estabilidad</div>
-    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Press de hombro</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="press-hombro" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
-    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Vuelos laterales</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="vuelos-lat" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
-    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Press inclinado DB</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="press-inc" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
-    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Antebrazos</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="antebrazos" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Press de hombro</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="press-hombro" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Vuelos laterales</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="vuelos-lat" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Press inclinado DB</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="press-inc" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Antebrazos</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="antebrazos" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
     <div class="bloque-hdr">Bloque 4 · Tren inferior</div>
-    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Hip thrust</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="hip-thrust" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
-    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Sentadilla front DB</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="sent-front" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
-    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Gemelos</div><div class="ej-meta">Series · reps</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="gemelos-d3" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Hip thrust</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="hip-thrust" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Sentadilla front DB</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="sent-front" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Gemelos</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="gemelos-d3" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
     <div class="nota-bloque"><div class="nota-title">Nota del DT — Fuerza sarcoplasmática</div><div class="nota-text">Volumen alto, cargas moderadas, tiempo bajo tensión. Series largas. Foco en hombro y cadena posterior.</div></div>
   </div>
 
@@ -193,6 +311,41 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
     <div class="bloque-hdr" style="color:var(--green)">Velocidad</div>
     <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Sprint 200m × 6</div><div class="ej-meta">Recuperación completa entre sprints</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="sprint-200" inputmode="decimal"><div class="ej-input-lbl">mejor seg</div></div></div>
     <div class="nota-bloque"><div class="nota-title">Recovery — no competir con el propio cuerpo</div><div class="nota-text">Es día de regenerar. El esfuerzo máximo va en los Días 1, 2 y 3.</div></div>
+  </div>
+
+  <!-- NOTA DE SESIÓN DEL ATLETA -->
+  <div id="nota-sesion-wrap" style="display:none;padding:0 0 4px">
+    <div style="padding:14px 20px 8px;background:var(--bg2);border-top:1px solid var(--border)">
+      <div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">¿Cómo te fue hoy? · Nota de sesión</div>
+
+      <!-- Estado físico -->
+      <div style="margin-bottom:12px">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:7px">Estado físico</div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap" id="estado-btns">
+          <button onclick="selEstado(this,'💪 Sin molestias')" class="estado-btn" style="padding:7px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:12px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer">💪 Sin molestias</button>
+          <button onclick="selEstado(this,'⚠️ Molestia leve')" class="estado-btn" style="padding:7px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:12px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer">⚠️ Molestia leve</button>
+          <button onclick="selEstado(this,'🛡️ En prevención')" class="estado-btn" style="padding:7px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:12px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer">🛡️ En prevención</button>
+          <button onclick="selEstado(this,'🚨 Lesionado')" class="estado-btn" style="padding:7px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:12px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer">🚨 Lesionado</button>
+        </div>
+      </div>
+
+      <!-- Intensidad percibida -->
+      <div style="margin-bottom:12px">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:7px">Intensidad percibida (RPE)</div>
+        <div style="display:flex;gap:6px" id="rpe-btns">
+          <button onclick="selRpe(this,'1-3 Suave')" class="rpe-btn" style="flex:1;padding:8px 4px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:11px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer">1–3<div style="font-size:9px;color:var(--muted);font-weight:400">Suave</div></button>
+          <button onclick="selRpe(this,'4-6 Moderado')" class="rpe-btn" style="flex:1;padding:8px 4px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:11px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer">4–6<div style="font-size:9px;color:var(--muted);font-weight:400">Moderado</div></button>
+          <button onclick="selRpe(this,'7-8 Duro')" class="rpe-btn" style="flex:1;padding:8px 4px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:11px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer">7–8<div style="font-size:9px;color:var(--muted);font-weight:400">Duro</div></button>
+          <button onclick="selRpe(this,'9-10 Máximo')" class="rpe-btn" style="flex:1;padding:8px 4px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:11px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer">9–10<div style="font-size:9px;color:var(--muted);font-weight:400">Máximo</div></button>
+        </div>
+      </div>
+
+      <!-- Nota libre -->
+      <div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Nota libre (opcional)</div>
+        <textarea id="nota-libre" placeholder="Cómo te sentiste, algo que quieras contarle al DT..." style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:11px 13px;font-size:14px;color:var(--white);font-family:Inter,sans-serif;outline:none;resize:none;min-height:72px;-webkit-appearance:none"></textarea>
+      </div>
+    </div>
   </div>
 
   <div class="save-bar on" id="save-bar">
@@ -343,9 +496,9 @@ function selDia(idx) {
   document.querySelectorAll('.dia-content').forEach((d, i) => {
     d.classList.toggle('on', i === idx);
   });
-  // Scroll arriba
-  const content = document.getElementById('dia-' + idx);
-  if (content) content.scrollTop = 0;
+  // Mostrar nota de sesión
+  const notaWrap = document.getElementById('nota-sesion-wrap');
+  if (notaWrap) notaWrap.style.display = 'block';
   window.scrollTo(0, 0);
 }
 
@@ -357,34 +510,47 @@ function guardarSesion() {
   const fecha = new Date().toLocaleDateString('es-AR');
   const hora  = new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'});
 
-  // Recolectar datos del día activo
+  // Recolectar pesos del día activo
   const diaEl = document.getElementById('dia-' + diaActual);
   const inputs = diaEl ? diaEl.querySelectorAll('.ej-input') : [];
   const registros = {};
   inputs.forEach(inp => {
-    const key = inp.dataset.ej;
     const val = inp.value.trim();
-    if (val && val !== '') registros[key] = val;
+    if (val) registros[inp.dataset.ej] = val;
   });
 
-  const payload = {
-    atleta:   atletaActual.ap + ', ' + atletaActual.nom,
-    dia:      diaNames[diaActual],
-    fecha:    fecha,
-    hora:     hora,
-    datos:    JSON.stringify(registros)
+  // Reporte del atleta
+  const notaLibre   = document.getElementById('nota-libre')?.value?.trim() || '';
+  const reporte = {
+    estado: estadoActual || '—',
+    rpe:    rpeActual    || '—',
+    nota:   notaLibre    || '—',
   };
 
-  // Actualizar mensaje
+  const payload = {
+    tipo:   'SESION',
+    atleta: atletaActual.ap + ', ' + atletaActual.nom,
+    dia:    diaNames[diaActual],
+    fecha:  fecha,
+    hora:   hora,
+    datos:  JSON.stringify(registros),
+    reporte: JSON.stringify(reporte),
+  };
+
   document.getElementById('ok-msg').textContent =
     `${atletaActual.ap} · ${diaNames[diaActual]} · ${fecha}`;
 
-  // Enviar a Google Sheets si URL está configurada
   if (GOOGLE_SCRIPT_URL !== 'TU_GOOGLE_SCRIPT_URL_AQUI') {
     const params = new URLSearchParams(payload);
-    fetch(GOOGLE_SCRIPT_URL + '?' + params.toString(), { method: 'GET', mode: 'no-cors' })
-      .catch(() => {}); // silencioso — no-cors no lanza error manejable
+    fetch(GOOGLE_SCRIPT_URL + '?' + params.toString(), {method:'GET', mode:'no-cors'}).catch(()=>{});
   }
+
+  // Reset nota
+  estadoActual = ''; rpeActual = '';
+  if (document.getElementById('nota-libre')) document.getElementById('nota-libre').value = '';
+  document.querySelectorAll('.estado-btn,.rpe-btn').forEach(b => {
+    b.style.background='transparent'; b.style.color='var(--text2)'; b.style.borderColor='var(--border)';
+  });
 
   showScreen('s-ok');
 }
@@ -403,7 +569,70 @@ function volver() {
   showScreen('s-inicio');
 }
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
+// ── ESTADO Y RPE ─────────────────────────────────────────────────────────────
+let estadoActual = '';
+let rpeActual = '';
+
+function selEstado(btn, val) {
+  estadoActual = val;
+  document.querySelectorAll('.estado-btn').forEach(b => {
+    b.style.background = 'transparent';
+    b.style.color = 'var(--text2)';
+    b.style.borderColor = 'var(--border)';
+  });
+  btn.style.background = 'var(--green-bg)';
+  btn.style.color = 'var(--green)';
+  btn.style.borderColor = 'var(--green)';
+}
+
+function selRpe(btn, val) {
+  rpeActual = val;
+  document.querySelectorAll('.rpe-btn').forEach(b => {
+    b.style.background = 'transparent';
+    b.style.color = 'var(--text2)';
+    b.style.borderColor = 'var(--border)';
+  });
+  btn.style.background = 'var(--amber-bg)';
+  btn.style.color = 'var(--amber)';
+  btn.style.borderColor = 'var(--amber)';
+}
+
+
+function guardarFicha() {
+  const nombre  = document.getElementById('f-nombre').value.trim();
+  if (!nombre) { alert('Completá tu nombre y apellido'); return; }
+
+  const payload = {
+    tipo:    'FICHA',
+    atleta:  nombre,
+    dia:     'Ficha personal',
+    fecha:   new Date().toLocaleDateString('es-AR'),
+    hora:    new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}),
+    datos:   JSON.stringify({
+      dni:      document.getElementById('f-dni').value,
+      tel:      document.getElementById('f-tel').value,
+      prov:     document.getElementById('f-prov').value,
+      pos:      document.getElementById('f-pos').value,
+      lat:      document.getElementById('f-lat').value,
+      num:      document.getElementById('f-num').value,
+      peso:     document.getElementById('f-peso').value,
+      altura:   document.getElementById('f-altura').value,
+      cob:      document.getElementById('f-cob').value,
+      obs:      document.getElementById('f-obs').value,
+    })
+  };
+
+  document.getElementById('ok-msg').textContent = `Ficha de ${nombre} enviada al staff técnico.`;
+
+  if (GOOGLE_SCRIPT_URL !== 'TU_GOOGLE_SCRIPT_URL_AQUI') {
+    const params = new URLSearchParams(payload);
+    fetch(GOOGLE_SCRIPT_URL + '?' + params.toString(), {method:'GET', mode:'no-cors'}).catch(()=>{});
+  }
+
+  showScreen('s-ok');
+}
+
+
 renderAtletas(ATLETAS);
 </script>
 </body>
