@@ -337,41 +337,56 @@ select.ficha-input option{background:var(--bg2)}
 
   </div><!-- fin entreno-scroll -->
 
-  <!-- PARTE FIJA ABAJO: nota + guardar -->
+  <!-- PARTE FIJA ABAJO: solo botón guardar, nota aparece después -->
   <div class="entreno-bottom">
-    <!-- NOTA DE SESIÓN DEL ATLETA -->
-    <div id="nota-sesion-wrap" style="display:none">
-      <div style="padding:14px 20px 10px;background:var(--bg2);border-top:1px solid var(--border)">
-        <div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">¿Cómo te fue hoy? · Nota de sesión</div>
-        <div style="margin-bottom:12px">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:7px">Estado físico</div>
-          <div style="display:flex;gap:7px;flex-wrap:wrap" id="estado-btns">
-            <button onclick="selEstado(this,'💪 Sin molestias')" class="estado-btn" style="padding:7px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:12px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer">💪 Sin molestias</button>
-            <button onclick="selEstado(this,'⚠️ Molestia leve')" class="estado-btn" style="padding:7px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:12px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer">⚠️ Molestia leve</button>
-            <button onclick="selEstado(this,'🛡️ En prevención')" class="estado-btn" style="padding:7px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:12px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer">🛡️ En prevención</button>
-            <button onclick="selEstado(this,'🚨 Lesionado')" class="estado-btn" style="padding:7px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:12px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer">🚨 Lesionado</button>
-          </div>
-        </div>
-        <div style="margin-bottom:12px">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:7px">Intensidad percibida (RPE)</div>
-          <div style="display:flex;gap:6px" id="rpe-btns">
-            <button onclick="selRpe(this,'1-3 Suave')" class="rpe-btn" style="flex:1;padding:8px 4px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:11px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer">1–3<div style="font-size:9px;color:var(--muted);font-weight:400">Suave</div></button>
-            <button onclick="selRpe(this,'4-6 Moderado')" class="rpe-btn" style="flex:1;padding:8px 4px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:11px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer">4–6<div style="font-size:9px;color:var(--muted);font-weight:400">Moderado</div></button>
-            <button onclick="selRpe(this,'7-8 Duro')" class="rpe-btn" style="flex:1;padding:8px 4px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:11px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer">7–8<div style="font-size:9px;color:var(--muted);font-weight:400">Duro</div></button>
-            <button onclick="selRpe(this,'9-10 Máximo')" class="rpe-btn" style="flex:1;padding:8px 4px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:11px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer">9–10<div style="font-size:9px;color:var(--muted);font-weight:400">Máximo</div></button>
-          </div>
-        </div>
-        <div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Nota libre (opcional)</div>
-          <textarea id="nota-libre" placeholder="Cómo te sentiste, algo que quieras contarle al DT..." style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:11px 13px;font-size:14px;color:var(--white);font-family:Inter,sans-serif;outline:none;resize:none;min-height:72px;-webkit-appearance:none"></textarea>
-        </div>
-      </div>
-    </div>
     <div style="padding:12px 20px 24px;border-top:1px solid var(--border)">
-      <button class="btn-guardar" style="width:100%" onclick="guardarSesion()">Guardar sesión →</button>
+      <button class="btn-guardar" style="width:100%" onclick="mostrarNota()">Guardar sesión →</button>
     </div>
   </div>
 
+</div>
+
+<!-- ── PANTALLA NOTA DE SESIÓN ── -->
+<div class="screen" id="s-nota">
+  <div style="background:var(--bg2);padding:20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px">
+    <button onclick="showScreen('s-entreno')" style="background:transparent;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1">←</button>
+    <div>
+      <div style="font-family:var(--display);font-size:22px;color:var(--white);letter-spacing:2px">NOTA DE SESIÓN</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px" id="nota-atleta-info">Pre-temporada 2026</div>
+    </div>
+  </div>
+
+  <div style="flex:1;overflow-y:auto;padding:20px 20px 120px">
+    <div style="margin-bottom:20px">
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Estado físico</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="estado-btns">
+        <button onclick="selEstado(this,'💪 Sin molestias')" class="estado-btn" style="padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">💪 Sin molestias</button>
+        <button onclick="selEstado(this,'⚠️ Molestia leve')" class="estado-btn" style="padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">⚠️ Molestia leve</button>
+        <button onclick="selEstado(this,'🛡️ En prevención')" class="estado-btn" style="padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">🛡️ En prevención</button>
+        <button onclick="selEstado(this,'🚨 Lesionado')" class="estado-btn" style="padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">🚨 Lesionado</button>
+      </div>
+    </div>
+
+    <div style="margin-bottom:20px">
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Intensidad percibida (RPE)</div>
+      <div style="display:flex;gap:8px" id="rpe-btns">
+        <button onclick="selRpe(this,'1-3 Suave')" class="rpe-btn" style="flex:1;padding:12px 4px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">1–3<div style="font-size:10px;color:var(--muted);font-weight:400;margin-top:3px">Suave</div></button>
+        <button onclick="selRpe(this,'4-6 Moderado')" class="rpe-btn" style="flex:1;padding:12px 4px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">4–6<div style="font-size:10px;color:var(--muted);font-weight:400;margin-top:3px">Moderado</div></button>
+        <button onclick="selRpe(this,'7-8 Duro')" class="rpe-btn" style="flex:1;padding:12px 4px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">7–8<div style="font-size:10px;color:var(--muted);font-weight:400;margin-top:3px">Duro</div></button>
+        <button onclick="selRpe(this,'9-10 Máximo')" class="rpe-btn" style="flex:1;padding:12px 4px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">9–10<div style="font-size:10px;color:var(--muted);font-weight:400;margin-top:3px">Máximo</div></button>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Nota libre (opcional)</div>
+      <textarea id="nota-libre" placeholder="Cómo te sentiste, algo que quieras contarle al DT..." style="width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:14px;font-size:15px;color:var(--white);font-family:Inter,sans-serif;outline:none;resize:none;min-height:120px;-webkit-appearance:none"></textarea>
+    </div>
+  </div>
+
+  <div style="position:fixed;bottom:0;left:0;right:0;padding:14px 20px 28px;background:var(--bg);border-top:1px solid var(--border);display:flex;gap:10px">
+    <button onclick="showScreen('s-entreno')" style="flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;font-size:14px;font-weight:600;color:var(--text2);font-family:Inter,sans-serif;cursor:pointer">← Volver</button>
+    <button onclick="guardarSesion()" style="flex:2;background:var(--cel);border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;color:var(--bg);font-family:Inter,sans-serif;cursor:pointer">Confirmar y guardar ✓</button>
+  </div>
 </div>
 
 <!-- ── PANTALLA 3: OK ── -->
@@ -511,15 +526,8 @@ function entrar(ap) {
 // ── SELECCIONAR DÍA ──────────────────────────────────────────────────────────
 function selDia(idx) {
   diaActual = idx;
-  document.querySelectorAll('.dia-tab').forEach((t, i) => {
-    t.classList.toggle('on', i === idx);
-  });
-  document.querySelectorAll('.dia-content').forEach((d, i) => {
-    d.classList.toggle('on', i === idx);
-  });
-  // Mostrar nota de sesión
-  const notaWrap = document.getElementById('nota-sesion-wrap');
-  if (notaWrap) notaWrap.style.display = 'block';
+  document.querySelectorAll('.dia-tab').forEach((t, i) => t.classList.toggle('on', i === idx));
+  document.querySelectorAll('.dia-content').forEach((d, i) => d.classList.toggle('on', i === idx));
   window.scrollTo(0, 0);
 }
 
@@ -600,7 +608,15 @@ function volver() {
   showScreen('s-inicio');
 }
 
-// ── ESTADO Y RPE ─────────────────────────────────────────────────────────────
+function mostrarNota() {
+  if (!atletaActual) return;
+  const diaNames = ['Día 1 · Empuje', 'Día 2 · Tracción', 'Día 3 · Sarcoplasmática', 'Recovery'];
+  const info = document.getElementById('nota-atleta-info');
+  if (info) info.textContent = `${atletaActual.ap} · ${diaNames[diaActual]}`;
+  showScreen('s-nota');
+}
+
+
 let estadoActual = '';
 let rpeActual = '';
 
