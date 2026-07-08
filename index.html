@@ -5,6 +5,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>FAB · Entrenamiento</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDE0E2S0g3HS-dOM66azQf1hKV-_8pwQzA",
+  authDomain: "fab-beisbol-carlos-entrenador.firebaseapp.com",
+  projectId: "fab-beisbol-carlos-entrenador",
+  storageBucket: "fab-beisbol-carlos-entrenador.firebasestorage.app",
+  messagingSenderId: "976457069756",
+  appId: "1:976457069756:web:bcbab2f5aee5fe8b864cb9"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+// Exponemos las funciones al scope global para que el resto del JS las use
+window._fbGuardar = async (coleccion, datos) => {
+  try {
+    await addDoc(collection(db, coleccion), { ...datos, timestamp: serverTimestamp() });
+    return true;
+  } catch(e) {
+    console.error('Firebase error:', e);
+    return false;
+  }
+};
+</script>
 <style>
 :root{
   --bg:#0A1628;--bg2:#111f38;--bg3:#192d4e;
@@ -492,14 +520,13 @@ function selDia(idx) {
 }
 
 // ── GUARDAR SESIÓN ────────────────────────────────────────────────────────────
-function guardarSesion() {
+async function guardarSesion() {
   if (!atletaActual) return;
 
   const diaNames = ['Día 1 · Empuje', 'Día 2 · Tracción', 'Día 3 · Sarcoplasmática', 'Recovery'];
   const fecha = new Date().toLocaleDateString('es-AR');
   const hora  = new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'});
 
-  // Recolectar pesos del día activo
   const diaEl = document.getElementById('dia-' + diaActual);
   const inputs = diaEl ? diaEl.querySelectorAll('.ej-input') : [];
   const registros = {};
@@ -508,33 +535,37 @@ function guardarSesion() {
     if (val) registros[inp.dataset.ej] = val;
   });
 
-  // Reporte del atleta
-  const notaLibre   = document.getElementById('nota-libre')?.value?.trim() || '';
+  const notaLibre = document.getElementById('nota-libre')?.value?.trim() || '';
   const reporte = {
     estado: estadoActual || '—',
     rpe:    rpeActual    || '—',
     nota:   notaLibre    || '—',
   };
 
-  const payload = {
-    tipo:   'SESION',
-    atleta: atletaActual.ap + ', ' + atletaActual.nom,
-    dia:    diaNames[diaActual],
-    fecha:  fecha,
-    hora:   hora,
-    datos:  JSON.stringify(registros),
-    reporte: JSON.stringify(reporte),
+  const datos = {
+    tipo:     'SESION',
+    atleta:   atletaActual.ap + ', ' + atletaActual.nom,
+    apellido: atletaActual.ap,
+    dia:      diaNames[diaActual],
+    diaNum:   diaActual,
+    fecha, hora, registros, reporte,
   };
 
   document.getElementById('ok-msg').textContent =
     `${atletaActual.ap} · ${diaNames[diaActual]} · ${fecha}`;
 
+  // Guardar en Firebase Firestore (tiempo real)
+  if (window._fbGuardar) await window._fbGuardar('sesiones', datos);
+
+  // Google Sheets como respaldo
   if (GOOGLE_SCRIPT_URL !== 'TU_GOOGLE_SCRIPT_URL_AQUI') {
-    const params = new URLSearchParams(payload);
+    const params = new URLSearchParams({
+      tipo: datos.tipo, atleta: datos.atleta, dia: datos.dia,
+      fecha, hora, datos: JSON.stringify(registros), reporte: JSON.stringify(reporte)
+    });
     fetch(GOOGLE_SCRIPT_URL + '?' + params.toString(), {method:'GET', mode:'no-cors'}).catch(()=>{});
   }
 
-  // Reset nota
   estadoActual = ''; rpeActual = '';
   if (document.getElementById('nota-libre')) document.getElementById('nota-libre').value = '';
   document.querySelectorAll('.estado-btn,.rpe-btn').forEach(b => {
@@ -594,34 +625,40 @@ function selRpe(btn, val) {
 }
 
 
-function guardarFicha() {
-  const nombre  = document.getElementById('f-nombre').value.trim();
+async function guardarFicha() {
+  const nombre = document.getElementById('f-nombre').value.trim();
   if (!nombre) { alert('Completá tu nombre y apellido'); return; }
 
-  const payload = {
-    tipo:    'FICHA',
-    atleta:  nombre,
-    dia:     'Ficha personal',
-    fecha:   new Date().toLocaleDateString('es-AR'),
-    hora:    new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}),
-    datos:   JSON.stringify({
-      dni:      document.getElementById('f-dni').value,
-      tel:      document.getElementById('f-tel').value,
-      prov:     document.getElementById('f-prov').value,
-      pos:      document.getElementById('f-pos').value,
-      lat:      document.getElementById('f-lat').value,
-      num:      document.getElementById('f-num').value,
-      peso:     document.getElementById('f-peso').value,
-      altura:   document.getElementById('f-altura').value,
-      cob:      document.getElementById('f-cob').value,
-      obs:      document.getElementById('f-obs').value,
-    })
+  const fichaData = {
+    dni:    document.getElementById('f-dni').value,
+    tel:    document.getElementById('f-tel').value,
+    prov:   document.getElementById('f-prov').value,
+    pos:    document.getElementById('f-pos').value,
+    lat:    document.getElementById('f-lat').value,
+    num:    document.getElementById('f-num').value,
+    peso:   document.getElementById('f-peso').value,
+    altura: document.getElementById('f-altura').value,
+    cob:    document.getElementById('f-cob').value,
+    obs:    document.getElementById('f-obs').value,
+  };
+
+  const datos = {
+    tipo:   'FICHA',
+    atleta: nombre,
+    dia:    'Ficha personal',
+    fecha:  new Date().toLocaleDateString('es-AR'),
+    hora:   new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}),
+    ...fichaData,
   };
 
   document.getElementById('ok-msg').textContent = `Ficha de ${nombre} enviada al staff técnico.`;
 
+  // Guardar en Firebase
+  if (window._fbGuardar) await window._fbGuardar('fichas', datos);
+
+  // Google Sheets como respaldo
   if (GOOGLE_SCRIPT_URL !== 'TU_GOOGLE_SCRIPT_URL_AQUI') {
-    const params = new URLSearchParams(payload);
+    const params = new URLSearchParams({ tipo: datos.tipo, atleta: nombre, dia: datos.dia, fecha: datos.fecha, hora: datos.hora, datos: JSON.stringify(fichaData), reporte: '' });
     fetch(GOOGLE_SCRIPT_URL + '?' + params.toString(), {method:'GET', mode:'no-cors'}).catch(()=>{});
   }
 
