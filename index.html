@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -56,7 +55,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 /* DÍA HOY badge */
 .hoy-badge{font-size:9px;background:var(--green-bg);color:var(--green);padding:1px 5px;border-radius:99px;display:block;margin-top:2px}
 
-.dia-content{display:none;flex:1;overflow-y:auto;padding-bottom:100px}
+.dia-content{display:none;flex:1;overflow-y:auto;padding-bottom:200px}
 .dia-content.on{display:block}
 
 .bloque-hdr{padding:10px 20px;background:rgba(107,184,245,0.06);font-size:10px;font-weight:600;color:var(--cel);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border);border-top:1px solid var(--border);margin-top:4px}
@@ -79,7 +78,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .nota-text{font-size:13px;color:var(--text2);line-height:1.6;font-style:italic}
 
 /* ── BARRA GUARDAR ── */
-.save-bar{position:fixed;bottom:0;left:0;right:0;padding:14px 20px 24px;background:var(--bg);border-top:1px solid var(--border);display:none}
+.save-bar{position:fixed;bottom:0;left:0;right:0;padding:14px 20px 28px;background:var(--bg);border-top:1px solid var(--border);display:none}
 .save-bar.on{display:flex;gap:10px}
 .btn-guardar{flex:1;background:var(--cel);color:var(--bg);border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;letter-spacing:.02em}
 .btn-guardar:active{opacity:.85;transform:scale(.98)}
@@ -125,16 +124,6 @@ select.ficha-input option{background:var(--bg2)}
     <input class="search-input" id="search-input" type="text" placeholder="Buscá tu apellido..." oninput="filtrarAtletas(this.value)" autocomplete="off" autocorrect="off" spellcheck="false">
   </div>
   <div class="atletas-list" id="atletas-list"></div>
-  <div style="padding:0 20px 12px">
-    <button onclick="showScreen('s-ficha')" style="width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;margin-bottom:8px">
-      <span style="font-size:20px">📋</span>
-      <div style="text-align:left">
-        <div style="font-size:13px;font-weight:600;color:var(--white)">Completar mi ficha</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px">Peso · altura · posición · provincia</div>
-      </div>
-      <span style="font-size:18px;color:var(--muted);margin-left:auto">›</span>
-    </button>
-  </div>
 </div>
 
 <!-- ── PANTALLA FICHA DEL ATLETA ── -->
@@ -221,7 +210,7 @@ select.ficha-input option{background:var(--bg2)}
     </div>
   </div>
   <div class="save-bar on">
-    <button class="btn-guardar" style="background:var(--bg3);color:var(--text2);border:1px solid var(--border)" onclick="showScreen('s-inicio')">← Volver</button>
+    <button class="btn-guardar" style="background:var(--bg3);color:var(--text2);border:1px solid var(--border)" onclick="atletaActual ? showScreen('s-entreno') : showScreen('s-inicio')">← Volver</button>
     <button class="btn-guardar" onclick="guardarFicha()">Enviar ficha →</button>
   </div>
 </div>
@@ -232,7 +221,7 @@ select.ficha-input option{background:var(--bg2)}
     <div class="header-top">
       <button class="btn-back" onclick="volver()">←</button>
       <div class="header-nombre" id="h-nombre">—</div>
-      <div style="width:36px"></div>
+      <button onclick="showScreen('s-ficha')" style="background:transparent;border:none;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;padding:4px 8px;font-family:Inter,sans-serif;white-space:nowrap">📋 Mi ficha</button>
     </div>
     <div class="header-fase">Pre-temporada · <span id="h-fecha"></span></div>
     <div class="dia-tabs">
@@ -560,6 +549,13 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
   document.getElementById(id).classList.add('on');
   window.scrollTo(0, 0);
+  // Si abre la ficha y hay atleta seleccionado, pre-llena el nombre
+  if (id === 's-ficha' && atletaActual) {
+    const nombreInput = document.getElementById('f-nombre');
+    if (nombreInput && !nombreInput.value) {
+      nombreInput.value = atletaActual.ap + ', ' + atletaActual.nom;
+    }
+  }
 }
 
 function volver() {
