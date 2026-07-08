@@ -281,6 +281,40 @@ select.ficha-input{text-align:left}
   .topbar{padding:16px 16px 0}
 }
 </style>
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, collection, onSnapshot, query, orderBy, limit } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDE0E2S0g3HS-dOM66azQf1hKV-_8pwQzA",
+  authDomain: "fab-beisbol-carlos-entrenador.firebaseapp.com",
+  projectId: "fab-beisbol-carlos-entrenador",
+  storageBucket: "fab-beisbol-carlos-entrenador.firebasestorage.app",
+  messagingSenderId: "976457069756",
+  appId: "1:976457069756:web:bcbab2f5aee5fe8b864cb9"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+// Escuchar sesiones en tiempo real
+window._fbEscuchar = (callback) => {
+  const q = query(collection(db, 'sesiones'), orderBy('timestamp','desc'), limit(100));
+  return onSnapshot(q, snap => {
+    const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    callback(docs);
+  });
+};
+
+// Escuchar fichas
+window._fbFichas = (callback) => {
+  return onSnapshot(collection(db, 'fichas'), snap => {
+    const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    callback(docs);
+  });
+};
+</script>
 </head>
 <body>
 <div class="app">
@@ -299,6 +333,7 @@ select.ficha-input{text-align:left}
     <div class="ni" onclick="goScreen('carga',this)"><span class="ni-icon">✎</span><span>Cargar rutina</span></div>
     <div class="ni" onclick="goScreen('reporte',this)"><span class="ni-icon">◎</span><span>Nuevo reporte</span></div>
     <div class="nav-sec">Análisis</div>
+    <div class="ni" onclick="goScreen('seguimiento',this)"><span class="ni-icon">◉</span><span>Seguimiento</span></div>
     <div class="ni" onclick="goScreen('progresion',this)"><span class="ni-icon">↗</span><span>Progresión</span></div>
     <div class="ni" onclick="goScreen('provincias',this)"><span class="ni-icon">⊙</span><span>Provincias</span></div>
     <div class="ni" onclick="goScreen('calendario',this)"><span class="ni-icon">◈</span><span>Calendario</span></div>
@@ -656,6 +691,37 @@ select.ficha-input{text-align:left}
 
 
 
+
+  <!-- ── SEGUIMIENTO EN VIVO ── -->
+  <div class="screen" id="s-seguimiento">
+    <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center">
+      <div style="font-size:12px;color:var(--muted)">Datos en tiempo real desde Firebase</div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--green)">
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 2s infinite"></span>
+        En vivo
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+      <div class="metric"><div class="metric-val" id="seg-total">—</div><div class="metric-lbl">Sesiones hoy</div></div>
+      <div class="metric"><div class="metric-val c-green" id="seg-sin-mol">—</div><div class="metric-lbl">Sin molestias</div></div>
+      <div class="metric"><div class="metric-val c-amber" id="seg-mol">—</div><div class="metric-lbl">Con molestias</div></div>
+      <div class="metric"><div class="metric-val c-red" id="seg-lesion">—</div><div class="metric-lbl">Lesionados</div></div>
+    </div>
+    <div style="font-size:13px;font-weight:600;color:var(--white);margin-bottom:10px">Últimas sesiones</div>
+    <div class="tbl-wrap" style="margin-bottom:20px">
+      <table>
+        <thead><tr><th>Atleta</th><th>Día</th><th>Fecha</th><th>Hora</th><th>Estado</th><th>RPE</th><th>Nota</th><th>Ejercicios</th></tr></thead>
+        <tbody id="seg-tbody"><tr><td colspan="8" style="text-align:center;color:var(--muted);padding:30px">Conectando con Firebase...</td></tr></tbody>
+      </table>
+    </div>
+    <div style="font-size:13px;font-weight:600;color:var(--white);margin-bottom:10px">Fichas recibidas</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Atleta</th><th>Peso</th><th>Altura</th><th>Posición</th><th>Provincia</th><th>Cobertura</th><th>Fecha</th></tr></thead>
+        <tbody id="fichas-tbody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">Sin fichas aún...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
 
   <!-- ── TESTS ── -->
   <div class="screen" id="s-tests">
@@ -1189,7 +1255,7 @@ const TITLES={
   progresion:['PROGRESIÓN','Evolución de ejercicios clave'],
   provincias:['PROVINCIAS','Control de reportes y coordinación'],
   calendario:['CALENDARIO','Competencias · Gestiones · Situación actual'],
-  tests:['TESTS','Estado de tests por atleta · realizados · pendientes · a renovar'],
+  seguimiento:['SEGUIMIENTO EN VIVO','Sesiones · reportes · fichas · en tiempo real desde Firebase'],
 };
 
 function goScreen(id,el){
@@ -1986,6 +2052,70 @@ buildProgRows();
 buildFichaSelector();
 renderCompetencias();
 renderTests();
+
+// ── SEGUIMIENTO EN VIVO (Firebase) ───────────────────────────────────────────
+function initSeguimiento(){
+  if(!window._fbEscuchar) {
+    setTimeout(initSeguimiento, 500); // esperar que cargue el módulo Firebase
+    return;
+  }
+
+  // Escuchar sesiones
+  window._fbEscuchar(docs => {
+    const hoy = new Date().toLocaleDateString('es-AR');
+    const hoyDocs = docs.filter(d => d.fecha === hoy);
+
+    // Stats
+    const sinMol = hoyDocs.filter(d => d.reporte?.estado?.includes('Sin molestias')).length;
+    const conMol = hoyDocs.filter(d => d.reporte?.estado?.includes('leve') || d.reporte?.estado?.includes('prevención')).length;
+    const lesion = hoyDocs.filter(d => d.reporte?.estado?.includes('Lesionado')).length;
+
+    const stEl = document.getElementById('seg-total');     if(stEl) stEl.textContent = hoyDocs.length;
+    const smEl = document.getElementById('seg-sin-mol');   if(smEl) smEl.textContent = sinMol;
+    const mlEl = document.getElementById('seg-mol');       if(mlEl) mlEl.textContent = conMol;
+    const lsEl = document.getElementById('seg-lesion');    if(lsEl) lsEl.textContent = lesion;
+
+    // Tabla sesiones
+    const tbody = document.getElementById('seg-tbody');
+    if(tbody) {
+      if(!docs.length){ tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:30px">Sin sesiones registradas aún</td></tr>'; return; }
+      tbody.innerHTML = docs.slice(0,50).map(d => {
+        const ejs = d.registros ? Object.entries(d.registros).map(([k,v])=>`${k}: ${v}`).join(' · ') : '—';
+        const estadoColor = d.reporte?.estado?.includes('Sin') ? 'var(--green)' : d.reporte?.estado?.includes('Lesion') ? 'var(--red)' : 'var(--amber)';
+        return `<tr>
+          <td class="td-n">${d.atleta||'—'}</td>
+          <td>${d.dia||'—'}</td>
+          <td style="font-family:var(--mono);font-size:11px">${d.fecha||'—'}</td>
+          <td style="font-family:var(--mono);font-size:11px">${d.hora||'—'}</td>
+          <td><span style="color:${estadoColor};font-size:12px">${d.reporte?.estado||'—'}</span></td>
+          <td style="font-family:var(--mono);font-size:11px">${d.reporte?.rpe||'—'}</td>
+          <td style="font-size:12px;color:var(--text2);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.reporte?.nota||'—'}</td>
+          <td style="font-size:11px;color:var(--muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ejs}</td>
+        </tr>`;
+      }).join('');
+    }
+  });
+
+  // Escuchar fichas
+  if(window._fbFichas) {
+    window._fbFichas(docs => {
+      const tbody = document.getElementById('fichas-tbody');
+      if(!tbody) return;
+      if(!docs.length){ tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">Sin fichas recibidas aún</td></tr>'; return; }
+      tbody.innerHTML = docs.map(d => `<tr>
+        <td class="td-n">${d.atleta||'—'}</td>
+        <td style="font-family:var(--mono)">${d.peso ? d.peso+' kg' : '—'}</td>
+        <td style="font-family:var(--mono)">${d.altura ? d.altura+' cm' : '—'}</td>
+        <td>${d.pos||'—'}</td>
+        <td>${d.prov||'—'}</td>
+        <td>${d.cob||'—'}</td>
+        <td style="font-family:var(--mono);font-size:11px">${d.fecha||'—'}</td>
+      </tr>`).join('');
+    });
+  }
+}
+
+setTimeout(initSeguimiento, 1000);
 </script>
 </body>
 </html>
