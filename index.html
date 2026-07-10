@@ -8,7 +8,7 @@
 <!-- Firebase SDK -->
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getFirestore, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getFirestore, collection, addDoc, serverTimestamp, query, where, orderBy, limit, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDE0E2S0g3HS-dOM66azQf1hKV-_8pwQzA",
@@ -22,7 +22,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
 
-// Exponemos las funciones al scope global para que el resto del JS las use
+// Guardar sesión o ficha
 window._fbGuardar = async (coleccion, datos) => {
   try {
     await addDoc(collection(db, coleccion), { ...datos, timestamp: serverTimestamp() });
@@ -30,6 +30,53 @@ window._fbGuardar = async (coleccion, datos) => {
   } catch(e) {
     console.error('Firebase error:', e);
     return false;
+  }
+};
+
+// Leer últimas sesiones de un atleta para mostrar últimos pesos
+window._fbUltimoPesos = async (apellido) => {
+  try {
+    const q = query(
+      collection(db, 'sesiones'),
+      where('apellido', '==', apellido),
+      orderBy('timestamp', 'desc'),
+      limit(10)
+    );
+    const snap = await getDocs(q);
+    // Consolidar el último peso de cada ejercicio
+    const ultimos = {};
+    snap.docs.forEach(d => {
+      const data = d.data();
+      if (data.registros) {
+        Object.entries(data.registros).forEach(([ej, val]) => {
+          if (!ultimos[ej] && val && val !== '') ultimos[ej] = val;
+        });
+      }
+    });
+    return ultimos;
+  } catch(e) {
+    console.error('Firebase read error:', e);
+    return {};
+  }
+};
+
+// Leer resumen de sesiones del atleta (cantidad, última fecha)
+window._fbResumenAtleta = async (apellido) => {
+  try {
+    const q = query(
+      collection(db, 'sesiones'),
+      where('apellido', '==', apellido),
+      orderBy('timestamp', 'desc')
+    );
+    const snap = await getDocs(q);
+    const sesiones = snap.docs.map(d => d.data());
+    return {
+      total: sesiones.length,
+      ultimaFecha: sesiones[0]?.fecha || '—',
+      ultimoDia: sesiones[0]?.dia || '—',
+    };
+  } catch(e) {
+    return { total: 0, ultimaFecha: '—', ultimoDia: '—' };
   }
 };
 </script>
@@ -245,7 +292,28 @@ select.ficha-input option{background:var(--bg2)}
   </div>
 </div>
 
-<!-- ── PANTALLA 2: ENTRENAMIENTO ── -->
+<!-- ── PANTALLA SELECTOR DE RUTINA ── -->
+<div class="screen" id="s-selector">
+  <div style="background:var(--bg2);padding:28px 24px 24px;border-bottom:1px solid var(--border);text-align:center">
+    <div style="font-family:var(--display);font-size:32px;color:var(--cel);letter-spacing:3px;margin-bottom:4px" id="sel-nombre">—</div>
+    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Pre-temporada 2026 · Elegí tu rutina</div>
+  </div>
+  <div style="padding:24px 20px;display:flex;flex-direction:column;gap:14px">
+    <button onclick="cargarEntreno('fab')" style="background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:20px;text-align:left;cursor:pointer;transition:all .15s" onmousedown="this.style.borderColor='var(--cel)'">
+      <div style="font-size:18px;margin-bottom:6px">⚾</div>
+      <div style="font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px">FAB · Pre-temporada</div>
+      <div style="font-size:12px;color:var(--muted)">Días 1, 2, 3 y Recovery · Plan del plantel general</div>
+    </button>
+    <button onclick="cargarEntreno('extra')" style="background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:20px;text-align:left;cursor:pointer;transition:all .15s" onmousedown="this.style.borderColor='var(--amber)'">
+      <div style="font-size:18px;margin-bottom:6px">🏋️</div>
+      <div style="font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px">Mi entrenador</div>
+      <div style="font-size:12px;color:var(--muted)" id="sel-profe">Rutina personalizada</div>
+    </button>
+  </div>
+  <div style="padding:0 20px">
+    <button onclick="volver()" style="width:100%;background:transparent;border:1px solid var(--border);border-radius:12px;padding:12px;font-size:13px;color:var(--muted);font-family:Inter,sans-serif;cursor:pointer">← Volver a la lista</button>
+  </div>
+</div>
 <div class="screen" id="s-entreno">
   <div class="entreno-header">
     <div class="header-top">
@@ -254,16 +322,17 @@ select.ficha-input option{background:var(--bg2)}
       <button onclick="showScreen('s-ficha')" style="background:transparent;border:none;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;padding:4px 8px;font-family:Inter,sans-serif;white-space:nowrap">📋 Mi ficha</button>
     </div>
     <div class="header-fase">Pre-temporada · <span id="h-fecha"></span></div>
-    <div class="dia-tabs">
+    <div class="dia-tabs" id="tabs-fab">
       <button class="dia-tab" id="tab-0" onclick="selDia(0)">Día 1<span class="hoy-badge" id="hoy-0" style="display:none">HOY</span></button>
       <button class="dia-tab" id="tab-1" onclick="selDia(1)">Día 2<span class="hoy-badge" id="hoy-1" style="display:none">HOY</span></button>
       <button class="dia-tab" id="tab-2" onclick="selDia(2)">Día 3<span class="hoy-badge" id="hoy-2" style="display:none">HOY</span></button>
       <button class="dia-tab" id="tab-3" onclick="selDia(3)">Recovery<span class="hoy-badge" id="hoy-3" style="display:none">HOY</span></button>
     </div>
+    <div class="dia-tabs" id="tabs-extra" style="display:none"></div>
   </div>
 
-  <!-- ÁREA SCROLLABLE: ejercicios -->
-  <div class="entreno-scroll">
+  <!-- ÁREA SCROLLABLE: ejercicios FAB -->
+  <div class="entreno-scroll" id="dias-fab">
 
   <div id="dia-0" class="dia-content">
     <div class="bloque-hdr">Bloque 1 · Movilidad 10'</div>
@@ -335,7 +404,10 @@ select.ficha-input option{background:var(--bg2)}
     <div class="nota-bloque"><div class="nota-title">Recovery — no competir con el propio cuerpo</div><div class="nota-text">Es día de regenerar. El esfuerzo máximo va en los Días 1, 2 y 3.</div></div>
   </div>
 
-  </div><!-- fin entreno-scroll -->
+  </div><!-- fin entreno-scroll fab -->
+
+  <!-- ÁREA SCROLLABLE: ejercicios EXTRA (otro profe) -->
+  <div class="entreno-scroll" id="dias-extra" style="display:none"></div>
 
   <!-- PARTE FIJA ABAJO: solo botón guardar, nota aparece después -->
   <div class="entreno-bottom">
@@ -438,6 +510,8 @@ const ATLETAS = [
   {ap:"Morales",      nom:"Aramis",       pressMax:"70kg", sentMax:"110kg",pmMax:"—"},
   {ap:"Contreras",    nom:"Emilio",       pressMax:"—",  sentMax:"—",   pmMax:"—"},
   {ap:"Gimenez",      nom:"Carlos (DT)",  pressMax:"—",  sentMax:"—",   pmMax:"—"},
+  {ap:"Borras",       nom:"Juan",         pressMax:"—",  sentMax:"—",   pmMax:"—"},
+  {ap:"Cukierman",    nom:"Mariano (PC)", pressMax:"—",  sentMax:"—",   pmMax:"—"},
 ];
 
 // ── URL DEL GOOGLE SCRIPT (completar después) ─────────────────────────────────
@@ -448,6 +522,62 @@ const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw-MCObqgQOY5
 // ── ESTADO ────────────────────────────────────────────────────────────────────
 let atletaActual = null;
 let diaActual = 0;
+let rutinaActual = 'fab'; // 'fab' o 'extra'
+
+function mostrarTabsFAB() {
+  document.getElementById('tabs-fab').style.display = 'flex';
+  document.getElementById('tabs-extra').style.display = 'none';
+  document.getElementById('dias-fab').style.display = 'block';
+  document.getElementById('dias-extra').style.display = 'none';
+}
+
+function mostrarTabsExtra(ap) {
+  document.getElementById('tabs-fab').style.display = 'none';
+  document.getElementById('tabs-extra').style.display = 'flex';
+  document.getElementById('dias-fab').style.display = 'none';
+  document.getElementById('dias-extra').style.display = 'block';
+
+  // Mostrar días según el atleta
+  const diasAtleta = RUTINAS_EXTRA[ap] || [];
+  const tabsEl = document.getElementById('tabs-extra');
+  tabsEl.innerHTML = diasAtleta.map((d,i) =>
+    `<button class="dia-tab ${i===0?'on':''}" onclick="selDiaExtra(${i},this)">${d.label}</button>`
+  ).join('');
+
+  const diasEl = document.getElementById('dias-extra');
+  diasEl.innerHTML = diasAtleta.map((d,i) =>
+    `<div id="dia-extra-${i}" class="dia-content ${i===0?'on':''}">${renderDiaExtra(d)}</div>`
+  ).join('');
+}
+
+function selDiaExtra(idx, btn) {
+  diaActual = idx;
+  document.querySelectorAll('#tabs-extra .dia-tab').forEach((t,i) => t.classList.toggle('on', i===idx));
+  document.querySelectorAll('[id^="dia-extra-"]').forEach((d,i) => d.classList.toggle('on', i===idx));
+  window.scrollTo(0,0);
+}
+
+function renderDiaExtra(dia) {
+  return dia.bloques.map(b => `
+    <div class="bloque-hdr" style="${b.color?`color:${b.color}`:''}">
+      ${b.nombre}${b.nota?`<span style="font-size:10px;color:var(--amber);margin-left:8px;text-transform:none">⚡ ${b.nota}</span>`:''}
+    </div>
+    ${b.ejercicios.map(ej => `
+      <div class="ej-row">
+        <div class="ej-info">
+          <div class="ej-nombre">${ej.nombre}</div>
+          <div class="ej-meta">${ej.series||''}</div>
+          ${ej.nota?`<div style="font-size:11px;color:var(--amber);margin-top:3px">⚡ ${ej.nota}</div>`:''}
+        </div>
+        <div class="ej-input-wrap">
+          <input class="ej-input" placeholder="—" data-ej="${ej.id}" inputmode="decimal">
+          <div class="ej-input-lbl">${ej.unidad||'kg'}</div>
+        </div>
+      </div>
+    `).join('')}
+  `).join('');
+}
+
 
 // ── DETECTAR DÍA AUTOMÁTICO ──────────────────────────────────────────────────
 function diaDeHoy() {
@@ -462,6 +592,224 @@ function fechaHoy() {
 }
 
 // ── RENDER LISTA DE ATLETAS ──────────────────────────────────────────────────
+// ── RUTINAS EXTRA (otro profe) ────────────────────────────────────────────────
+const RUTINAS_EXTRA = {
+
+  'Cukierman': [
+    { label:'Día 1', bloques:[
+      { nombre:'MOVILIDAD GLOBAL', ejercicios:[
+        {nombre:'Gato contento/enojado',series:'',id:'cuk-mov1',unidad:'✓'},
+        {nombre:'Dislocaciones de hombro',series:'',id:'cuk-mov2',unidad:'✓'},
+        {nombre:'Movilidad de aductores',series:'',id:'cuk-mov3',unidad:'✓'},
+      ]},
+      { nombre:'ZONA MEDIA', nota:'ENFOCATE ACÁ Y MÁTATE EN ZONA MEDIA', color:'var(--green)', ejercicios:[
+        {nombre:'Crunch',series:'',id:'cuk-crunch',unidad:'reps'},
+        {nombre:'Twist ruso',series:'',id:'cuk-twist',unidad:'kg'},
+        {nombre:'Bisagras',series:'',id:'cuk-bisagras',unidad:'reps'},
+      ]},
+      { nombre:'BLOQUE 1', ejercicios:[
+        {nombre:'Sentadilla con banco',series:'',nota:'SUBE RÁPIDO',id:'cuk-sq-banco',unidad:'kg'},
+        {nombre:'Doble salto',series:'',nota:'DURA LO MENOS POSIBLE EN EL SUELO — SÉ EXPLOSIVO',id:'cuk-doble-salto',unidad:'reps'},
+        {nombre:'Slam con med ball',series:'',nota:'SIN MOVIMIENTOS EN FALSO — UN SOLO MOVIMIENTO Y RÁPIDO',id:'cuk-slam',unidad:'kg'},
+      ]},
+      { nombre:'BLOQUE 2', ejercicios:[
+        {nombre:'Remo con BB',series:'',nota:'MUEVO RÁPIDO',id:'cuk-remo-bb',unidad:'kg'},
+        {nombre:'Jalones con mancuerna',series:'',nota:'MUEVO RÁPIDO, PESADO',id:'cuk-jalones-db',unidad:'kg'},
+        {nombre:'Dominadas',series:'',nota:'CON AYUDA — MUEVO RÁPIDO',id:'cuk-dom',unidad:'reps'},
+      ]},
+      { nombre:'BLOQUE 3', ejercicios:[
+        {nombre:'Curl de bíceps',series:'',id:'cuk-curl-1',unidad:'kg'},
+        {nombre:'Tríceps',series:'',id:'cuk-tri-1',unidad:'kg'},
+      ]},
+    ]},
+    { label:'Día 2', bloques:[
+      { nombre:'ZONA MEDIA', nota:'IGUAL QUE EL DÍA 1', color:'var(--green)', ejercicios:[
+        {nombre:'Crunch',series:'',id:'cuk-crunch-2',unidad:'reps'},
+        {nombre:'Twist ruso',series:'',id:'cuk-twist-2',unidad:'kg'},
+        {nombre:'Bisagras',series:'',id:'cuk-bisagras-2',unidad:'reps'},
+      ]},
+      { nombre:'BLOQUE 1', ejercicios:[
+        {nombre:'Peso muerto / Sentadilla barra hexagonal',series:'',nota:'MUÉVETE RÁPIDO AL SUBIR Y BAJAR',id:'cuk-pm-hex',unidad:'kg'},
+        {nombre:'Salto en profundidad + salto desde el banco',series:'',nota:'DURA LO MENOS POSIBLE EN EL SUELO',id:'cuk-salto-prof',unidad:'reps'},
+        {nombre:'Búlgara',series:'',nota:'FOCO SUBIR RÁPIDO',id:'cuk-bulgara-2',unidad:'kg'},
+      ]},
+      { nombre:'BLOQUE 2', ejercicios:[
+        {nombre:'Press de banca',series:'',nota:'EMPUJA MUY FUERTE',id:'cuk-pb-2',unidad:'kg'},
+        {nombre:'Apertura',series:'',nota:'OJO CON EL CODO, CUIDADO ACÁ',id:'cuk-aper-2',unidad:'kg'},
+        {nombre:'Lanzamiento med ball (acostado mirando el techo)',series:'',nota:'SIN MOVIMIENTOS EN FALSO — MUY RÁPIDO',id:'cuk-lanzmb-2',unidad:'kg'},
+      ]},
+      { nombre:'BLOQUE 3', ejercicios:[
+        {nombre:'Curl de bíceps',series:'',id:'cuk-curl-2',unidad:'kg'},
+        {nombre:'Tríceps con mancuerna',series:'',id:'cuk-tri-2',unidad:'kg'},
+      ]},
+    ]},
+    { label:'Día 3', bloques:[
+      { nombre:'MOVILIDAD GLOBAL', ejercicios:[
+        {nombre:'Gato contento/enojado',series:'',id:'cuk-mov3-1',unidad:'✓'},
+        {nombre:'Dislocaciones de hombro',series:'',id:'cuk-mov3-2',unidad:'✓'},
+        {nombre:'Movilidad de aductores',series:'',id:'cuk-mov3-3',unidad:'✓'},
+      ]},
+      { nombre:'BLOQUE 1', ejercicios:[
+        {nombre:'Prensa',series:'',id:'cuk-prensa-3',unidad:'kg'},
+        {nombre:'Saltos / Mov. específico del deporte',series:'',id:'cuk-saltos-3',unidad:'reps'},
+        {nombre:'Gemelos en prensa',series:'',id:'cuk-gem-3',unidad:'kg'},
+      ]},
+      { nombre:'BLOQUE 2', ejercicios:[
+        {nombre:'Hombros',series:'',id:'cuk-hom-3',unidad:'kg'},
+        {nombre:'Land mine',series:'',id:'cuk-landmine-3',unidad:'kg'},
+        {nombre:'Mov. específico del deporte',series:'',id:'cuk-esp-3',unidad:'reps'},
+      ]},
+      { nombre:'BLOQUE 3', ejercicios:[
+        {nombre:'Dorsales en máquina',series:'',id:'cuk-dors-3',unidad:'kg'},
+        {nombre:'Jalones',series:'',id:'cuk-jal-3',unidad:'kg'},
+        {nombre:'Lanzamiento med ball',series:'',id:'cuk-lanzmb-3',unidad:'kg'},
+      ]},
+    ]},
+  ],
+
+  'Alfonso': [
+    { label:'Día 1', bloques:[
+      { nombre:'ENTRADA EN CALOR', ejercicios:[
+        {nombre:'Correctivo de hombros',series:'1×8',id:'alf-correct-1',unidad:'✓'},
+        {nombre:'Pull-apart',series:'1×5 de 3 seg.',id:'alf-pullap-1',unidad:'✓'},
+        {nombre:'Camel-cat / movilidad torácica con rodillo',series:'1×8',id:'alf-camel-1',unidad:'✓'},
+        {nombre:'Movilidad de cadera',series:'1×6 p/l',id:'alf-cad-1',unidad:'✓'},
+        {nombre:'Movilidad de tobillo asistida con kettlebell',series:'2×15 seg. p/l',id:'alf-tob-1',unidad:'✓'},
+        {nombre:'Roll-out en fitball + Press paloff en estocada + Sentadilla goblet con teraband',series:'2×10-15 / 2×5 p/l / 2×5-8 — cadencia 2-2-1',id:'alf-complex-1',unidad:'✓'},
+      ]},
+      { nombre:'PLIOMETRÍA + LANZAMIENTO', ejercicios:[
+        {nombre:'Salto pitcher + lanzamiento lateral',series:'3×2 p/l → 3×3 → 4×3 → 3×4 → 4×4',id:'alf-pliolanZ-1',unidad:'reps'},
+      ]},
+      { nombre:'RUTINA · RIR 1-2', ejercicios:[
+        {nombre:'1A · Sentadilla',series:'3×5 90kg / 1×1 100kg + 1×6-8 90kg',id:'alf-sq-1',unidad:'kg'},
+        {nombre:'1B · Press plano',series:'3×5 57.5kg / 3×6 / 1×1 65kg + 1×8-10',id:'alf-pb-1',unidad:'kg'},
+        {nombre:'2B · Vuelos posteriores acostado Y-T-V',series:'3×4 c/u → 3×5 → 3×6 → 3×6-8',id:'alf-ytv-1',unidad:'kg'},
+        {nombre:'1C · Press militar sentado con mancuernas',series:'3×10 → 3×12 → 4×6 → 3×8-10',id:'alf-pm-1',unidad:'kg'},
+        {nombre:'2C · Sentadilla búlgara',series:'3×5 p/l → 3×6 → 4×6 → 3×8 → 3×10',id:'alf-bulg-1',unidad:'kg'},
+        {nombre:'1D · Vuelos anteriores 1 brazo',series:'3×10 p/l → 3×12 → 3×8-10 (más pesado)',id:'alf-vuelos-ant-1',unidad:'kg'},
+        {nombre:'2D · Tríceps tras nuca con polea 1 brazo',series:'3×10 p/l → 3×12 → 3×8-10 (más pesado)',id:'alf-tri-1',unidad:'kg'},
+      ]},
+    ]},
+    { label:'Día 2', bloques:[
+      { nombre:'ENTRADA EN CALOR', ejercicios:[
+        {nombre:'Correctivo de hombros',series:'1×8',id:'alf-correct-2',unidad:'✓'},
+        {nombre:'Pull-apart',series:'1×5 de 3 seg.',id:'alf-pullap-2',unidad:'✓'},
+        {nombre:'Camel-cat / movilidad torácica con rodillo',series:'1×8',id:'alf-camel-2',unidad:'✓'},
+        {nombre:'Movilidad de cadera',series:'1×6 p/l',id:'alf-cad-2',unidad:'✓'},
+        {nombre:'Movilidad de tobillo asistida con kettlebell',series:'2×15 seg. p/l',id:'alf-tob-2',unidad:'✓'},
+        {nombre:'Bicho muerto unilateral + buenos días + revolver la olla',series:'2×6-10 p/l / 2×5-8 / 2×8-12 p/l',id:'alf-complex-2',unidad:'✓'},
+      ]},
+      { nombre:'PLIOMETRÍA Y DLO', ejercicios:[
+        {nombre:'2 trigers + 1 hang clean',series:'3×3 → 4×3 → 3×4 → 3×2 (más pesado) → 5×2',id:'alf-hangclean-2',unidad:'kg'},
+        {nombre:'Saltos verticales con mancuernas (10% PC) + saltos asistidos',series:'3×3 c/u → 4×3 → 3×4 → 4×4 → 3×5',id:'alf-saltos-2',unidad:'kg'},
+      ]},
+      { nombre:'RUTINA · RIR 1-2', ejercicios:[
+        {nombre:'1A · Peso muerto',series:'1×1 102.5kg / 1-2-3 / 3×2 → 3×3 → 3×4',id:'alf-pm-2',unidad:'kg'},
+        {nombre:'1B · Press inclinado con mancuernas',series:'3×10 → 3×12 → 3×8 (más pesado) → 4×10',id:'alf-pinc-2',unidad:'kg'},
+        {nombre:'2B · Dominadas toma supina',series:'¿cuánto fue lo último?',id:'alf-dom-2',unidad:'reps'},
+        {nombre:'1C · Estocadas zercher con rotación',series:'3×4 p/l → 3×5 → 4×5 → 3×6 → 3×3 (más pesado)',id:'alf-zercher-2',unidad:'kg'},
+        {nombre:'2C · Remo al mentón',series:'3×10 → 3×12 → 4×12 → 3×12-15 → 3×10 (más pesado)',id:'alf-remenTon-2',unidad:'kg'},
+        {nombre:'1D · Bíceps con barra toma prona',series:'3×12 → 3×15 → 4×8 (más pesado) → 3×10-12',id:'alf-bic-2',unidad:'kg'},
+        {nombre:'2D · Press paloff a 1 pierna',series:'3×6 p/l → 3×8 → 4×8 → 3×10 → 3×10-12',id:'alf-paloff-2',unidad:'kg'},
+      ]},
+    ]},
+    { label:'Día 3', bloques:[
+      { nombre:'ENTRADA EN CALOR', ejercicios:[
+        {nombre:'Correctivo de hombros',series:'1×8',id:'alf-correct-3',unidad:'✓'},
+        {nombre:'Pull-apart',series:'1×5 de 3 seg.',id:'alf-pullap-3',unidad:'✓'},
+        {nombre:'Camel-cat / movilidad torácica con rodillo',series:'1×8',id:'alf-camel-3',unidad:'✓'},
+        {nombre:'Movilidad de cadera',series:'1×6 p/l',id:'alf-cad-3',unidad:'✓'},
+        {nombre:'Movilidad de tobillo con kettlebell',series:'2×15 seg. p/l',id:'alf-tob-3',unidad:'✓'},
+        {nombre:'Caminata con trap bar (peso adelante y atrás)',series:'×3 — podés subir semana a semana',id:'alf-trapwalk-3',unidad:'kg'},
+      ]},
+      { nombre:'DLO', ejercicios:[
+        {nombre:'2 hang rows + 1 hang snatch',series:'4×3 → 3×4 → 3×2 (más pesado) → 4×2 → 5×2',id:'alf-hangsnatch-3',unidad:'kg'},
+      ]},
+      { nombre:'RUTINA · RIR 1-2', ejercicios:[
+        {nombre:'1A · Press plano 1 brazo con mancuerna',series:'3×6 p/l → 3×8 → 3×5 (más pesado) → 4×5 → 3×6',id:'alf-pb1b-3',unidad:'kg'},
+        {nombre:'2A · Lanzamiento arrodillado contra la pared',series:'3×5 → 3×6 → 3×6 → 4×6 → 3×8',id:'alf-lanzrod-3',unidad:'reps'},
+        {nombre:'1B · Pistolas al banco (90° fémur)',series:'3×4 p/l → 4×4 → 3×5 → 4×5 → 3×6',id:'alf-pistola-3',unidad:'reps'},
+        {nombre:'2B · Saltos verticales 1 pierna',series:'3×4 p/l → 4×4 → 3×5 → 4×5 → 3×5',id:'alf-saltopie-3',unidad:'reps'},
+        {nombre:'1C · Face-pull',series:'3×10 → 3×12 → 2×15 → 3×10 (más pesado) → 3×10-12',id:'alf-facepull-3',unidad:'kg'},
+        {nombre:'2C · Tríceps con polea cadencia 1-1-1',series:'3×10 → 3×12 → 2×15 → 3×10 (más pesado) → 3×10-12',id:'alf-tri-3',unidad:'kg'},
+      ]},
+    ]},
+  ],
+
+  'Riello': [
+    { label:'Día 1', bloques:[
+      { nombre:'ENTRADA EN CALOR', ejercicios:[
+        {nombre:'Movilidad y activación de core y cintura escapular',series:'',id:'kev-mov-1',unidad:'✓'},
+      ]},
+      { nombre:'PLIOMETRÍA', nota:'Velocidad y explosividad', ejercicios:[
+        {nombre:'Drop jump 40cm + salto al cajón',series:'3×2 p/l → 4×2 → 3×3 → 4×3 → 5×3',id:'kev-dropjump-1',unidad:'reps'},
+        {nombre:'Saltos pogo pasando conos tortuga + salto horizontal',series:'2 pasadas ×3 → ×4 → ×5 / 3 pasadas ×3 → ×4',id:'kev-pogo-1',unidad:'reps'},
+      ]},
+      { nombre:'RUTINA · RIR 1-2', ejercicios:[
+        {nombre:'1A · Sentadilla (cadera por debajo de rodilla)',series:'3×3 100kg → 3×5 → 1-2-3 110kg → 3×3 → 3×4',id:'kev-sq-1',unidad:'kg'},
+        {nombre:'1B · Press inclinado con barra',series:'3×6 → 4×6 → 3×8 → 4×8 → 3×5 (más pesado)',id:'kev-pinc-1',unidad:'kg'},
+        {nombre:'2B · Remo 1 brazo con mancuerna',series:'3×8 p/l → 4×8 → 3×10 → 4×10 → 3×6 (más pesado)',id:'kev-remo1b-1',unidad:'kg'},
+        {nombre:'1C · Tríceps con polea alta',series:'3×10 → 3×12 → 3×8 (más pesado) → 3×8-10 → 3×10-12',id:'kev-tri-1',unidad:'kg'},
+        {nombre:'2C · Dominadas en máquina toma prona',series:'3×10 → 3×12 → 3×8 (más pesado) → 3×8-10 → 3×10-12',id:'kev-dom-1',unidad:'reps'},
+        {nombre:'1D · Vuelos laterales (1 seg. pausa arriba)',series:'4×8 → 3×10 → 3×12 → 3×12-15',id:'kev-vuelat-1',unidad:'kg'},
+        {nombre:'2D · Press paloff con polea',series:'4×5 p/l → 3×6 → 3×8 → 3×10 → 3×6 (más pesado)',id:'kev-paloff-1',unidad:'kg'},
+      ]},
+    ]},
+    { label:'Día 2', bloques:[
+      { nombre:'ENTRADA EN CALOR', ejercicios:[
+        {nombre:'Movilidad y activación de core y cintura escapular',series:'',id:'kev-mov-2',unidad:'✓'},
+      ]},
+      { nombre:'DLO', nota:'Velocidad y explosividad', ejercicios:[
+        {nombre:'DKB ×2 + hang DKB clean (grabate)',series:'3×3 → 4×3 → 3×1 (más pesado)',id:'kev-dkb-2',unidad:'kg'},
+      ]},
+      { nombre:'RUTINA · RIR 1-2', ejercicios:[
+        {nombre:'1A · Press plano con mancuernas',series:'3×8 → 3×10 → 4×10 → 3×6 (más pesado) → 4×6',id:'kev-pb-2',unidad:'kg'},
+        {nombre:'1B · Banco de isquiotibiales 1 pierna',series:'3×8 p/l → 3×10 → 3×12 → 3×8 (más pesado) → 3×8-10',id:'kev-isqui-2',unidad:'kg'},
+        {nombre:'2B · Dominadas en máquina 1 brazo',series:'3×8 p/l → 3×10 → 3×12 → 3×8 (más pesado) → 3×8-10',id:'kev-dom1b-2',unidad:'reps'},
+        {nombre:'1C · Sentadilla cosaco',series:'3×4 p/l → 4×4 → 3×5 → 3×6 → 2×8',id:'kev-cosaco-2',unidad:'reps'},
+        {nombre:'2C · Press militar sentado con mancuernas',series:'3×8 → 3×10 → 3×12 → 3×12-15 → 3×8 (más pesado)',id:'kev-pm-2',unidad:'kg'},
+        {nombre:'1D · Bíceps con barra toma prona',series:'3×10 → 3×12 → 3×12-15 → 3×15 → 4×10 (más pesado)',id:'kev-bic-2',unidad:'kg'},
+      ]},
+    ]},
+    { label:'Día 3', bloques:[
+      { nombre:'ENTRADA EN CALOR', ejercicios:[
+        {nombre:'Movilidad y activación de core y cintura escapular',series:'',id:'kev-mov-3',unidad:'✓'},
+      ]},
+      { nombre:'DLO', nota:'Velocidad y explosividad', ejercicios:[
+        {nombre:'Jerk (grabate)',series:'3×3 → 4×3 → 3×1 (más pesado)',id:'kev-jerk-3',unidad:'kg'},
+      ]},
+      { nombre:'RUTINA · RIR 1-2', ejercicios:[
+        {nombre:'1A · Remo landmine',series:'3×5 → 4×5 → 3×6 → 4×6 → 3×8',id:'kev-landmine-3',unidad:'kg'},
+        {nombre:'1B · Swing de cadera con kettlebell pesado',series:'3×6 → 3×8 → 4×8 → 3×10 → 3×5 (más pesado)',id:'kev-swing-3',unidad:'kg'},
+        {nombre:'2B · Curl francés con mancuernas en banco inclinado',series:'3×8 → 3×10 → 4×10 → 3×12 → 3×8 (más pesado)',id:'kev-curlfranc-3',unidad:'kg'},
+        {nombre:'1C · Lunge barbell over shoulders',series:'4×3 p/l → 3×3 → 4×3 → 3×4 → 3×5',id:'kev-lunge-3',unidad:'kg'},
+        {nombre:'2C · Lanzamientos 1 brazo contra pared (simulando béisbol)',series:'4×1 p/l → 3×2 → 4×2 → 3×3 → 4×3',id:'kev-lanzbeisbol-3',unidad:'reps'},
+        {nombre:'1D · Accesorio libre',series:'a definir',id:'kev-acc-3',unidad:'kg'},
+      ]},
+    ]},
+    { label:'Día 4', bloques:[
+      { nombre:'ENTRADA EN CALOR', ejercicios:[
+        {nombre:'Movilidad y activación de core y cintura escapular',series:'',id:'kev-mov-4',unidad:'✓'},
+      ]},
+      { nombre:'RUTINA · RIR 1-2', ejercicios:[
+        {nombre:'1A · Press plano con taco',series:'3×3 80kg → 3×4 → 2×5 → 3×3 85kg → 3×4 85kg',id:'kev-pbtaco-4',unidad:'kg'},
+        {nombre:'2A · Slam ball',series:'3×3 → 3×4 → 2×5 → 3×5',id:'kev-slam-4',unidad:'kg'},
+        {nombre:'1B · Peso muerto con trap bar',series:'3×2 140kg → 4×2 → 3×3 → 4×3 → 2×4',id:'kev-pmtrap-4',unidad:'kg'},
+        {nombre:'2B · Saltos asistidos con banda',series:'3×3 → 4×3 → 3×4 → 3×4 → 2×5',id:'kev-saltoband-4',unidad:'reps'},
+        {nombre:'1C · Lanzamiento pitcher (2 elevaciones + lanzar en 3ra)',series:'4×1 p/l → 3×2 → 4×2 → 3×3 → 4×3',id:'kev-lanzpitch-4',unidad:'reps'},
+        {nombre:'2C · Press paloff con rotación',series:'4×4 p/l → 3×5 → 4×5 → 3×6 → 4×6',id:'kev-paloffrot-4',unidad:'kg'},
+      ]},
+    ]},
+  ],
+};
+
+// Atletas con rutina extra de otro profe
+const ATLETAS_EXTRA = {
+  'Cukierman': { nombre: 'Mariano · Pitching Coach', profe: 'Entrenador Personal' },
+  'Alfonso':   { nombre: 'Manuel Alfonso', profe: 'EntrenaBien B' },
+  'Riello':    { nombre: 'Kevin Riello', profe: 'Entrenador Personal' },
+};
+
 function renderAtletas(lista) {
   const el = document.getElementById('atletas-list');
   if (!lista.length) {
@@ -488,39 +836,76 @@ function filtrarAtletas(q) {
 }
 
 // ── ENTRAR AL ENTRENAMIENTO ──────────────────────────────────────────────────
-function entrar(ap) {
+async function entrar(ap) {
   atletaActual = ATLETAS.find(a => a.ap === ap);
   if (!atletaActual) return;
+
+  // Si el atleta tiene rutina extra, mostrar selector primero
+  if (ATLETAS_EXTRA[ap]) {
+    document.getElementById('sel-nombre').textContent = atletaActual.ap.toUpperCase() + ', ' + atletaActual.nom;
+    document.getElementById('sel-profe').textContent = ATLETAS_EXTRA[ap].profe;
+    showScreen('s-selector');
+    return;
+  }
+
+  // Si no tiene rutina extra, ir directo al entrenamiento FAB
+  await cargarEntreno('fab');
+}
+
+async function cargarEntreno(tipo) {
+  if (!atletaActual) return;
+  rutinaActual = tipo;
 
   // Header
   document.getElementById('h-nombre').textContent = atletaActual.ap.toUpperCase();
   document.getElementById('h-fecha').textContent = fechaHoy();
 
-  // Récords
-  const pb = document.getElementById('rec-pb');
-  const sq = document.getElementById('rec-sq');
-  const pm = document.getElementById('rec-pm');
-  const hx = document.getElementById('rec-hex');
-  if (pb && atletaActual.pressMax !== '—') pb.textContent = '↑ ' + atletaActual.pressMax;
-  if (sq && atletaActual.sentMax !== '—') sq.textContent = '↑ ' + atletaActual.sentMax;
-  if (pm && atletaActual.pmMax !== '—')   pm.textContent = '↑ ' + atletaActual.pmMax;
-  if (hx && atletaActual.sentMax !== '—') hx.textContent = '↑ ' + atletaActual.sentMax;
+  // Pestañas según el tipo de rutina
+  if (tipo === 'extra') {
+    mostrarTabsExtra(atletaActual.ap);
+  } else {
+    mostrarTabsFAB();
+  }
 
-  // Detectar día de hoy
-  const diaHoy = diaDeHoy();
-  for (let i = 0; i < 4; i++) {
-    const hoyEl = document.getElementById('hoy-' + i);
-    if (hoyEl) hoyEl.style.display = (i === diaHoy) ? 'block' : 'none';
+  // Detectar día de hoy para FAB
+  if (tipo === 'fab') {
+    const diaHoy = diaDeHoy();
+    for (let i = 0; i < 4; i++) {
+      const hoyEl = document.getElementById('hoy-' + i);
+      if (hoyEl) hoyEl.style.display = (i === diaHoy) ? 'block' : 'none';
+    }
+    selDia(diaHoy >= 0 ? diaHoy : 0);
+  } else {
+    selDia(0);
   }
 
   // Limpiar inputs
   document.querySelectorAll('.ej-input').forEach(inp => inp.value = '');
 
-  // Ir al día de hoy o al 0
-  selDia(diaHoy >= 0 ? diaHoy : 0);
-
-  // Mostrar pantalla
   showScreen('s-entreno');
+
+  // Cargar últimos pesos desde Firebase
+  if (window._fbUltimoPesos) {
+    const [ultimos, resumen] = await Promise.all([
+      window._fbUltimoPesos(atletaActual.ap),
+      window._fbResumenAtleta ? window._fbResumenAtleta(atletaActual.ap) : Promise.resolve({total:0})
+    ]);
+    document.querySelectorAll('.ej-input').forEach(inp => {
+      const ej = inp.dataset.ej;
+      if (ej && ultimos[ej]) {
+        const wrap = inp.closest('.ej-input-wrap');
+        if (wrap) {
+          let recEl = wrap.querySelector('.rec-fb');
+          if (!recEl) { recEl = document.createElement('div'); recEl.className = 'rec-fb'; recEl.style.cssText = 'font-size:10px;color:var(--green);font-family:var(--mono);margin-top:2px;text-align:center'; wrap.appendChild(recEl); }
+          recEl.textContent = '↑ ' + ultimos[ej];
+        }
+      }
+    });
+    if (resumen.total > 0) {
+      const faseEl = document.getElementById('h-fecha');
+      if (faseEl) faseEl.textContent = `${fechaHoy()} · ${resumen.total}/16 sesiones`;
+    }
+  }
 }
 
 // ── SELECCIONAR DÍA ──────────────────────────────────────────────────────────
@@ -539,7 +924,13 @@ async function guardarSesion() {
   const fecha = new Date().toLocaleDateString('es-AR');
   const hora  = new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'});
 
-  const diaEl = document.getElementById('dia-' + diaActual);
+  // Recolectar pesos — del día activo según rutina
+  let diaEl;
+  if (rutinaActual === 'extra') {
+    diaEl = document.getElementById('dia-extra-' + diaActual);
+  } else {
+    diaEl = document.getElementById('dia-' + diaActual);
+  }
   const inputs = diaEl ? diaEl.querySelectorAll('.ej-input') : [];
   const registros = {};
   inputs.forEach(inp => {
@@ -554,17 +945,22 @@ async function guardarSesion() {
     nota:   notaLibre    || '—',
   };
 
+  const diaLabel = rutinaActual === 'extra'
+    ? `Mi entrenador · Día ${diaActual+1}`
+    : diaNames[diaActual];
+
   const datos = {
     tipo:     'SESION',
+    rutina:   rutinaActual === 'extra' ? 'extra' : 'fab',
     atleta:   atletaActual.ap + ', ' + atletaActual.nom,
     apellido: atletaActual.ap,
-    dia:      diaNames[diaActual],
+    dia:      diaLabel,
     diaNum:   diaActual,
     fecha, hora, registros, reporte,
   };
 
   document.getElementById('ok-msg').textContent =
-    `${atletaActual.ap} · ${diaNames[diaActual]} · ${fecha}`;
+    `${atletaActual.ap} · ${diaLabel} · ${fecha}`;
 
   // Guardar en Firebase Firestore (tiempo real)
   if (window._fbGuardar) await window._fbGuardar('sesiones', datos);
