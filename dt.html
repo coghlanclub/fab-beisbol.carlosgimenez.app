@@ -385,9 +385,33 @@ window._fbFichas = (callback) => {
     </div>
     <div class="metrics">
       <div class="metric"><div class="metric-val">36</div><div class="metric-lbl">Atletas en nómina</div><div class="metric-note" style="color:var(--muted)">3 nuevos por confirmar</div></div>
-      <div class="metric"><div class="metric-val" style="color:var(--muted)">—</div><div class="metric-lbl">Asistencia</div><div class="metric-note" style="color:var(--muted)">Sin reportes aún</div></div>
-      <div class="metric"><div class="metric-val c-cel">6</div><div class="metric-lbl">Sesiones pre-temp.</div><div class="metric-note" style="color:var(--muted)">Mar y Jue · 7→27 jul</div></div>
-      <div class="metric"><div class="metric-val c-amber" id="dash-dias-resto">20</div><div class="metric-lbl">Días al fin</div><div class="metric-note" style="color:var(--muted)">Pre-temporada · 27 jul</div></div>
+      <div class="metric"><div class="metric-val c-cel" id="m-ses-hechas">2/16</div><div class="metric-lbl">Sesiones realizadas</div><div class="metric-note" style="color:var(--muted)">7 jul → 27 ago</div></div>
+      <div class="metric"><div class="metric-val c-amber" id="dash-dias-resto">20</div><div class="metric-lbl">Días al fin</div><div class="metric-note" style="color:var(--muted)">Pre-temporada · 27 ago</div></div>
+    </div>
+
+    <!-- ASISTENCIA POR NOMBRE -->
+    <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:16px 18px;margin-bottom:16px">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 2s infinite"></span>
+          Asistencia por atleta · Firebase en vivo
+        </div>
+        <div id="m-asist-resumen" style="font-size:12px;color:var(--cel)">Conectando...</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <div style="font-size:12px;font-weight:600;color:var(--green);margin-bottom:8px" id="asist-si-titulo">✓ Entrenaron</div>
+          <div id="asist-si" style="display:flex;flex-wrap:wrap;gap:5px">
+            <span style="color:var(--muted);font-size:12px">Sin datos aún</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:600;color:var(--red);margin-bottom:8px" id="asist-no-titulo">✗ Sin registrar</div>
+          <div id="asist-no" style="display:flex;flex-wrap:wrap;gap:5px">
+            <span style="color:var(--muted);font-size:12px">Cargando...</span>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="alert-bar" style="background:rgba(107,184,245,0.08);border-color:rgba(107,184,245,0.2);color:var(--cel)">
       ▶ Pre-temporada en curso · 7 jul → 27 ago 2026 · Martes y jueves · 16 sesiones
@@ -1944,7 +1968,66 @@ function initSeguimiento(){
       }
     });
 
-    // Atletas sin actividad en +7 días
+    // ── FECHAS DE SESIONES PRE-TEMPORADA (martes y jueves 7jul→27ago) ──────────
+    const SESIONES_FECHAS = [
+      '7/7/2026','9/7/2026','14/7/2026','16/7/2026',
+      '21/7/2026','23/7/2026','28/7/2026','30/7/2026',
+      '4/8/2026','6/8/2026','11/8/2026','13/8/2026',
+      '18/8/2026','20/8/2026','25/8/2026','27/8/2026'
+    ];
+    // Convertir a formato es-AR para comparar con Firebase
+    const FECHAS_ENTRENO = new Set(SESIONES_FECHAS.map(f => {
+      const [d,m,y] = f.split('/');
+      return new Date(y,m-1,d).toLocaleDateString('es-AR');
+    }));
+    const sesionesHechas = SESIONES_FECHAS.filter(f => {
+      const [d,m,y] = f.split('/');
+      return new Date(y,m-1,d) <= new Date();
+    }).length;
+
+    // Actualizar contador sesiones
+    const mSes = document.getElementById('m-ses-hechas');
+    if(mSes) mSes.textContent = sesionesHechas + '/16';
+
+    // ── ASISTENCIA REAL POR ATLETA ────────────────────────────────────────────
+    const atletasConSesion = new Set(
+      sesiones
+        .filter(d => FECHAS_ENTRENO.has(d.fecha))
+        .map(d => d.apellido || (d.atleta||'').split(',')[0].trim())
+    );
+    const atletasSinSesion = ATLETAS.filter(a => !atletasConSesion.has(a.ap));
+
+    // Resumen header
+    const mResumen = document.getElementById('m-asist-resumen');
+    if(mResumen) mResumen.textContent = `${atletasConSesion.size} de ${ATLETAS.length} atletas`;
+
+    // Títulos con conteos
+    const siTit = document.getElementById('asist-si-titulo');
+    const noTit = document.getElementById('asist-no-titulo');
+    if(siTit) siTit.textContent = `✓ Entrenaron (${atletasConSesion.size})`;
+    if(noTit) noTit.textContent = `✗ Sin registrar (${atletasSinSesion.length})`;
+
+    // Nombres que SÍ entrenaron — verde
+    const siEl = document.getElementById('asist-si');
+    if(siEl) {
+      siEl.innerHTML = atletasConSesion.size === 0
+        ? '<span style="color:var(--muted);font-size:12px">Nadie registró aún</span>'
+        : [...atletasConSesion].sort().map(ap =>
+            `<span style="background:var(--green-bg);border:1px solid rgba(34,201,138,0.3);color:var(--green);font-size:11px;padding:3px 9px;border-radius:99px;font-weight:600">${ap}</span>`
+          ).join('');
+    }
+
+    // Nombres que NO entrenaron — rojo
+    const noEl = document.getElementById('asist-no');
+    if(noEl) {
+      noEl.innerHTML = atletasSinSesion.length === 0
+        ? '<span style="color:var(--green);font-size:12px">✓ Todos registraron</span>'
+        : atletasSinSesion.map(a =>
+            `<span style="background:var(--red-bg);border:1px solid rgba(245,82,74,0.2);color:var(--red);font-size:11px;padding:3px 9px;border-radius:99px">${a.ap}</span>`
+          ).join('');
+    }
+
+
     const inactivos = ATLETAS.filter(a => {
       const dat = porAtleta[a.ap];
       return !dat || !dat.ultimaFecha || dat.ultimaFecha < hace7;
@@ -1967,18 +2050,31 @@ function initSeguimiento(){
     const segMol   = document.getElementById('seg-mol');       if(segMol)   segMol.textContent   = sesiones.filter(d=>d.fecha===hoy&&(d.reporte?.estado?.includes('leve')||d.reporte?.estado?.includes('prevención'))).length;
     const segLes   = document.getElementById('seg-lesion');    if(segLes)   segLes.textContent   = sesiones.filter(d=>d.fecha===hoy&&d.reporte?.estado?.includes('Lesion')).length;
 
-    // ── ALERTAS EN DASHBOARD ────────────────────────────────────────────────────
+    // ── ALERTAS: LISTAS POR NOMBRE ─────────────────────────────────────────────
     const alertBox = document.getElementById('fb-alertas');
     if(alertBox) {
-      if(inactivos.length === 0) {
-        alertBox.innerHTML = '<div style="color:var(--green);font-size:13px">✓ Todos los atletas tienen actividad reciente</div>';
-      } else {
-        alertBox.innerHTML = `
-          <div style="font-size:12px;font-weight:600;color:var(--red);margin-bottom:8px">⚠ ${inactivos.length} atletas sin actividad en +7 días</div>
-          <div style="display:flex;flex-wrap:wrap;gap:6px">
-            ${inactivos.map(a=>`<span style="background:var(--red-bg);border:1px solid rgba(245,82,74,0.3);color:var(--red);font-size:11px;padding:3px 9px;border-radius:99px">${a.ap}</span>`).join('')}
-          </div>`;
+      let html = '';
+
+      if(atletasConSesion.size > 0) {
+        html += `<div style="font-size:12px;font-weight:600;color:var(--green);margin-bottom:6px">✓ ${atletasConSesion.size} entrenaron</div>`;
+        html += `<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px">`;
+        html += [...atletasConSesion].sort().map(ap =>
+          `<span style="background:var(--green-bg);border:1px solid rgba(34,201,138,0.3);color:var(--green);font-size:11px;padding:2px 9px;border-radius:99px">${ap}</span>`
+        ).join('');
+        html += '</div>';
       }
+
+      if(atletasSinSesion.length > 0) {
+        html += `<div style="font-size:12px;font-weight:600;color:var(--amber);margin-bottom:6px">⚠ ${atletasSinSesion.length} sin sesión registrada</div>`;
+        html += `<div style="display:flex;flex-wrap:wrap;gap:5px">`;
+        html += atletasSinSesion.map(a =>
+          `<span style="background:var(--amber-bg);border:1px solid rgba(245,166,35,0.2);color:var(--amber);font-size:11px;padding:2px 9px;border-radius:99px">${a.ap}</span>`
+        ).join('');
+        html += '</div>';
+      }
+
+      if(!html) html = '<div style="color:var(--green);font-size:13px">✓ Todos los atletas registraron sus sesiones</div>';
+      alertBox.innerHTML = html;
     }
 
     // ── SEGUIMIENTO: TABLA DE SESIONES ─────────────────────────────────────────
