@@ -366,6 +366,23 @@ window._fbFichas = (callback) => {
 
   <!-- ── DASHBOARD ── -->
   <div class="screen on" id="s-dashboard">
+    <!-- MÉTRICAS FIREBASE EN TIEMPO REAL -->
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px">
+      <div class="metric"><div class="metric-val c-cel" id="m-hoy">—</div><div class="metric-lbl">Sesiones hoy</div><div class="metric-note" id="m-hoy-n" style="color:var(--muted)">Firebase en vivo</div></div>
+      <div class="metric"><div class="metric-val c-cel" id="fb-fichas-count">—</div><div class="metric-lbl">Fichas recibidas</div><div class="metric-note" style="color:var(--muted)">completadas por atletas</div></div>
+      <div class="metric"><div class="metric-val" id="m-total">—</div><div class="metric-lbl">Total sesiones</div><div class="metric-note" style="color:var(--muted)">pre-temporada</div></div>
+      <div class="metric"><div class="metric-val c-green" id="m-activos">—</div><div class="metric-lbl">Activos (7 días)</div><div class="metric-note" style="color:var(--muted)">entrenaron esta semana</div></div>
+      <div class="metric"><div class="metric-val c-red" id="m-inactivos">—</div><div class="metric-lbl">Sin actividad</div><div class="metric-note" style="color:var(--muted)">+7 días sin registrar</div></div>
+    </div>
+
+    <!-- ALERTAS FIREBASE -->
+    <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:16px;margin-bottom:16px">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+        <span style="width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 2s infinite"></span>
+        Alertas · tiempo real desde Firebase
+      </div>
+      <div id="fb-alertas" style="color:var(--muted);font-size:13px">Conectando...</div>
+    </div>
     <div class="metrics">
       <div class="metric"><div class="metric-val">36</div><div class="metric-lbl">Atletas en nómina</div><div class="metric-note" style="color:var(--muted)">3 nuevos por confirmar</div></div>
       <div class="metric"><div class="metric-val" style="color:var(--muted)">—</div><div class="metric-lbl">Asistencia</div><div class="metric-note" style="color:var(--muted)">Sin reportes aún</div></div>
@@ -373,7 +390,7 @@ window._fbFichas = (callback) => {
       <div class="metric"><div class="metric-val c-amber" id="dash-dias-resto">20</div><div class="metric-lbl">Días al fin</div><div class="metric-note" style="color:var(--muted)">Pre-temporada · 27 jul</div></div>
     </div>
     <div class="alert-bar" style="background:rgba(107,184,245,0.08);border-color:rgba(107,184,245,0.2);color:var(--cel)">
-      ▶ Pre-temporada iniciada hoy · 6 sesiones disponibles (martes y jueves) · Enviame los ejercicios del Día 1 y Día 2 para cargarlos
+      ▶ Pre-temporada en curso · 7 jul → 27 ago 2026 · Martes y jueves · 16 sesiones
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
       <div style="font-size:14px;font-weight:600;color:var(--white)">Estado actual de la nómina</div>
@@ -391,8 +408,19 @@ window._fbFichas = (callback) => {
     </div>
   </div>
 
-  <!-- ── ATLETAS ── -->
+  <!-- ── NÓMINA FIREBASE ── -->
   <div class="screen" id="s-atletas">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+      <div style="font-size:12px;color:var(--muted)">Datos en tiempo real desde Firebase</div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--green)"><span style="width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block"></span>En vivo</div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Atleta</th><th>Sesiones</th><th>Progreso</th><th>Último press</th><th>Última sentadilla</th><th>Estado reciente</th><th>Última nota</th><th>Fecha</th></tr></thead>
+        <tbody id="nomina-fb-tbody"><tr><td colspan="8" style="text-align:center;color:var(--muted);padding:30px">Conectando con Firebase...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
     <div class="search-bar">
       <input class="form-input" placeholder="Buscar atleta..." oninput="filtrarAt(this.value)">
       <select class="form-input" style="width:160px" onchange="filtrarProv(this.value)">
@@ -547,6 +575,18 @@ window._fbFichas = (callback) => {
 
   <!-- ── PROGRESIÓN ── -->
   <div class="screen" id="s-progresion">
+    <!-- SELECTOR ATLETA FIREBASE -->
+    <div style="margin-bottom:16px">
+      <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Ver progresión de un atleta (datos reales Firebase)</label>
+      <select class="form-input" style="width:280px" id="prog-atleta-sel" onchange="window.renderProgresionFb&&renderProgresionFb(this.value,window._fbDatos?.porAtleta)">
+        <option value="">Seleccionar atleta...</option>
+      </select>
+    </div>
+    <div id="prog-fb-content" style="margin-bottom:20px">
+      <div style="text-align:center;padding:30px;color:var(--muted)">Seleccioná un atleta para ver su progresión real de pesos y comentarios</div>
+    </div>
+
+    <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;padding-top:10px;border-top:1px solid var(--border)">Vista general (datos de tests)</div>
     <div class="search-bar">
       <select class="form-input" style="width:220px" id="prog-at-sel">
         <option value="">Todos los atletas</option>
@@ -554,11 +594,6 @@ window._fbFichas = (callback) => {
       <select class="form-input" style="width:150px">
         <option>Últimas 8 semanas</option><option>Todo 2026</option>
       </select>
-    </div>
-    <div class="metrics" style="grid-template-columns:repeat(3,1fr)">
-      <div class="metric"><div class="metric-val c-green">18</div><div class="metric-lbl">En mejora</div></div>
-      <div class="metric"><div class="metric-val c-amber">6</div><div class="metric-lbl">Estancados</div></div>
-      <div class="metric"><div class="metric-val c-red">2</div><div class="metric-lbl">En baja</div></div>
     </div>
     <div class="prog-wrap">
       <div style="display:grid;grid-template-columns:200px 1fr 100px;background:var(--bg3);border-bottom:1px solid var(--border)">
@@ -871,7 +906,7 @@ window._fbFichas = (callback) => {
     </div>
 
     <div class="at-save-bar">
-      <button class="btn btn-ghost" style="flex:1">Cancelar</button>
+      <button class="btn btn-ghost" style="flex:1" onclick="goScreen('dashboard',null)">Cancelar</button>
       <button class="btn btn-primary" style="flex:2" onclick="guardar()">Guardar sesión</button>
     </div>
   </div>
@@ -1102,6 +1137,8 @@ const ATLETAS=[
   {ap:"Morales",       nom:"Aramis",        prov:"",pos:"",asist:0, num:0, altura:0,  peso:0,  pesoIdeal:0},
   {ap:"Contreras",     nom:"Emilio",        prov:"",pos:"",asist:0, num:0, altura:0,  peso:0,  pesoIdeal:0},
   {ap:"Gimenez",       nom:"Carlos (DT)",   prov:"",pos:"DT",asist:0,num:22,altura:180,peso:92, pesoIdeal:89.0},
+  {ap:"Borras",         nom:"Juan",          prov:"Córdoba",pos:"",asist:0,num:0,altura:0,  peso:0,  pesoIdeal:0},
+  {ap:"Cukierman",      nom:"Mariano (PC)",  prov:"",pos:"Pitching Coach",asist:0,num:0,altura:0,peso:0,pesoIdeal:0},
 ];
 
 // ── DATOS DE TESTS (desde TEST_Bs_As_-_ARGENTINA.xlsx) ────────────────────
@@ -1235,7 +1272,7 @@ function buildProgRows(){
 }
 
 function initSelects(){
-  ['rep-at','carga-atleta-sel','prog-at-sel'].forEach(id=>{
+  ['rep-at','carga-atleta-sel','prog-at-sel','prog-atleta-sel'].forEach(id=>{
     const s=document.getElementById(id);
     if(!s)return;
     if(id==='prog-at-sel')s.innerHTML='<option value="">Todos los atletas</option>';
@@ -1530,66 +1567,9 @@ const ESTADO_COLORS = {activo:'var(--green)',gestion:'var(--amber)',confirmado:'
 const ESTADO_BADGE  = {activo:'bg',gestion:'ba',confirmado:'bc',pendiente:'bx'};
 const ESTADO_LABEL  = {activo:'Activo',gestion:'En gestión',confirmado:'Confirmado',pendiente:'Pendiente'};
 
-function renderCompetencias(){
-  // ── CARDS VISUALES ──────────────────────────────────────────────────────
-  const list = document.getElementById('competencias-list');
-  if(list){
-    const hoy = new Date();
-    list.innerHTML = competencias.map(c => {
-      const fT = c.fecha ? new Date(c.fecha) : null;
-      const diasRest = fT ? Math.max(0,Math.ceil((fT-hoy)/(1000*60*60*24))) : null;
-      const semsRest = diasRest !== null ? Math.ceil(diasRest/7) : null;
-      const inicio = document.getElementById('cal-inicio')?.value;
-      const sesTot = (fT && inicio)
-        ? Math.round(((fT-new Date(inicio))/(1000*60*60*24))/7*c.sesSem)
-        : semsRest !== null ? semsRest*c.sesSem : null;
-      const pct = sesTot>0 ? Math.min(100,Math.round(c.sesReales/sesTot*100)) : 0;
-      const sesRest = sesTot!==null ? Math.max(0,sesTot-c.sesReales) : null;
-      const accentColor = ESTADO_COLORS[c.estado]||'var(--muted)';
-      const diasColor = diasRest!==null ? (diasRest<30?'var(--red)':diasRest<60?'var(--amber)':'var(--cel)') : 'var(--muted)';
 
-      return `<div style="background:var(--bg2);border:1px solid var(--border);border-top:3px solid ${accentColor};border-radius:14px;padding:18px 20px;position:relative;overflow:hidden">
-        <div style="position:absolute;top:0;right:0;width:80px;height:80px;border-radius:50%;background:${accentColor};opacity:.04;transform:translate(20px,-20px);pointer-events:none"></div>
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
-          <div>
-            <div style="font-family:var(--display);font-size:20px;color:var(--white);letter-spacing:1px;margin-bottom:3px">${c.nombre.toUpperCase()}</div>
-            <div style="font-size:12px;color:var(--muted)">${c.fecha ? new Date(c.fecha).toLocaleDateString('es-AR',{day:'2-digit',month:'long',year:'numeric'}) : 'Fecha a confirmar'}</div>
-          </div>
-          <span class="badge ${ESTADO_BADGE[c.estado]||'bx'}" style="font-size:11px;padding:4px 10px;flex-shrink:0">${ESTADO_LABEL[c.estado]||c.estado}</span>
-        </div>
-        <div style="font-size:12px;color:var(--text2);margin-bottom:14px">${c.nota}</div>
-        <div style="display:flex;gap:20px;align-items:center;margin-bottom:12px">
-          ${diasRest!==null ? `
-          <div style="text-align:center">
-            <div style="font-family:var(--display);font-size:44px;color:${diasColor};letter-spacing:2px;line-height:1">${diasRest}</div>
-            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:3px">días</div>
-          </div>` : `<div style="font-family:var(--display);font-size:28px;color:var(--muted)">—</div>`}
-          ${sesTot!==null ? `
-          <div style="flex:1">
-            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:5px">
-              <span style="font-family:var(--mono)">${c.sesReales} / ${sesTot} sesiones</span>
-              <span style="color:${accentColor};font-weight:600">${pct}%</span>
-            </div>
-            <div style="background:var(--bg3);border-radius:4px;height:5px;overflow:hidden">
-              <div style="width:${pct}%;height:5px;background:${accentColor};border-radius:4px;transition:width .8s"></div>
-            </div>
-            <div style="font-size:10px;color:var(--muted);margin-top:4px">${sesRest} restantes · ${semsRest} semanas</div>
-          </div>` : ''}
-        </div>
-      </div>`;
-    }).join('');
-  }
+// (versión anterior eliminada)
 
-  // ── MODAL EDITOR ────────────────────────────────────────────────────────
-  renderModalList();
-
-  // ── RELOJ: apunta a la próxima con fecha ─────────────────────────────────
-  const conFecha = competencias.filter(c=>c.fecha).sort((a,b)=>new Date(a.fecha)-new Date(b.fecha));
-  if(conFecha.length > 0){
-    updateMainCounter(conFecha[0]);
-    updateClock(conFecha[0]);
-  }
-}
 
 function renderModalList(){
   const ml = document.getElementById('modal-comp-list');
@@ -1645,51 +1625,25 @@ function closeModal(){
   renderCompetencias();
 }
 
-function updateMainCounter(c){
-  if(!c || !c.fecha) return;
-  const hoy=new Date(), fT=new Date(c.fecha);
-  const inicio=document.getElementById('cal-inicio')?.value || '2026-07-07';
-  // Calcular sesiones totales reales (martes=2, jueves=4)
-  let sesTot = 0;
-  const fI = new Date(inicio);
-  let d = new Date(fI);
-  while(d <= fT){
-    if(d.getDay()===2 || d.getDay()===4) sesTot++;
-    d.setDate(d.getDate()+1);
-  }
-  const sesHechas = c.sesReales || 0;
-  const sesRest = Math.max(0, sesTot - sesHechas);
-  const pct = sesTot > 0 ? Math.min(100, Math.round(sesHechas/sesTot*100)) : 0;
 
-  const pb=document.getElementById('cal-prog-bar'); if(pb) pb.style.width=pct+'%';
-  const sr=document.getElementById('cal-ses-resto'); if(sr) sr.textContent=`${pct}% completado`;
-  const pi=document.getElementById('cal-prog-ini'); if(pi) pi.textContent='7 jul 2026';
-  const pf=document.getElementById('cal-prog-fin'); if(pf) pf.textContent='27 ago 2026';
-  const sh=document.getElementById('cal-ses-hechas'); if(sh) sh.textContent=sesHechas;
-  const st=document.getElementById('cal-ses-total');  if(st) st.textContent=sesTot;
-  const rb=document.getElementById('cal-ses-rest-big'); if(rb) rb.textContent=sesRest;
-  // También actualizar dashboard
-  const dd=document.getElementById('dash-dias-resto');
-  if(dd){ const dias=Math.max(0,Math.ceil((fT-hoy)/(1000*60*60*24))); dd.textContent=dias; }
-}
+// (versión anterior eliminada)
+
 
 function updateClock(c){ /* reloj removido */ }
 
 
-function updComp(id,field,value){
-  const c=competencias.find(x=>x.id===id);
-  if(c){c[field]=value; renderModalList(); renderCompetencias();}
-}
-function delComp(id){
-  if(!confirm('¿Eliminar esta competencia?')) return;
-  competencias=competencias.filter(x=>x.id!==id);
-  renderModalList(); renderCompetencias();
-}
-function addCompetencia(){
-  competencias.push({id:nextCompId++,nombre:'Nueva competencia',fecha:'',sesSem:3,sesReales:0,estado:'pendiente',nota:''});
-  renderModalList(); renderCompetencias();
-}
-function calcContador(){ renderCompetencias(); }
+
+// (versión anterior eliminada)
+
+
+// (versión anterior eliminada)
+
+
+// (versión anterior eliminada)
+
+
+// (versión anterior eliminada)
+
 
 
 
@@ -1837,123 +1791,17 @@ function tieneTestCampo(ap){
   return !!(t && ((t.exitVelo && t.exitVelo!=='—') || (t.yardas60 && t.yardas60!=='—') || (t.batSpeed && t.batSpeed!=='—')));
 }
 
-function renderTests(){
-  const tbody = document.getElementById('tests-tbody');
-  const resumen = document.getElementById('tests-resumen');
-  if(!tbody) return;
 
-  const rows = ATLETAS.map(a => {
-    const d = fichaData[a.ap] || {};
-    const tc = tieneTestCampo(a.ap);
-    const t = TEST_DATA[a.ap] || {};
-    // Checks reales
-    const checks = [
-      d.testF||false,      // Fuerza máx
-      tc,                   // Test campo
-      d.testVel||false,    // Exit velo
-      d.testSpr||false,    // 60 yardas
-      d.test1||false,      // Test físico
-      d.apto||false,       // Apto médico
-    ];
-    const total = checks.filter(Boolean).length;
-    // Lógica de estado:
-    // - SIN TEST: 0 checks
-    // - RENOVAR: tiene algunos (1-3) pero no todos los deportivos clave
-    // - PARCIAL: tiene algunos pero faltan campo o fuerza
-    // - COMPLETO: tiene fuerza + campo (mínimo), idealmente 5+
-    const tieneDeportivos = checks[0] || checks[1]; // fuerza o campo
-    const estado = total === 0 ? 'sin-test'
-                 : total >= 5 ? 'completo'
-                 : tieneDeportivos && total >= 3 ? 'renovar'
-                 : 'pendiente';
+// (versión anterior eliminada)
 
-    return { a, d, t, checks, total, estado, tc };
-  });
 
-  // Resumen stats
-  const completos  = rows.filter(r=>r.estado==='completo').length;
-  const pendientes = rows.filter(r=>r.estado==='sin-test'||r.estado==='pendiente').length;
-  const renovar    = rows.filter(r=>r.estado==='renovar').length;
 
-  if(resumen){
-    resumen.innerHTML = `
-      <div style="background:var(--bg2);border:1px solid var(--green);border-radius:14px;padding:18px;text-align:center">
-        <div style="font-family:var(--display);font-size:44px;color:var(--green);letter-spacing:2px">${completos}</div>
-        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:6px">Tests completos</div>
-      </div>
-      <div style="background:var(--bg2);border:1px solid var(--amber);border-radius:14px;padding:18px;text-align:center">
-        <div style="font-family:var(--display);font-size:44px;color:var(--amber);letter-spacing:2px">${renovar}</div>
-        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:6px">A renovar / completar</div>
-      </div>
-      <div style="background:var(--bg2);border:1px solid var(--red);border-radius:14px;padding:18px;text-align:center">
-        <div style="font-family:var(--display);font-size:44px;color:var(--red);letter-spacing:2px">${pendientes}</div>
-        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:6px">Sin tests</div>
-      </div>`;
-  }
+// (versión anterior eliminada)
 
-  const filtrados = testsFiltro === 'todos'     ? rows
-    : testsFiltro === 'ok'                       ? rows.filter(r=>r.estado==='completo')
-    : testsFiltro === 'pendiente'                ? rows.filter(r=>r.estado==='sin-test'||r.estado==='pendiente')
-    : rows.filter(r=>r.estado==='renovar');
 
-  // Sort: sin test → pendiente → renovar → completo
-  const order = {'sin-test':0,'pendiente':1,'renovar':2,'completo':3};
-  filtrados.sort((a,b)=>(order[a.estado]||0)-(order[b.estado]||0));
 
-  tbody.innerHTML = filtrados.map(({a,d,t,checks,total,estado,tc}) => {
-    const estadoBadge = estado==='completo' ? '<span class="badge bg">Completo</span>'
-      : estado==='renovar'   ? '<span class="badge ba">Completar</span>'
-      : estado==='pendiente' ? '<span class="badge br">Pendiente</span>'
-      : '<span class="badge br" style="background:var(--red-bg)">Sin tests</span>';
+// (versión anterior eliminada)
 
-    const checkCells = [
-      // Fuerza máx
-      checks[0] ? `<td style="text-align:center"><span style="color:var(--green)" title="Press: ${d.pressMax||'—'} · Sent: ${d.sentMax||'—'}">✓</span><div style="font-size:9px;color:var(--muted);font-family:var(--mono)">${d.pressMax||'—'}</div></td>`
-                : `<td style="text-align:center"><span style="color:var(--red-bg);font-size:12px;cursor:pointer" onclick="marcarTest('${a.ap}','testF')">○</span></td>`,
-      // Test campo
-      checks[1] ? `<td style="text-align:center"><span style="color:var(--green)" title="Exit velo: ${t.exitVelo} · Bat: ${t.batSpeed}">✓</span><div style="font-size:9px;color:var(--muted);font-family:var(--mono)">${t.exitVelo||'—'} mph</div></td>`
-                : `<td style="text-align:center"><span style="color:var(--red-bg);font-size:12px">○</span></td>`,
-      // Exit velo
-      checks[2] ? `<td style="text-align:center"><span style="color:var(--green)">✓</span><div style="font-size:9px;color:var(--muted);font-family:var(--mono)">${d.velLanz||t.exitVelo||'—'}</div></td>`
-                : `<td style="text-align:center;color:var(--muted)">—</td>`,
-      // 60 yardas
-      checks[3] ? `<td style="text-align:center"><span style="color:var(--green)">✓</span><div style="font-size:9px;color:var(--muted);font-family:var(--mono)">${t.yardas60||'—'}s</div></td>`
-                : `<td style="text-align:center;color:var(--muted)">—</td>`,
-      // Test físico
-      checks[4] ? `<td style="text-align:center"><span style="color:var(--green)">✓</span></td>`
-                : `<td style="text-align:center"><span style="color:var(--red-bg);font-size:12px;cursor:pointer" onclick="marcarTest('${a.ap}','test1')">○</span></td>`,
-      // Apto médico
-      checks[5] ? `<td style="text-align:center"><span style="color:var(--green)">✓</span></td>`
-                : `<td style="text-align:center"><span style="color:var(--amber);font-size:12px;cursor:pointer" onclick="marcarTest('${a.ap}','apto')">○</span></td>`,
-    ].join('');
-
-    return `<tr>
-      <td>
-        <div class="td-n">${a.ap}, ${a.nom}</div>
-        <div style="font-size:11px;color:var(--muted)">${a.prov||'—'}</div>
-      </td>
-      ${checkCells}
-      <td>${estadoBadge}<div style="font-size:10px;color:var(--muted);margin-top:3px">${total}/${TEST_KEYS.length}</div></td>
-    </tr>`;
-  }).join('');
-}
-
-function marcarTest(ap, key){
-  if(!fichaData[ap]) return;
-  fichaData[ap][key] = true;
-  renderTests();
-  buildFichaSelector();
-  guardar();
-}
-
-function filtrarTests(tipo){
-  testsFiltro = tipo;
-  ['todos','ok','pendiente','renovar'].forEach(t=>{
-    const btn = document.getElementById('tf-'+t);
-    if(btn){ btn.className = t===tipo ? 'btn btn-primary' : 'btn btn-ghost'; btn.style.fontSize='12px'; }
-  });
-  renderTests();
-}
 
 function renderTests(){
   const tbody = document.getElementById('tests-tbody');
@@ -2053,69 +1901,238 @@ buildFichaSelector();
 renderCompetencias();
 renderTests();
 
-// ── SEGUIMIENTO EN VIVO (Firebase) ───────────────────────────────────────────
+// ── FIREBASE: ACTUALIZA TODO EL DASHBOARD EN TIEMPO REAL ─────────────────────
+const SESIONES_OBJETIVO = 16;
+
+function ecColor(e){
+  if(!e||e==='—') return 'var(--muted)';
+  if(e.includes('Sin')) return 'var(--green)';
+  if(e.includes('Lesion')) return 'var(--red)';
+  return 'var(--amber)';
+}
+
 function initSeguimiento(){
   if(!window._fbEscuchar) {
-    setTimeout(initSeguimiento, 500); // esperar que cargue el módulo Firebase
+    setTimeout(initSeguimiento, 600);
     return;
   }
 
-  // Escuchar sesiones
+  // ── ESCUCHAR SESIONES EN TIEMPO REAL ────────────────────────────────────────
   window._fbEscuchar(docs => {
-    const hoy = new Date().toLocaleDateString('es-AR');
-    const hoyDocs = docs.filter(d => d.fecha === hoy);
+    const sesiones = docs.filter(d => d.tipo === 'SESION' || !d.tipo);
+    const hoy      = new Date().toLocaleDateString('es-AR');
+    const hace7    = new Date(Date.now() - 7*24*60*60*1000).toLocaleDateString('es-AR');
 
-    // Stats
-    const sinMol = hoyDocs.filter(d => d.reporte?.estado?.includes('Sin molestias')).length;
-    const conMol = hoyDocs.filter(d => d.reporte?.estado?.includes('leve') || d.reporte?.estado?.includes('prevención')).length;
-    const lesion = hoyDocs.filter(d => d.reporte?.estado?.includes('Lesionado')).length;
+    // ── MÉTRICAS POR ATLETA ────────────────────────────────────────────────────
+    const porAtleta = {};
+    sesiones.forEach(d => {
+      const ap = d.apellido || (d.atleta||'').split(',')[0].trim();
+      if(!porAtleta[ap]) porAtleta[ap] = { total:0, sesiones:[], ultimaFecha:'', ultimoEstado:'—', ultimaNota:'—', ultimaHora:'', pesos:{} };
+      porAtleta[ap].total++;
+      porAtleta[ap].sesiones.push(d);
+      if(!porAtleta[ap].ultimaFecha || d.fecha >= porAtleta[ap].ultimaFecha) {
+        porAtleta[ap].ultimaFecha  = d.fecha  || '';
+        porAtleta[ap].ultimoEstado = d.reporte?.estado || '—';
+        porAtleta[ap].ultimaNota   = d.reporte?.nota   || '—';
+        porAtleta[ap].ultimaHora   = d.hora   || '';
+      }
+      if(d.registros) {
+        Object.entries(d.registros).forEach(([ej,val]) => {
+          if(!porAtleta[ap].pesos[ej]) porAtleta[ap].pesos[ej] = [];
+          porAtleta[ap].pesos[ej].push({ val, fecha: d.fecha });
+        });
+      }
+    });
 
-    const stEl = document.getElementById('seg-total');     if(stEl) stEl.textContent = hoyDocs.length;
-    const smEl = document.getElementById('seg-sin-mol');   if(smEl) smEl.textContent = sinMol;
-    const mlEl = document.getElementById('seg-mol');       if(mlEl) mlEl.textContent = conMol;
-    const lsEl = document.getElementById('seg-lesion');    if(lsEl) lsEl.textContent = lesion;
+    // Atletas sin actividad en +7 días
+    const inactivos = ATLETAS.filter(a => {
+      const dat = porAtleta[a.ap];
+      return !dat || !dat.ultimaFecha || dat.ultimaFecha < hace7;
+    });
 
-    // Tabla sesiones
+    // Atletas activos esta semana
+    const activosHoy = new Set(sesiones.filter(d => d.fecha === hoy).map(d => d.apellido || (d.atleta||'').split(',')[0].trim()));
+    const activosSemana = new Set(sesiones.filter(d => d.fecha >= hace7).map(d => d.apellido || (d.atleta||'').split(',')[0].trim()));
+
+    // ── DASHBOARD: MÉTRICAS PRINCIPALES ────────────────────────────────────────
+    const mHoy   = document.getElementById('m-hoy');       if(mHoy)   mHoy.textContent   = activosHoy.size;
+    const mTotal = document.getElementById('m-total');     if(mTotal) mTotal.textContent = sesiones.length;
+    const mActiv = document.getElementById('m-activos');   if(mActiv) mActiv.textContent = activosSemana.size;
+    const mInact = document.getElementById('m-inactivos'); if(mInact) mInact.textContent = inactivos.length;
+    const mHoyN  = document.getElementById('m-hoy-n');     if(mHoyN)  mHoyN.textContent  = `de ${ATLETAS.length} atletas`;
+
+    // Actualizar métricas del resumen original también
+    const segTotal = document.getElementById('seg-total');     if(segTotal) segTotal.textContent = activosHoy.size;
+    const segOk    = document.getElementById('seg-sin-mol');   if(segOk)    segOk.textContent    = sesiones.filter(d=>d.fecha===hoy&&d.reporte?.estado?.includes('Sin')).length;
+    const segMol   = document.getElementById('seg-mol');       if(segMol)   segMol.textContent   = sesiones.filter(d=>d.fecha===hoy&&(d.reporte?.estado?.includes('leve')||d.reporte?.estado?.includes('prevención'))).length;
+    const segLes   = document.getElementById('seg-lesion');    if(segLes)   segLes.textContent   = sesiones.filter(d=>d.fecha===hoy&&d.reporte?.estado?.includes('Lesion')).length;
+
+    // ── ALERTAS EN DASHBOARD ────────────────────────────────────────────────────
+    const alertBox = document.getElementById('fb-alertas');
+    if(alertBox) {
+      if(inactivos.length === 0) {
+        alertBox.innerHTML = '<div style="color:var(--green);font-size:13px">✓ Todos los atletas tienen actividad reciente</div>';
+      } else {
+        alertBox.innerHTML = `
+          <div style="font-size:12px;font-weight:600;color:var(--red);margin-bottom:8px">⚠ ${inactivos.length} atletas sin actividad en +7 días</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            ${inactivos.map(a=>`<span style="background:var(--red-bg);border:1px solid rgba(245,82,74,0.3);color:var(--red);font-size:11px;padding:3px 9px;border-radius:99px">${a.ap}</span>`).join('')}
+          </div>`;
+      }
+    }
+
+    // ── SEGUIMIENTO: TABLA DE SESIONES ─────────────────────────────────────────
     const tbody = document.getElementById('seg-tbody');
     if(tbody) {
-      if(!docs.length){ tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:30px">Sin sesiones registradas aún</td></tr>'; return; }
-      tbody.innerHTML = docs.slice(0,50).map(d => {
-        const ejs = d.registros ? Object.entries(d.registros).map(([k,v])=>`${k}: ${v}`).join(' · ') : '—';
-        const estadoColor = d.reporte?.estado?.includes('Sin') ? 'var(--green)' : d.reporte?.estado?.includes('Lesion') ? 'var(--red)' : 'var(--amber)';
-        return `<tr>
-          <td class="td-n">${d.atleta||'—'}</td>
-          <td>${d.dia||'—'}</td>
-          <td style="font-family:var(--mono);font-size:11px">${d.fecha||'—'}</td>
-          <td style="font-family:var(--mono);font-size:11px">${d.hora||'—'}</td>
-          <td><span style="color:${estadoColor};font-size:12px">${d.reporte?.estado||'—'}</span></td>
-          <td style="font-family:var(--mono);font-size:11px">${d.reporte?.rpe||'—'}</td>
-          <td style="font-size:12px;color:var(--text2);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.reporte?.nota||'—'}</td>
-          <td style="font-size:11px;color:var(--muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ejs}</td>
+      if(!sesiones.length){
+        tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:30px">Sin sesiones registradas aún</td></tr>';
+      } else {
+        tbody.innerHTML = sesiones.slice(0,100).map(d => {
+          const ejs = d.registros ? Object.entries(d.registros).slice(0,4).map(([k,v])=>`<b style="color:var(--white)">${v}</b><span style="color:var(--muted);font-size:10px"> ${k.replace(/-/g,' ')}</span>`).join(' · ') : '—';
+          return `<tr>
+            <td class="td-n">${d.atleta||'—'}</td>
+            <td><span class="badge bc" style="font-size:10px">${(d.dia||'—').split(' · ')[0]}</span></td>
+            <td style="font-family:var(--mono);font-size:11px">${d.fecha||'—'}</td>
+            <td style="font-family:var(--mono);font-size:11px">${d.hora||'—'}</td>
+            <td style="color:${ecColor(d.reporte?.estado)};font-size:12px">${d.reporte?.estado||'—'}</td>
+            <td style="font-family:var(--mono);font-size:11px">${d.reporte?.rpe||'—'}</td>
+            <td style="font-size:12px;color:var(--text2);max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${d.reporte?.nota||''}">${d.reporte?.nota||'—'}</td>
+            <td style="font-size:11px;color:var(--text2)">${ejs}</td>
+          </tr>`;
+        }).join('');
+      }
+    }
+
+    // ── NÓMINA: ACTUALIZAR CADA ATLETA CON DATOS REALES ────────────────────────
+    // Actualiza las filas de la tabla de atletas si existe
+    const nominaBody = document.getElementById('nomina-fb-tbody');
+    if(nominaBody) {
+      nominaBody.innerHTML = ATLETAS.map(a => {
+        const dat = porAtleta[a.ap] || { total:0, ultimaFecha:'—', ultimoEstado:'—', ultimaNota:'—', pesos:{} };
+        const pct = Math.round((dat.total / SESIONES_OBJETIVO) * 100);
+        const pb  = dat.pesos['press-banca']?.slice(-1)[0]?.val || '—';
+        const sq  = dat.pesos['sentadilla']?.slice(-1)[0]?.val  || dat.pesos['sentadilla-d1']?.slice(-1)[0]?.val || '—';
+        const inact = !dat.ultimaFecha || dat.ultimaFecha < hace7;
+        const rowBg = inact && dat.total === 0 ? 'background:rgba(245,82,74,0.04)' : '';
+        return `<tr style="${rowBg}">
+          <td class="td-n">${a.ap}${inact&&dat.total===0?'<span class="badge br" style="margin-left:6px;font-size:9px">sin actividad</span>':''}</td>
+          <td><span style="font-family:var(--mono)">${dat.total}</span> <span style="color:var(--muted);font-size:10px">/ ${SESIONES_OBJETIVO}</span></td>
+          <td>
+            <div style="display:flex;align-items:center;gap:7px">
+              <div style="flex:1;background:var(--bg3);border-radius:3px;height:5px">
+                <div style="width:${pct}%;height:5px;background:${pct>=80?'var(--green)':pct>=40?'var(--amber)':'var(--red)'};border-radius:3px"></div>
+              </div>
+              <span style="font-family:var(--mono);font-size:10px;color:var(--muted)">${pct}%</span>
+            </div>
+          </td>
+          <td style="font-family:var(--mono);color:var(--amber)">${pb}</td>
+          <td style="font-family:var(--mono);color:var(--amber)">${sq}</td>
+          <td style="color:${ecColor(dat.ultimoEstado)};font-size:12px">${dat.ultimoEstado}</td>
+          <td style="font-size:11px;color:var(--text2);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${dat.ultimaNota}">${dat.ultimaNota}</td>
+          <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${dat.ultimaFecha||'—'}</td>
         </tr>`;
       }).join('');
     }
+
+    // ── PROGRESIÓN: ACTUALIZAR SI HAY ATLETA SELECCIONADO ──────────────────────
+    const progSel = document.getElementById('prog-atleta-sel');
+    if(progSel && progSel.value) renderProgresionFb(progSel.value, porAtleta);
+
+    // Guardar datos globalmente para usar en otras funciones
+    window._fbDatos = { porAtleta, sesiones, hoy, hace7, inactivos };
   });
 
-  // Escuchar fichas
+  // ── ESCUCHAR FICHAS ─────────────────────────────────────────────────────────
   if(window._fbFichas) {
     window._fbFichas(docs => {
+      // Tabla en pantalla seguimiento
       const tbody = document.getElementById('fichas-tbody');
-      if(!tbody) return;
-      if(!docs.length){ tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">Sin fichas recibidas aún</td></tr>'; return; }
-      tbody.innerHTML = docs.map(d => `<tr>
-        <td class="td-n">${d.atleta||'—'}</td>
-        <td style="font-family:var(--mono)">${d.peso ? d.peso+' kg' : '—'}</td>
-        <td style="font-family:var(--mono)">${d.altura ? d.altura+' cm' : '—'}</td>
-        <td>${d.pos||'—'}</td>
-        <td>${d.prov||'—'}</td>
-        <td>${d.cob||'—'}</td>
-        <td style="font-family:var(--mono);font-size:11px">${d.fecha||'—'}</td>
-      </tr>`).join('');
+      if(tbody) {
+        if(!docs.length){ tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">Sin fichas recibidas aún</td></tr>'; return; }
+        tbody.innerHTML = docs.map(d => `<tr>
+          <td class="td-n">${d.atleta||'—'}</td>
+          <td style="font-family:var(--mono)">${d.peso?d.peso+' kg':'—'}</td>
+          <td style="font-family:var(--mono)">${d.altura?d.altura+' cm':'—'}</td>
+          <td>${d.pos||'—'}</td>
+          <td>${d.prov||'—'}</td>
+          <td>${d.cob||'—'}</td>
+          <td style="font-family:var(--mono);font-size:11px">${d.fecha||'—'}</td>
+        </tr>`).join('');
+      }
+
+      // Contador en dashboard
+      const fichaCount = document.getElementById('fb-fichas-count');
+      if(fichaCount) fichaCount.textContent = docs.length;
     });
   }
 }
 
-setTimeout(initSeguimiento, 1000);
+// ── PROGRESIÓN POR ATLETA (Firebase) ──────────────────────────────────────────
+function renderProgresionFb(ap, porAtleta) {
+  const dat    = (porAtleta || window._fbDatos?.porAtleta)?.[ap];
+  const target = document.getElementById('prog-fb-content');
+  if(!target) return;
+  if(!dat || dat.total === 0) {
+    target.innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted)">Sin sesiones registradas para ${ap}</div>`;
+    return;
+  }
+
+  const ejsConDatos = Object.entries(dat.pesos).filter(([,arr]) => arr.length > 0);
+  if(!ejsConDatos.length) {
+    target.innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted)">Sin pesos registrados aún</div>`;
+    return;
+  }
+
+  const rows = ejsConDatos.map(([ej, registros]) => {
+    const sorted = registros.sort((a,b) => a.fecha > b.fecha ? 1 : -1);
+    const primero = parseFloat(sorted[0].val) || sorted[0].val;
+    const ultimo  = parseFloat(sorted[sorted.length-1].val) || sorted[sorted.length-1].val;
+    const trend   = typeof primero === 'number' && typeof ultimo === 'number'
+      ? ultimo > primero ? `<span style="color:var(--green)">↑ +${(ultimo-primero).toFixed(1)}kg</span>`
+      : ultimo < primero ? `<span style="color:var(--red)">↓ ${(ultimo-primero).toFixed(1)}kg</span>`
+      : `<span style="color:var(--amber)">→ igual</span>`
+      : '—';
+    const historial = sorted.slice(-6).map(r=>`<span style="font-family:var(--mono);font-size:11px;background:var(--bg3);padding:2px 6px;border-radius:4px">${r.val}</span>`).join(' ');
+    return `<tr>
+      <td class="td-n" style="text-transform:capitalize">${ej.replace(/-/g,' ')}</td>
+      <td style="font-family:var(--mono);color:var(--muted)">${sorted[0].val}</td>
+      <td style="font-family:var(--mono);color:var(--amber);font-weight:600">${sorted[sorted.length-1].val}</td>
+      <td>${trend}</td>
+      <td style="font-size:11px">${sorted.length}</td>
+      <td>${historial}</td>
+    </tr>`;
+  }).join('');
+
+  // Comentarios
+  const comentarios = dat.sesiones
+    .filter(s => s.reporte?.nota && s.reporte.nota !== '—')
+    .map(s => `<div style="padding:8px 12px;background:var(--bg3);border-radius:8px;margin-bottom:6px">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:3px">${s.fecha} · ${s.dia||''} · <span style="color:${ecColor(s.reporte?.estado)}">${s.reporte?.estado||''}</span> · RPE ${s.reporte?.rpe||'—'}</div>
+      <div style="font-size:13px;color:var(--text2)">${s.reporte.nota}</div>
+    </div>`).join('');
+
+  target.innerHTML = `
+    <div style="font-size:13px;font-weight:600;color:var(--white);margin-bottom:10px">
+      ${ap} · ${dat.total}/${SESIONES_OBJETIVO} sesiones · ${Math.round(dat.total/SESIONES_OBJETIVO*100)}% completado
+    </div>
+    <div class="tbl-wrap" style="margin-bottom:16px">
+      <table>
+        <thead><tr><th>Ejercicio</th><th>Primer registro</th><th>Último registro</th><th>Tendencia</th><th>Sesiones</th><th>Historial</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    ${comentarios ? `
+    <div style="font-size:13px;font-weight:600;color:var(--white);margin-bottom:10px">Comentarios del atleta</div>
+    ${comentarios}` : ''}
+  `;
+}
+
+// Exponer para que el selector de la pantalla progresión la llame
+window.renderProgresionFb = renderProgresionFb;
+
+setTimeout(initSeguimiento, 800);
+
 </script>
+<div class="toast" id="toast">✓ Guardado</div>
 </body>
 </html>
