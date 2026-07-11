@@ -384,8 +384,8 @@ window._fbFichas = (callback) => {
       <div id="fb-alertas" style="color:var(--muted);font-size:13px">Conectando...</div>
     </div>
     <div class="metrics">
-      <div class="metric"><div class="metric-val">36</div><div class="metric-lbl">Atletas en nómina</div><div class="metric-note" style="color:var(--muted)">3 nuevos por confirmar</div></div>
-      <div class="metric"><div class="metric-val c-cel" id="m-ses-hechas">2/16</div><div class="metric-lbl">Sesiones realizadas</div><div class="metric-note" style="color:var(--muted)">7 jul → 27 ago</div></div>
+      <div class="metric"><div class="metric-val" id="m-nomina">39</div><div class="metric-lbl">Atletas en nómina</div><div class="metric-note" style="color:var(--muted)">pre-temporada 2026</div></div>
+      <div class="metric"><div class="metric-val c-cel" id="m-ses-hechas">—</div><div class="metric-lbl">Sesiones realizadas</div><div class="metric-note" style="color:var(--muted)">7 jul → 27 ago</div></div>
       <div class="metric"><div class="metric-val c-amber" id="dash-dias-resto">20</div><div class="metric-lbl">Días al fin</div><div class="metric-note" style="color:var(--muted)">Pre-temporada · 27 ago</div></div>
     </div>
 
@@ -440,8 +440,19 @@ window._fbFichas = (callback) => {
     </div>
     <div class="tbl-wrap">
       <table>
-        <thead><tr><th>Atleta</th><th>Sesiones</th><th>Progreso</th><th>Último press</th><th>Última sentadilla</th><th>Estado reciente</th><th>Última nota</th><th>Fecha</th></tr></thead>
-        <tbody id="nomina-fb-tbody"><tr><td colspan="8" style="text-align:center;color:var(--muted);padding:30px">Conectando con Firebase...</td></tr></tbody>
+        <thead><tr>
+          <th>Atleta</th>
+          <th>Sesiones</th>
+          <th>Progreso</th>
+          <th>Días entrenados</th>
+          <th>Días faltados</th>
+          <th>Último press</th>
+          <th>Última sent.</th>
+          <th>Estado</th>
+          <th>Última nota</th>
+          <th>Última sesión</th>
+        </tr></thead>
+        <tbody id="nomina-fb-tbody"><tr><td colspan="10" style="text-align:center;color:var(--muted);padding:30px">Conectando con Firebase...</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -1985,9 +1996,29 @@ function initSeguimiento(){
       return new Date(y,m-1,d) <= new Date();
     }).length;
 
-    // Actualizar contador sesiones
+    // ── MÉTRICAS DASHBOARD: sesiones realizadas dinámico ──────────────────────
     const mSes = document.getElementById('m-ses-hechas');
     if(mSes) mSes.textContent = sesionesHechas + '/16';
+
+    // Atletas que hicieron TODAS las sesiones pasadas
+    const perfectos = ATLETAS.filter(a => {
+      const dat = porAtleta[a.ap];
+      if(!dat) return false;
+      const diasPasados = [...FECHAS_ENTRENO].filter(f => f <= hoy);
+      const diasAt = new Set(dat.sesiones.filter(s => FECHAS_ENTRENO.has(s.fecha)).map(s => s.fecha));
+      return diasPasados.every(f => diasAt.has(f));
+    });
+
+    // Actualizar métrica de activos con info más útil
+    const mActiv = document.getElementById('m-activos');
+    const mInact = document.getElementById('m-inactivos');
+    if(mActiv) mActiv.textContent = atletasConSesion.size;
+    if(mInact) mInact.textContent = inactivos.length;
+
+    // Métrica de atletas perfectos (sin faltas)
+    const mHoyN = document.getElementById('m-hoy-n');
+    if(mHoyN) mHoyN.textContent = `de 39 atletas · ${perfectos.length} sin faltas`;
+
 
     // ── ASISTENCIA REAL POR ATLETA ────────────────────────────────────────────
     const atletasConSesion = new Set(
@@ -2040,9 +2071,9 @@ function initSeguimiento(){
     // ── DASHBOARD: MÉTRICAS PRINCIPALES ────────────────────────────────────────
     const mHoy   = document.getElementById('m-hoy');       if(mHoy)   mHoy.textContent   = activosHoy.size;
     const mTotal = document.getElementById('m-total');     if(mTotal) mTotal.textContent = sesiones.length;
-    const mActiv = document.getElementById('m-activos');   if(mActiv) mActiv.textContent = activosSemana.size;
-    const mInact = document.getElementById('m-inactivos'); if(mInact) mInact.textContent = inactivos.length;
-    const mHoyN  = document.getElementById('m-hoy-n');     if(mHoyN)  mHoyN.textContent  = `de ${ATLETAS.length} atletas`;
+    document.getElementById('m-activos') && (document.getElementById('m-activos').textContent = activosSemana.size);
+    document.getElementById('m-inactivos') && (document.getElementById('m-inactivos').textContent = inactivos.length);
+    document.getElementById('m-hoy-n') && (document.getElementById('m-hoy-n').textContent = `de ${ATLETAS.length} atletas`);
 
     // Actualizar métricas del resumen original también
     const segTotal = document.getElementById('seg-total');     if(segTotal) segTotal.textContent = activosHoy.size;
@@ -2099,36 +2130,79 @@ function initSeguimiento(){
       }
     }
 
-    // ── NÓMINA: ACTUALIZAR CADA ATLETA CON DATOS REALES ────────────────────────
-    // Actualiza las filas de la tabla de atletas si existe
+    // ── NÓMINA: MÉTRICAS COMPLETAS POR ATLETA ──────────────────────────────────
     const nominaBody = document.getElementById('nomina-fb-tbody');
     if(nominaBody) {
       nominaBody.innerHTML = ATLETAS.map(a => {
-        const dat = porAtleta[a.ap] || { total:0, ultimaFecha:'—', ultimoEstado:'—', ultimaNota:'—', pesos:{} };
+        const dat = porAtleta[a.ap] || { total:0, sesiones:[], ultimaFecha:'—', ultimoEstado:'—', ultimaNota:'—', pesos:{} };
         const pct = Math.round((dat.total / SESIONES_OBJETIVO) * 100);
+
+        // Últimos pesos clave
         const pb  = dat.pesos['press-banca']?.slice(-1)[0]?.val || '—';
-        const sq  = dat.pesos['sentadilla']?.slice(-1)[0]?.val  || dat.pesos['sentadilla-d1']?.slice(-1)[0]?.val || '—';
-        const inact = !dat.ultimaFecha || dat.ultimaFecha < hace7;
-        const rowBg = inact && dat.total === 0 ? 'background:rgba(245,82,74,0.04)' : '';
+        const sq  = dat.pesos['sentadilla']?.slice(-1)[0]?.val || dat.pesos['sentadilla-d1']?.slice(-1)[0]?.val || '—';
+
+        // Días que SÍ entrenó (fechas reales de sesión en días de entrenamiento)
+        const diasEntrenados = [...new Set(
+          dat.sesiones
+            .filter(s => FECHAS_ENTRENO.has(s.fecha))
+            .map(s => s.fecha)
+        )].sort();
+
+        // Días que FALTÓ (días de entrenamiento pasados sin sesión)
+        const diasPasados = [...FECHAS_ENTRENO].filter(f => f <= hoy).sort();
+        const diasFaltados = diasPasados.filter(f => !diasEntrenados.includes(f));
+
+        // Color de fila
+        const sinActividad = dat.total === 0;
+        const irregular = dat.total > 0 && diasFaltados.length > diasEntrenados.length;
+        const rowBg = sinActividad
+          ? 'background:rgba(245,82,74,0.04)'
+          : irregular ? 'background:rgba(245,166,35,0.03)' : '';
+
+        // Badge estado
+        const statusBadge = sinActividad
+          ? '<span class="badge br" style="font-size:9px;margin-left:6px">sin actividad</span>'
+          : irregular
+          ? '<span class="badge ba" style="font-size:9px;margin-left:6px">irregular</span>'
+          : dat.total > 0 ? '<span class="badge bg" style="font-size:9px;margin-left:6px">activo</span>' : '';
+
+        // Días entrenados pills
+        const diasEntrenadosHTML = diasEntrenados.length
+          ? diasEntrenados.map(f => `<span style="font-size:9px;background:var(--green-bg);color:var(--green);padding:1px 5px;border-radius:4px;margin:1px;display:inline-block">${f}</span>`).join('')
+          : '<span style="color:var(--muted);font-size:11px">ninguno</span>';
+
+        // Días faltados pills
+        const diasFaltadosHTML = diasFaltados.length
+          ? diasFaltados.map(f => `<span style="font-size:9px;background:var(--red-bg);color:var(--red);padding:1px 5px;border-radius:4px;margin:1px;display:inline-block">${f}</span>`).join('')
+          : diasPasados.length === 0
+          ? '<span style="color:var(--muted);font-size:11px">sin sesiones aún</span>'
+          : '<span style="color:var(--green);font-size:11px">✓ ninguno</span>';
+
         return `<tr style="${rowBg}">
-          <td class="td-n">${a.ap}${inact&&dat.total===0?'<span class="badge br" style="margin-left:6px;font-size:9px">sin actividad</span>':''}</td>
-          <td><span style="font-family:var(--mono)">${dat.total}</span> <span style="color:var(--muted);font-size:10px">/ ${SESIONES_OBJETIVO}</span></td>
+          <td class="td-n">${a.ap}${statusBadge}</td>
           <td>
-            <div style="display:flex;align-items:center;gap:7px">
-              <div style="flex:1;background:var(--bg3);border-radius:3px;height:5px">
+            <span style="font-family:var(--mono);font-weight:600">${dat.total}</span>
+            <span style="color:var(--muted);font-size:10px"> / ${SESIONES_OBJETIVO}</span>
+          </td>
+          <td>
+            <div style="display:flex;align-items:center;gap:6px">
+              <div style="flex:1;background:var(--bg3);border-radius:3px;height:5px;min-width:60px">
                 <div style="width:${pct}%;height:5px;background:${pct>=80?'var(--green)':pct>=40?'var(--amber)':'var(--red)'};border-radius:3px"></div>
               </div>
               <span style="font-family:var(--mono);font-size:10px;color:var(--muted)">${pct}%</span>
             </div>
           </td>
-          <td style="font-family:var(--mono);color:var(--amber)">${pb}</td>
-          <td style="font-family:var(--mono);color:var(--amber)">${sq}</td>
+          <td style="max-width:160px">${diasEntrenadosHTML}</td>
+          <td style="max-width:160px">${diasFaltadosHTML}</td>
+          <td style="font-family:var(--mono);color:var(--amber);font-size:12px">${pb}</td>
+          <td style="font-family:var(--mono);color:var(--amber);font-size:12px">${sq}</td>
           <td style="color:${ecColor(dat.ultimoEstado)};font-size:12px">${dat.ultimoEstado}</td>
-          <td style="font-size:11px;color:var(--text2);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${dat.ultimaNota}">${dat.ultimaNota}</td>
+          <td style="font-size:11px;color:var(--text2);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${dat.ultimaNota}">${dat.ultimaNota}</td>
           <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${dat.ultimaFecha||'—'}</td>
         </tr>`;
       }).join('');
     }
+
 
     // ── PROGRESIÓN: ACTUALIZAR SI HAY ATLETA SELECCIONADO ──────────────────────
     const progSel = document.getElementById('prog-atleta-sel');
