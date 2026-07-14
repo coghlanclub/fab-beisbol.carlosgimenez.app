@@ -438,7 +438,7 @@ window._fbFichas = (callback) => {
       <div style="font-size:12px;color:var(--muted)">Datos en tiempo real desde Firebase</div>
       <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--green)"><span style="width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block"></span>En vivo</div>
     </div>
-    <div class="tbl-wrap">
+    <div class="tbl-wrap" style="margin-bottom:20px">
       <table>
         <thead><tr>
           <th>Atleta</th>
@@ -455,7 +455,7 @@ window._fbFichas = (callback) => {
         <tbody id="nomina-fb-tbody"><tr><td colspan="10" style="text-align:center;color:var(--muted);padding:30px">Conectando con Firebase...</td></tr></tbody>
       </table>
     </div>
-  </div>
+    <div style="font-size:13px;font-weight:600;color:var(--white);margin-bottom:12px">Vista de fichas</div>
     <div class="search-bar">
       <input class="form-input" placeholder="Buscar atleta..." oninput="filtrarAt(this.value)">
       <select class="form-input" style="width:160px" onchange="filtrarProv(this.value)">
@@ -468,7 +468,13 @@ window._fbFichas = (callback) => {
 
   <!-- ── CARGAR RUTINA (DT) ── -->
   <div class="screen" id="s-carga">
-    <div class="override-banner">✎ Para cambiar la rutina de un solo atleta: elegí el atleta en "Override individual" y editá sus ejercicios sin tocar el grupo.</div>
+    <!-- Header con volver -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="font-size:12px;color:var(--muted)">Cargar / modificar rutina del plantel</div>
+      <button class="btn btn-ghost" onclick="goScreen('dashboard',null)">← Volver</button>
+    </div>
+
+    <div class="override-banner">✎ Para cambiar la rutina de un solo atleta: elegí "Override individual" y seleccioná el atleta.</div>
     <div class="carga-grid">
       <div class="carga-left">
         <div class="carga-card">
@@ -483,37 +489,21 @@ window._fbFichas = (callback) => {
             <label class="form-lbl">Atleta</label>
             <select class="form-input" id="carga-atleta-sel"></select>
           </div>
-          <div class="form-group"><label class="form-lbl">Mes / Fase</label>
+          <div class="form-group"><label class="form-lbl">Fase</label>
             <select class="form-input">
               <option>Julio 2026 — Pre-temporada</option>
               <option>Agosto 2026 — Fuerza base</option>
-              <option>Septiembre 2026 — Potencia</option>
-            </select>
-          </div>
-          <div class="form-group"><label class="form-lbl">Semana</label>
-            <select class="form-input">
-              <option>Semana 26 (actual)</option>
-              <option>Semana 27</option><option>Semana 28</option>
             </select>
           </div>
         </div>
         <div class="carga-card">
-          <div class="carga-title">Estrategia del bloque</div>
-          <textarea class="form-input" placeholder="Describí el enfoque de esta fase para que el atleta entienda el por qué de los ejercicios..." style="min-height:120px"></textarea>
+          <div class="carga-title">Nota al atleta</div>
+          <textarea class="form-input" placeholder="Describí el enfoque de esta fase..." style="min-height:100px"></textarea>
         </div>
-        <div class="carga-card">
-          <div class="carga-title">Sesiones objetivo</div>
-          <div class="form-group"><label class="form-lbl">Sesiones hasta fecha de meta</label>
-            <input class="form-input" type="number" placeholder="ej: 24" value="24">
-          </div>
-          <div class="form-group"><label class="form-lbl">Fecha de meta</label>
-            <input class="form-input" type="date" value="2026-09-15">
-          </div>
-          <div style="background:var(--cel-dim);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--cel);font-family:var(--mono)">
-            3 sesiones / semana · 8 semanas restantes
-          </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-ghost" onclick="goScreen('dashboard',null)" style="flex:1">Cancelar</button>
+          <button class="btn btn-green" onclick="guardar()" style="flex:2;padding:12px;font-size:14px">Guardar rutina</button>
         </div>
-        <button class="btn btn-green" onclick="guardar()" style="width:100%;padding:12px;font-size:14px">Guardar rutina</button>
       </div>
       <div>
         <div class="ej-editor">
@@ -527,10 +517,14 @@ window._fbFichas = (callback) => {
             <div class="ej-hdr">Intensidad</div><div class="ej-hdr"></div>
           </div>
           <div id="ejs-d1">
-            <div class="ej-edit-row"><input class="form-input" value="Press de banca"><input class="form-input" value="4" style="text-align:center"><input class="form-input" value="8" style="text-align:center"><input class="form-input" value="75%" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
-            <div class="ej-edit-row"><input class="form-input" value="Sentadilla BB"><input class="form-input" value="4" style="text-align:center"><input class="form-input" value="6" style="text-align:center"><input class="form-input" value="80%" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
-            <div class="ej-edit-row"><input class="form-input" value="Búlgaras"><input class="form-input" value="3" style="text-align:center"><input class="form-input" value="10" style="text-align:center"><input class="form-input" value="SP" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
-            <div class="ej-edit-row"><input class="form-input" value="Subidas al cajón"><input class="form-input" value="3" style="text-align:center"><input class="form-input" value="8" style="text-align:center"><input class="form-input" value="SP" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
+            <div class="ej-edit-row"><input class="form-input" value="Press banca"><input class="form-input" value="3" style="text-align:center"><input class="form-input" value="10" style="text-align:center"><input class="form-input" value="—" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
+            <div class="ej-edit-row"><input class="form-input" value="Press uni lat"><input class="form-input" value="3" style="text-align:center"><input class="form-input" value="10" style="text-align:center"><input class="form-input" value="—" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
+            <div class="ej-edit-row"><input class="form-input" value="Apertura"><input class="form-input" value="3" style="text-align:center"><input class="form-input" value="10" style="text-align:center"><input class="form-input" value="—" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
+            <div class="ej-edit-row"><input class="form-input" value="Dominadas"><input class="form-input" value="3" style="text-align:center"><input class="form-input" value="máx" style="text-align:center"><input class="form-input" value="—" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
+            <div class="ej-edit-row"><input class="form-input" value="Sentadilla"><input class="form-input" value="3" style="text-align:center"><input class="form-input" value="10" style="text-align:center"><input class="form-input" value="—" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
+            <div class="ej-edit-row"><input class="form-input" value="Estocada con mancuerna"><input class="form-input" value="3" style="text-align:center"><input class="form-input" value="10" style="text-align:center"><input class="form-input" value="—" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
+            <div class="ej-edit-row"><input class="form-input" value="Prensa"><input class="form-input" value="3" style="text-align:center"><input class="form-input" value="10" style="text-align:center"><input class="form-input" value="—" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
+            <div class="ej-edit-row"><input class="form-input" value="Gemelos"><input class="form-input" value="3" style="text-align:center"><input class="form-input" value="10" style="text-align:center"><input class="form-input" value="—" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
           </div>
         </div>
         <div style="margin-top:12px" class="ej-editor">
@@ -544,9 +538,15 @@ window._fbFichas = (callback) => {
             <div class="ej-hdr">Intensidad</div><div class="ej-hdr"></div>
           </div>
           <div id="ejs-d2">
-            <div class="ej-edit-row"><input class="form-input" value="Remo BB"><input class="form-input" value="4" style="text-align:center"><input class="form-input" value="8" style="text-align:center"><input class="form-input" value="75%" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
-            <div class="ej-edit-row"><input class="form-input" value="Dominadas"><input class="form-input" value="4" style="text-align:center"><input class="form-input" value="MAX" style="text-align:center"><input class="form-input" value="BW" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
-            <div class="ej-edit-row"><input class="form-input" value="Remo DB unilateral"><input class="form-input" value="3" style="text-align:center"><input class="form-input" value="10" style="text-align:center"><input class="form-input" value="70%" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
+            <div class="ej-edit-row"><input class="form-input" value="Dorsalera"><input class="form-input" value="3" style="text-align:center"><input class="form-input" value="10" style="text-align:center"><input class="form-input" value="—" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
+            <div class="ej-edit-row"><input class="form-input" value="Remo DB"><input class="form-input" value="3" style="text-align:center"><input class="form-input" value="10" style="text-align:center"><input class="form-input" value="—" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
+            <div class="ej-edit-row"><input class="form-input" value="Dominadas abiertas"><input class="form-input" value="3" style="text-align:center"><input class="form-input" value="máx" style="text-align:center"><input class="form-input" value="—" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
+            <div class="ej-edit-row"><input class="form-input" value="Curl bíceps"><input class="form-input" value="3" style="text-align:center"><input class="form-input" value="10" style="text-align:center"><input class="form-input" value="—" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
+            <div class="ej-edit-row"><input class="form-input" value="Tríceps en polea"><input class="form-input" value="3" style="text-align:center"><input class="form-input" value="10" style="text-align:center"><input class="form-input" value="—" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
+            <div class="ej-edit-row"><input class="form-input" value="Peso muerto"><input class="form-input" value="3" style="text-align:center"><input class="form-input" value="10" style="text-align:center"><input class="form-input" value="—" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
+            <div class="ej-edit-row"><input class="form-input" value="Búlgara"><input class="form-input" value="3" style="text-align:center"><input class="form-input" value="10" style="text-align:center"><input class="form-input" value="—" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
+            <div class="ej-edit-row"><input class="form-input" value="Sent. barra hexagonal"><input class="form-input" value="3" style="text-align:center"><input class="form-input" value="10" style="text-align:center"><input class="form-input" value="—" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
+            <div class="ej-edit-row"><input class="form-input" value="Gemelos"><input class="form-input" value="3" style="text-align:center"><input class="form-input" value="10" style="text-align:center"><input class="form-input" value="—" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
           </div>
         </div>
         <div style="margin-top:12px" class="ej-editor">
@@ -560,10 +560,13 @@ window._fbFichas = (callback) => {
             <div class="ej-hdr">Intensidad</div><div class="ej-hdr"></div>
           </div>
           <div id="ejs-d3">
-            <div class="ej-edit-row"><input class="form-input" value="BB Hip Thrust"><input class="form-input" value="4" style="text-align:center"><input class="form-input" value="6" style="text-align:center"><input class="form-input" value="85%" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
-            <div class="ej-edit-row"><input class="form-input" value="Med Ball Rotacional"><input class="form-input" value="4" style="text-align:center"><input class="form-input" value="8" style="text-align:center"><input class="form-input" value="MAX VEL" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
-            <div class="ej-edit-row"><input class="form-input" value="Sprint 30m"><input class="form-input" value="6" style="text-align:center"><input class="form-input" value="1" style="text-align:center"><input class="form-input" value="MAX" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
-            <div class="ej-edit-row"><input class="form-input" value="Velocidad lanzamiento"><input class="form-input" value="3" style="text-align:center"><input class="form-input" value="10" style="text-align:center"><input class="form-input" value="MAX" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
+            <div class="ej-edit-row"><input class="form-input" value="Twist ruso"><input class="form-input" value="3" style="text-align:center"><input class="form-input" value="10" style="text-align:center"><input class="form-input" value="—" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
+            <div class="ej-edit-row"><input class="form-input" value="Anti-rotación con polea"><input class="form-input" value="3" style="text-align:center"><input class="form-input" value="10" style="text-align:center"><input class="form-input" value="—" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
+            <div class="ej-edit-row"><input class="form-input" value="Press de hombro"><input class="form-input" value="3" style="text-align:center"><input class="form-input" value="10" style="text-align:center"><input class="form-input" value="—" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
+            <div class="ej-edit-row"><input class="form-input" value="Vuelos laterales"><input class="form-input" value="3" style="text-align:center"><input class="form-input" value="10" style="text-align:center"><input class="form-input" value="—" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
+            <div class="ej-edit-row"><input class="form-input" value="Hip thrust"><input class="form-input" value="3" style="text-align:center"><input class="form-input" value="10" style="text-align:center"><input class="form-input" value="—" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
+            <div class="ej-edit-row"><input class="form-input" value="Sent. front con mancuerna"><input class="form-input" value="3" style="text-align:center"><input class="form-input" value="10" style="text-align:center"><input class="form-input" value="—" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
+            <div class="ej-edit-row"><input class="form-input" value="Gemelos"><input class="form-input" value="3" style="text-align:center"><input class="form-input" value="10" style="text-align:center"><input class="form-input" value="—" style="text-align:center"><button class="del-btn" onclick="delEj(this)">×</button></div>
           </div>
         </div>
       </div>
