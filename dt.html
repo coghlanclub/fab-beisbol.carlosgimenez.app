@@ -2003,6 +2003,14 @@ function initSeguimiento(){
     const mSes = document.getElementById('m-ses-hechas');
     if(mSes) mSes.textContent = sesionesHechas + '/16';
 
+    // ── VARIABLES QUE SE USAN EN TODO EL BLOQUE ───────────────────────────────
+    const inactivos = ATLETAS.filter(a => {
+      const dat = porAtleta[a.ap];
+      return !dat || !dat.ultimaFecha || dat.ultimaFecha < hace7;
+    });
+    const activosHoy    = new Set(sesiones.filter(d => d.fecha === hoy).map(d => d.apellido || (d.atleta||'').split(',')[0].trim()));
+    const activosSemana = new Set(sesiones.filter(d => d.fecha >= hace7).map(d => d.apellido || (d.atleta||'').split(',')[0].trim()));
+
     // ── ASISTENCIA REAL POR ATLETA ────────────────────────────────────────────
     const atletasConSesion = new Set(
       sesiones
@@ -2011,7 +2019,7 @@ function initSeguimiento(){
     );
     const atletasSinSesion = ATLETAS.filter(a => !atletasConSesion.has(a.ap));
 
-    // Atletas que hicieron TODAS las sesiones pasadas
+    // Atletas sin faltas
     const perfectos = ATLETAS.filter(a => {
       const dat = porAtleta[a.ap];
       if(!dat) return false;
@@ -2021,9 +2029,9 @@ function initSeguimiento(){
     });
 
     // Actualizar métricas
-    document.getElementById('m-activos') && (document.getElementById('m-activos').textContent = activosSemana.size);
+    document.getElementById('m-activos')   && (document.getElementById('m-activos').textContent   = activosSemana.size);
     document.getElementById('m-inactivos') && (document.getElementById('m-inactivos').textContent = inactivos.length);
-    document.getElementById('m-hoy-n') && (document.getElementById('m-hoy-n').textContent = `de 39 atletas · ${perfectos.length} sin faltas`);
+    document.getElementById('m-hoy-n')     && (document.getElementById('m-hoy-n').textContent     = `de 39 atletas · ${perfectos.length} sin faltas`);
 
     // Resumen header
     const mResumen = document.getElementById('m-asist-resumen');
@@ -2056,21 +2064,9 @@ function initSeguimiento(){
     }
 
 
-    const inactivos = ATLETAS.filter(a => {
-      const dat = porAtleta[a.ap];
-      return !dat || !dat.ultimaFecha || dat.ultimaFecha < hace7;
-    });
-
-    // Atletas activos esta semana
-    const activosHoy = new Set(sesiones.filter(d => d.fecha === hoy).map(d => d.apellido || (d.atleta||'').split(',')[0].trim()));
-    const activosSemana = new Set(sesiones.filter(d => d.fecha >= hace7).map(d => d.apellido || (d.atleta||'').split(',')[0].trim()));
-
     // ── DASHBOARD: MÉTRICAS PRINCIPALES ────────────────────────────────────────
     const mHoy   = document.getElementById('m-hoy');       if(mHoy)   mHoy.textContent   = activosHoy.size;
     const mTotal = document.getElementById('m-total');     if(mTotal) mTotal.textContent = sesiones.length;
-    document.getElementById('m-activos') && (document.getElementById('m-activos').textContent = activosSemana.size);
-    document.getElementById('m-inactivos') && (document.getElementById('m-inactivos').textContent = inactivos.length);
-    document.getElementById('m-hoy-n') && (document.getElementById('m-hoy-n').textContent = `de ${ATLETAS.length} atletas`);
 
     // Actualizar métricas del resumen original también
     const segTotal = document.getElementById('seg-total');     if(segTotal) segTotal.textContent = activosHoy.size;
