@@ -295,6 +295,20 @@ select.ficha-input option{background:var(--bg2)}
     </div>
   </div>
 
+  <!-- ALERTA PLAN DE TIRO -->
+  <div id="alerta-tiro" style="display:none;margin:0 24px 16px;padding:14px 16px;border-radius:12px;border:1px solid rgba(245,166,35,0.3);background:rgba(245,166,35,0.08)">
+    <div style="font-size:10px;font-weight:600;color:var(--amber);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px" id="alerta-tiro-semana">⚡ PLAN DE TIRO</div>
+    <div style="font-size:13px;font-weight:600;color:var(--white);margin-bottom:4px" id="alerta-tiro-label">—</div>
+    <div style="font-size:12px;color:var(--text2);line-height:1.5" id="alerta-tiro-msg">—</div>
+  </div>
+
+  <!-- FASE ACTUAL DEL PLAN DE TIRO -->
+  <div id="fase-tiro-wrap" style="display:none;margin:0 24px 10px;padding:10px 14px;border-radius:10px;border:1px solid rgba(107,184,245,0.15);background:rgba(107,184,245,0.05)">
+    <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px">Fase actual del plan de tiro</div>
+    <div style="font-size:13px;font-weight:600;color:var(--cel)" id="fase-tiro-label">—</div>
+    <div style="font-size:11px;color:var(--text2);margin-top:3px" id="fase-tiro-desc">—</div>
+  </div>
+
   <!-- BUSCADOR -->
   <div class="search-wrap">
     <span class="search-label">Ingresá tu apellido para comenzar</span>
@@ -463,7 +477,7 @@ select.ficha-input option{background:var(--bg2)}
     <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Estocada con mancuerna</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="estocada-db" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
     <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Prensa</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="prensa" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
     <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Gemelos</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="gemelos-d1" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
-    <div class="nota-bloque"><div class="nota-title">Nota del DT</div><div class="nota-text">Fase concéntrica explosiva en compuestos. Bajar lento 2 segundos. Serie de entrada antes de cargar.</div></div>
+    <div class="nota-bloque"><div class="nota-title">📋 Planificación · Día 1 — Fuerza General</div><div class="nota-text">Sesión central de fuerza del plantel. Fase concéntrica explosiva en compuestos — bajar lento 2 segundos, subir con intención. Hacé una serie de entrada antes de cargar tu máximo. Este es el día de empuje y tren inferior.</div></div>
   </div>
 
   <div id="dia-1" class="dia-content">
@@ -482,7 +496,7 @@ select.ficha-input option{background:var(--bg2)}
     <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Búlgara</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="bulgara" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
     <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Sentadilla barra hex.</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="sent-hex" inputmode="decimal"><div class="ej-input-lbl">kg</div><div class="rec-val" id="rec-hex"></div></div></div>
     <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Gemelos</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="gemelos-d2" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
-    <div class="nota-bloque"><div class="nota-title">Nota del DT</div><div class="nota-text">Balance con Día 1. Foco en espalda, isquios y glúteos. Serie de entrada antes de cada ejercicio compuesto.</div></div>
+    <div class="nota-bloque"><div class="nota-title">📋 Planificación · Día 2 — Recovery General</div><div class="nota-text">Día de regeneración activa para todo el plantel. Sin cargas máximas — el objetivo es recuperar el sistema nervioso y muscular del Día 1. Movilidad, zona 2 y trabajo de hombro. El esfuerzo máximo va en los días de fuerza.</div></div>
   </div>
 
   <div id="dia-2" class="dia-content">
@@ -501,7 +515,7 @@ select.ficha-input option{background:var(--bg2)}
     <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Hip thrust</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="hip-thrust" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
     <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Sentadilla front DB</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="sent-front" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
     <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Gemelos</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="gemelos-d3" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
-    <div class="nota-bloque"><div class="nota-title">Nota del DT — Fuerza sarcoplasmática</div><div class="nota-text">Volumen alto, cargas moderadas, tiempo bajo tensión. Series largas. Foco en hombro y cadena posterior.</div></div>
+    <div class="nota-bloque"><div class="nota-title">📋 Planificación · Día 3 — Fuerza Individual</div><div class="nota-text">Este es el día de sentadilla. Cada uno trabaja su patrón de sentadilla con la carga y variante que corresponde a su programa individual. Máxima concentración en técnica — este movimiento es el que más te va a devolver en el campo. Volumen alto, cargas moderadas-altas, foco en hombro y cadena posterior.</div></div>
   </div>
 
   <div id="dia-3" class="dia-content">
@@ -515,7 +529,7 @@ select.ficha-input option{background:var(--bg2)}
     <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Zona 2 · trote / bici</div><div class="ej-meta">15 minutos · ritmo conversacional</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="fc-z2" inputmode="numeric"><div class="ej-input-lbl">FC prom</div></div></div>
     <div class="bloque-hdr" style="color:var(--green)">Velocidad</div>
     <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Sprint 200m × 6</div><div class="ej-meta">Recuperación completa entre sprints</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="sprint-200" inputmode="decimal"><div class="ej-input-lbl">mejor seg</div></div></div>
-    <div class="nota-bloque"><div class="nota-title">Recovery — no competir con el propio cuerpo</div><div class="nota-text">Es día de regenerar. El esfuerzo máximo va en los Días 1, 2 y 3.</div></div>
+    <div class="nota-bloque"><div class="nota-title">📋 Planificación · Recovery Individual</div><div class="nota-text">Día de recuperación individual. Cada uno conoce su cuerpo — si algo te quedó cargado del Día 3, hoy lo trabajás. Movilidad de cadera, hombro y columna a full. Sin competir con el propio cuerpo. El que empuja en recovery después paga en el campo.</div></div>
   </div>
 
   </div><!-- fin entreno-scroll fab -->
@@ -537,36 +551,43 @@ select.ficha-input option{background:var(--bg2)}
   <div style="background:var(--bg2);padding:20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px">
     <button onclick="showScreen('s-entreno')" style="background:transparent;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1">←</button>
     <div>
-      <div style="font-family:var(--display);font-size:22px;color:var(--white);letter-spacing:2px">NOTA DE SESIÓN</div>
+      <div style="font-family:var(--display);font-size:22px;color:var(--white);letter-spacing:2px">REPORTE DE SESIÓN</div>
       <div style="font-size:11px;color:var(--muted);margin-top:2px" id="nota-atleta-info">Pre-temporada 2026</div>
     </div>
   </div>
 
   <div style="flex:1;overflow-y:auto;padding:20px 20px 120px">
+
+    <!-- Estado físico -->
     <div style="margin-bottom:20px">
-      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Estado físico</div>
+      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Estado físico</div>
+      <div style="font-size:12px;color:rgba(107,184,245,0.5);margin-bottom:10px">Si tenés alguna molestia, reportala — tu entrenador de gym o de pitcheo necesita saberlo</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="estado-btns">
         <button onclick="selEstado(this,'💪 Sin molestias')" class="estado-btn" style="padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">💪 Sin molestias</button>
         <button onclick="selEstado(this,'⚠️ Molestia leve')" class="estado-btn" style="padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">⚠️ Molestia leve</button>
-        <button onclick="selEstado(this,'🛡️ En prevención')" class="estado-btn" style="padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">🛡️ En prevención</button>
-        <button onclick="selEstado(this,'🚨 Lesionado')" class="estado-btn" style="padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">🚨 Lesionado</button>
+        <button onclick="selEstado(this,'🛡️ Cuidando algo')" class="estado-btn" style="padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">🛡️ Cuidando algo</button>
+        <button onclick="selEstado(this,'🚨 Fuera de juego')" class="estado-btn" style="padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">🚨 Fuera de juego</button>
       </div>
     </div>
 
+    <!-- RPE -->
     <div style="margin-bottom:20px">
-      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Intensidad percibida (RPE)</div>
+      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">Carga percibida de la sesión (RPE)</div>
       <div style="display:flex;gap:8px" id="rpe-btns">
-        <button onclick="selRpe(this,'1-3 Suave')" class="rpe-btn" style="flex:1;padding:12px 4px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">1–3<div style="font-size:10px;color:var(--muted);font-weight:400;margin-top:3px">Suave</div></button>
-        <button onclick="selRpe(this,'4-6 Moderado')" class="rpe-btn" style="flex:1;padding:12px 4px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">4–6<div style="font-size:10px;color:var(--muted);font-weight:400;margin-top:3px">Moderado</div></button>
-        <button onclick="selRpe(this,'7-8 Duro')" class="rpe-btn" style="flex:1;padding:12px 4px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">7–8<div style="font-size:10px;color:var(--muted);font-weight:400;margin-top:3px">Duro</div></button>
-        <button onclick="selRpe(this,'9-10 Máximo')" class="rpe-btn" style="flex:1;padding:12px 4px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">9–10<div style="font-size:10px;color:var(--muted);font-weight:400;margin-top:3px">Máximo</div></button>
+        <button onclick="selRpe(this,'1-3 Liviana')" class="rpe-btn" style="flex:1;padding:12px 4px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">1–3<div style="font-size:10px;color:var(--muted);font-weight:400;margin-top:3px">Liviana</div></button>
+        <button onclick="selRpe(this,'4-6 Exigente')" class="rpe-btn" style="flex:1;padding:12px 4px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">4–6<div style="font-size:10px;color:var(--muted);font-weight:400;margin-top:3px">Exigente</div></button>
+        <button onclick="selRpe(this,'7-8 Dura')" class="rpe-btn" style="flex:1;padding:12px 4px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">7–8<div style="font-size:10px;color:var(--muted);font-weight:400;margin-top:3px">Dura</div></button>
+        <button onclick="selRpe(this,'9-10 Al límite')" class="rpe-btn" style="flex:1;padding:12px 4px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">9–10<div style="font-size:10px;color:var(--muted);font-weight:400;margin-top:3px">Al límite</div></button>
       </div>
     </div>
 
+    <!-- Nota libre -->
     <div>
-      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Nota libre (opcional)</div>
-      <textarea id="nota-libre" placeholder="Cómo te sentiste, algo que quieras contarle al DT..." style="width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:14px;font-size:15px;color:var(--white);font-family:Inter,sans-serif;outline:none;resize:none;min-height:120px;-webkit-appearance:none"></textarea>
+      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Reporte al cuerpo técnico</div>
+      <div style="font-size:12px;color:rgba(107,184,245,0.5);margin-bottom:10px">Molestias en el brazo o hombro → comunicalo a tu entrenador de pitcheo. Molestias en gym → al entrenador de fuerza. Cualquier dato suma.</div>
+      <textarea id="nota-libre" placeholder="¿Cómo respondió el cuerpo? ¿Alguna molestia específica? ¿Algo fuera de lo normal en el entrenamiento de hoy?" style="width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:14px;font-size:15px;color:var(--white);font-family:Inter,sans-serif;outline:none;resize:none;min-height:120px;-webkit-appearance:none"></textarea>
     </div>
+
   </div>
 
   <div style="position:fixed;bottom:0;left:0;right:0;padding:14px 20px 28px;background:var(--bg);border-top:1px solid var(--border);display:flex;gap:10px">
@@ -632,6 +653,58 @@ const ATLETAS = [
 // Para conectar con Google Sheets: Tools → Script Editor → publicar como Web App
 // Pegá la URL aquí:
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw-MCObqgQOY5ybxecvAjCgfXzzcTL9itIY2UGAx5IBuT43cKn9RmYthkV6jn8Ztq5d/exec';
+
+// ── PLAN DE TIRO FAB — fases y alertas ───────────────────────────────────────
+const PLAN_TIRO = [
+  { semana:'W1', fecha:'2026-07-21', label:'Inicio Low Intensity',
+    desc:'Extensión hasta 120ft · buscar confort · sin compresión · HB + Plyo 70%',
+    alerta:'Esta semana arranca el programa de tiro. Hablá con tu entrenador de gym y campo antes de comenzar.' },
+  { semana:'W2', fecha:'2026-07-28', label:'Mid Intensity',
+    desc:'Extensión hasta 120-150ft · Plyo 80% · 9oz hasta 90ft · extensión hasta 150-180ft',
+    alerta:'Esta semana cambia a MID INTENSITY. Una semana antes hablá con tus entrenadores de gym y campo para coordinar la carga.' },
+  { semana:'W3', fecha:'2026-08-04', label:'High Intensity — ON RAMP',
+    desc:'Hasta 90ft con 9oz · Máxima extensión · Compresión cada 4-5 lanzamientos en línea recta · Weighted Balls',
+    alerta:'⚡ Esta semana es HIGH INTENSITY. Coordiná con tus entrenadores ANTES de arrancar — carga de gym debe ajustarse.' },
+  { semana:'W4', fecha:'2026-08-11', label:'PlyoVelo + Athletic Throws',
+    desc:'PlyoVelo · Walking Windup · Athletic throws en 90ft · 80-100%',
+    alerta:'⚡ Inicio PlyoVelo. Reducción de carga de gym obligatoria. Hablá con el entrenador de campo y gym esta semana.' },
+  { semana:'W5', fecha:'2026-08-18', label:'Flat Arsenal + Bullpen 30',
+    desc:'Flat Arsenal ×15 · Bullpen 30 lanzamientos · HA Plyo · 85%',
+    alerta:'⚡ Primera sesión de Bullpen. Coordiná cargas con tus entrenadores — semana de alta demanda.' },
+  { semana:'W6', fecha:'2026-08-25', label:'Bullpen Específico / Pitch Design',
+    desc:'Bullpen específico · Pitch Design · Command Focus ×15 · HB + PD',
+    alerta:'⚡ Bullpen específico. Hablá con el pitching coach y entrenador de gym antes de la semana.' },
+  { semana:'W7', fecha:'2026-09-01', label:'Live AB + Bullpen 40',
+    desc:'Live AB · Drills específicos · Bullpen 40 lanzamientos · Arsenal feeling 10-15',
+    alerta:'⚡ Semana de Live AB. Máxima coordinación entre entrenador de gym y campo requerida.' },
+];
+
+// Devuelve la alerta activa si estamos dentro de los 7 días previos a una fase
+function getAlertaTiro() {
+  const hoy = new Date();
+  for (const fase of PLAN_TIRO) {
+    const fechaFase = new Date(fase.fecha);
+    const diasRestantes = Math.ceil((fechaFase - hoy) / (1000*60*60*24));
+    if (diasRestantes >= 0 && diasRestantes <= 7) {
+      return { ...fase, diasRestantes };
+    }
+    if (diasRestantes < 0 && diasRestantes >= -7) {
+      return { ...fase, diasRestantes, enCurso: true };
+    }
+  }
+  return null;
+}
+
+// Devuelve la fase actual del plan de tiro
+function getFaseActual() {
+  const hoy = new Date();
+  let faseActual = null;
+  for (const fase of PLAN_TIRO) {
+    if (new Date(fase.fecha) <= hoy) faseActual = fase;
+  }
+  return faseActual;
+}
+
 
 // ── ESTADO ────────────────────────────────────────────────────────────────────
 let atletaActual = null;
@@ -1340,6 +1413,42 @@ async function guardarFicha() {
 
 
 renderAtletas([], "");
+
+// Mostrar alerta y fase del plan de tiro
+(function() {
+  const alerta = getAlertaTiro();
+  const fase   = getFaseActual();
+
+  if (alerta) {
+    const el  = document.getElementById('alerta-tiro');
+    const sem = document.getElementById('alerta-tiro-semana');
+    const lbl = document.getElementById('alerta-tiro-label');
+    const msg = document.getElementById('alerta-tiro-msg');
+    if (el) {
+      el.style.display = 'block';
+      if (alerta.enCurso) {
+        sem.textContent = '⚡ ' + alerta.semana + ' · EN CURSO';
+        lbl.textContent = alerta.label;
+        msg.textContent = alerta.desc;
+      } else {
+        sem.textContent = '⚠️ ' + alerta.semana + ' · EN ' + alerta.diasRestantes + ' DIA' + (alerta.diasRestantes===1?'':'S');
+        lbl.textContent = alerta.label + ' — proxima semana';
+        msg.textContent = alerta.alerta;
+      }
+    }
+  }
+
+  if (fase) {
+    const wrap = document.getElementById('fase-tiro-wrap');
+    const lbl2 = document.getElementById('fase-tiro-label');
+    const desc = document.getElementById('fase-tiro-desc');
+    if (wrap) {
+      wrap.style.display = 'block';
+      lbl2.textContent = fase.semana + ' · ' + fase.label;
+      desc.textContent = fase.desc;
+    }
+  }
+})();
 </script>
 </body>
 </html>
