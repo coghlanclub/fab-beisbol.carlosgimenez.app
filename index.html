@@ -99,22 +99,82 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .screen{display:none;min-height:100vh;flex-direction:column}
 .screen.on{display:flex}
 
-/* ── PANTALLA 1: ELEGIR NOMBRE ── */
-#s-inicio{align-items:stretch;padding:0}
-.inicio-hero{background:var(--bg2);padding:36px 24px 28px;text-align:center;border-bottom:1px solid var(--border)}
-.fab-logo{font-family:var(--display);font-size:52px;color:var(--cel);letter-spacing:6px;line-height:1;margin-bottom:6px}
-.fab-sub{font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
-.pre-badge{display:inline-block;background:var(--green-bg);border:1px solid rgba(34,201,138,0.3);color:var(--green);font-size:11px;font-weight:600;padding:4px 12px;border-radius:99px;margin-top:12px;letter-spacing:.04em}
-.search-wrap{padding:20px 20px 12px}
-.search-input{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:14px 16px;font-size:16px;color:var(--white);font-family:'Inter',sans-serif;outline:none;-webkit-appearance:none}
-.search-input::placeholder{color:var(--muted)}
-.search-input:focus{border-color:var(--cel)}
-.atletas-list{flex:1;overflow-y:auto;padding:0 20px 24px}
-.atleta-item{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}
-.atleta-item:active{transform:scale(.98);border-color:var(--cel)}
+/* ── PANTALLA 1: INICIO FUTURISTA ── */
+#s-inicio{align-items:stretch;padding:0;position:relative;overflow:hidden;background:var(--bg)}
+
+/* Hero principal */
+.inicio-hero{
+  position:relative;padding:52px 28px 40px;text-align:center;
+  background:radial-gradient(ellipse at 50% 0%, rgba(107,184,245,0.08) 0%, transparent 70%);
+  border-bottom:1px solid var(--border);overflow:hidden;
+}
+
+/* Diamante SVG de fondo */
+.diamond-bg{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(45deg);
+  width:280px;height:280px;border:1px solid rgba(107,184,245,0.06);
+  pointer-events:none;
+}
+.diamond-bg::before{
+  content:'';position:absolute;top:20px;left:20px;right:20px;bottom:20px;
+  border:1px solid rgba(107,184,245,0.04);
+}
+
+/* Líneas decorativas */
+.line-left,.line-right{
+  position:absolute;top:0;bottom:0;width:1px;
+  background:linear-gradient(to bottom,transparent,rgba(107,184,245,0.08),transparent);
+  pointer-events:none;
+}
+.line-left{left:28px}.line-right{right:28px}
+
+/* Gaucho SVG emblem */
+.gaucho-emblem{margin:0 auto 16px;width:140px;height:140px;position:relative}
+
+/* Logo FAB */
+.fab-wordmark{font-family:var(--display);font-size:64px;color:var(--white);letter-spacing:10px;line-height:1;margin-bottom:6px;position:relative}
+.fab-wordmark span{color:var(--cel)}
+.fab-tagline{font-size:10px;color:var(--muted);letter-spacing:.2em;text-transform:uppercase;margin-bottom:4px}
+.los-gauchos{font-family:var(--display);font-size:20px;color:var(--cel);letter-spacing:4px;margin-bottom:20px}
+
+/* Títulos pre-temp */
+.pre-badge{display:inline-block;background:var(--green-bg);border:1px solid rgba(34,201,138,0.3);color:var(--green);font-size:10px;font-weight:600;padding:4px 14px;border-radius:99px;letter-spacing:.06em;text-transform:uppercase}
+
+/* Stats banda */
+.stats-band{display:flex;justify-content:center;gap:0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:0 0 0 0}
+.stat-pill{flex:1;padding:10px 8px;text-align:center;border-right:1px solid var(--border)}
+.stat-pill:last-child{border-right:none}
+.stat-n{font-family:var(--display);font-size:22px;color:var(--cel);letter-spacing:2px;line-height:1}
+.stat-l{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:3px}
+
+/* Buscador */
+.search-wrap{padding:24px 24px 10px}
+.search-label{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;display:block;margin-bottom:10px;text-align:center}
+.search-box{position:relative}
+.search-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--muted);pointer-events:none}
+.search-input{
+  width:100%;background:var(--bg2);
+  border:1px solid var(--border2);border-radius:14px;
+  padding:16px 16px 16px 46px;font-size:17px;color:var(--white);
+  font-family:'Inter',sans-serif;outline:none;-webkit-appearance:none;
+  letter-spacing:.02em;
+}
+.search-input::placeholder{color:var(--muted);font-size:15px}
+.search-input:focus{border-color:var(--cel);background:rgba(107,184,245,0.04);box-shadow:0 0 0 3px rgba(107,184,245,0.08)}
+
+/* Resultado búsqueda */
+.atletas-list{flex:1;overflow-y:auto;padding:0 24px 24px}
+.atleta-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px;background:var(--bg2);
+  border:1px solid var(--border);border-radius:12px;
+  margin-bottom:7px;cursor:pointer;transition:all .12s;
+}
+.atleta-item:active{transform:scale(.98);border-color:var(--cel);background:rgba(107,184,245,0.06)}
 .ai-nombre{font-size:15px;font-weight:600;color:var(--white)}
-.ai-sub{font-size:12px;color:var(--muted);margin-top:2px}
-.ai-arrow{font-size:18px;color:var(--muted)}
+.ai-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.ai-arrow{font-size:16px;color:rgba(107,184,245,0.4)}
+.search-hint{text-align:center;padding:40px 20px;color:var(--muted);font-size:13px;line-height:1.7}
 
 /* ── PANTALLA 2: ENTRENAMIENTO ── */
 #s-entreno{background:var(--bg);display:flex;flex-direction:column;height:100vh}
@@ -192,15 +252,69 @@ select.ficha-input option{background:var(--bg2)}
 
 <!-- ── PANTALLA 1: ELEGIR NOMBRE ── -->
 <div class="screen on" id="s-inicio">
+
+  <!-- HERO -->
   <div class="inicio-hero">
-    <div class="fab-logo">FAB</div>
-    <div class="fab-sub">Federación Argentina · Béisbol</div>
-    <div class="pre-badge">Pre-temporada · 7 jul – 27 ago 2026</div>
+    <div class="diamond-bg"></div>
+    <div class="line-left"></div>
+    <div class="line-right"></div>
+
+    <!-- Logo oficial Los Gauchos -->
+    <div class="gaucho-emblem">
+      <img src="gaucho.png"
+           alt="Los Gauchos · FAB"
+           style="width:140px;height:140px;object-fit:contain;filter:drop-shadow(0 0 20px rgba(107,184,245,0.4))"
+           onerror="this.style.display='none';document.getElementById('fab-fallback').style.display='block'">
+      <div id="fab-fallback" style="display:none;font-family:var(--display);font-size:42px;color:var(--cel);letter-spacing:4px;line-height:90px;text-align:center">FAB</div>
+    </div>
+
+    <!-- Nombre -->
+    <div class="fab-tagline">Federación Argentina de Béisbol</div>
+    <div class="fab-wordmark">LOS <span>GAUCHOS</span></div>
+    <div class="fab-tagline" style="margin-bottom:12px;letter-spacing:.15em">Selección Nacional · Pre-temporada 2026</div>
+    <div class="pre-badge">⚾ 7 jul – 27 ago 2026</div>
   </div>
+
+  <!-- STATS BANDA -->
+  <div class="stats-band">
+    <div class="stat-pill">
+      <div class="stat-n" style="color:var(--amber)">8</div>
+      <div class="stat-l">Títulos</div>
+    </div>
+    <div class="stat-pill">
+      <div class="stat-n">1960</div>
+      <div class="stat-l">Fundación</div>
+    </div>
+    <div class="stat-pill">
+      <div class="stat-n" style="color:var(--green)">2024</div>
+      <div class="stat-l">Último título</div>
+    </div>
+    <div class="stat-pill">
+      <div class="stat-n">39</div>
+      <div class="stat-l">Atletas</div>
+    </div>
+  </div>
+
+  <!-- BUSCADOR -->
   <div class="search-wrap">
-    <input class="search-input" id="search-input" type="text" placeholder="Buscá tu apellido..." oninput="filtrarAtletas(this.value)" autocomplete="off" autocorrect="off" spellcheck="false">
+    <span class="search-label">Ingresá tu apellido para comenzar</span>
+    <div class="search-box">
+      <span class="search-icon">⚾</span>
+      <input class="search-input" id="search-input" type="text"
+        placeholder="Ej: Kramer, Zapata, Uzal..."
+        oninput="filtrarAtletas(this.value)"
+        autocomplete="off" autocorrect="off" spellcheck="false">
+    </div>
   </div>
-  <div class="atletas-list" id="atletas-list"></div>
+
+  <!-- LISTA (vacía por defecto, se llena al escribir) -->
+  <div class="atletas-list" id="atletas-list">
+    <div class="search-hint">
+      Escribí tu apellido arriba<br>
+      <span style="font-size:11px;color:rgba(107,184,245,0.4)">"Campeonato Americano 2024 · Lima, Perú · ¡Campeones!"</span>
+    </div>
+  </div>
+
 </div>
 
 <!-- ── PANTALLA FICHA DEL ATLETA ── -->
@@ -801,6 +915,138 @@ const RUTINAS_EXTRA = {
       ]},
     ]},
   ],
+  'Garcia': [
+    { label:'Día A · Lun', bloques:[
+      { nombre:'MOVILIDAD + ACTIVACIÓN', ejercicios:[
+        {nombre:'Foam roll cadena posterior',series:'3 min',id:'gar-foam-a',unidad:'✓'},
+        {nombre:'Movilidad cadera — apertura y rotación',series:'3×30 seg c/lado',id:'gar-mov-cad-a',unidad:'✓'},
+        {nombre:'Vitalización cruzada con med ball',series:'3×12',id:'gar-vital-a',unidad:'✓'},
+        {nombre:'Estocadas con salto',series:'3×10',id:'gar-estoc-salto-a',unidad:'reps'},
+      ]},
+      { nombre:'CIRCUITO 1 · Piernas sin carga en espalda', nota:'20 seg descanso entre ej · 3 min entre series', ejercicios:[
+        {nombre:'Prensa (reemplaza sentadilla con barra)',series:'4×12-10-10-8 · progresivo',id:'gar-prensa-a',unidad:'kg'},
+        {nombre:'Peso muerto barra (70-80%)',series:'4×12-10-10-8',id:'gar-pm-a',unidad:'kg'},
+        {nombre:'Retroestocadas con mancuerna',series:'4×12 c/lado',id:'gar-retroest-a',unidad:'kg'},
+      ]},
+      { nombre:'CIRCUITO 2 · Cadena posterior', ejercicios:[
+        {nombre:'Bisagra con med ball',series:'4×15',id:'gar-bisagra-a',unidad:'reps'},
+        {nombre:'Remo TRX abierto y cerrado',series:'4×10 c/lado',id:'gar-remo-trx-a',unidad:'reps'},
+        {nombre:'Roll de codos en fitball',series:'4×30-45 seg',id:'gar-roll-a',unidad:'seg'},
+      ]},
+      { nombre:'ZONA MEDIA · Rotacional', ejercicios:[
+        {nombre:'Rotación con polea',series:'4×20 c/lado',id:'gar-rot-pol-a',unidad:'kg'},
+        {nombre:'Espinales en banco',series:'3×15',id:'gar-espin-a',unidad:'reps'},
+      ]},
+    ]},
+    { label:'Día B · Mié', bloques:[
+      { nombre:'MOVILIDAD + ACTIVACIÓN', ejercicios:[
+        {nombre:'Foam roll torácico y caderas',series:'3 min',id:'gar-foam-b',unidad:'✓'},
+        {nombre:'Estocadas laterales con press de disco',series:'3×12',id:'gar-estlat-b',unidad:'kg'},
+        {nombre:'Apertura con bandas',series:'3×20',id:'gar-band-b',unidad:'✓'},
+      ]},
+      { nombre:'CIRCUITO 1 · Empuje horizontal', nota:'20 seg descanso entre ej · 3 min entre series', ejercicios:[
+        {nombre:'Press plano con mancuernas',series:'4×12-10-10-8',id:'gar-pb-b',unidad:'kg'},
+        {nombre:'Press inclinado con barra',series:'4×12-10-10-8',id:'gar-pinc-b',unidad:'kg'},
+        {nombre:'Fondos en paralelas',series:'4×10-12',id:'gar-fondos-b',unidad:'reps'},
+      ]},
+      { nombre:'CIRCUITO 2 · Pierna 1 pierna + core', ejercicios:[
+        {nombre:'Sentadilla 1 pierna (goblet o TRX)',series:'4×8-12 c/lado',id:'gar-sq1p-b',unidad:'reps'},
+        {nombre:'Estocadas con rotación med ball',series:'4×12 c/lado',id:'gar-estrot-b',unidad:'kg'},
+        {nombre:'Anti-rotación con polea',series:'4×10 c/lado',id:'gar-antirot-b',unidad:'kg'},
+      ]},
+      { nombre:'ACCESORIO', ejercicios:[
+        {nombre:'Bisagras con dos med ball',series:'4×12-20',id:'gar-bisagra-b',unidad:'reps'},
+        {nombre:'Leñador diagonal arrodillado con disco',series:'3×12 c/lado',id:'gar-lenador-b',unidad:'kg'},
+      ]},
+    ]},
+    { label:'Día C · Vie', bloques:[
+      { nombre:'MOVILIDAD + ACTIVACIÓN', ejercicios:[
+        {nombre:'Foam roll completo',series:'3 min',id:'gar-foam-c',unidad:'✓'},
+        {nombre:'Sentadilla + remo TRX',series:'3×12',id:'gar-sqtrx-c',unidad:'reps'},
+        {nombre:'Nados compuestos con bandas',series:'3×20',id:'gar-nados-c',unidad:'reps'},
+      ]},
+      { nombre:'CIRCUITO 1 · Tracción vertical y horizontal', nota:'20 seg descanso entre ej · 3 min entre series', ejercicios:[
+        {nombre:'Dominadas (con disco si podés)',series:'4×6-12',id:'gar-dom-c',unidad:'reps'},
+        {nombre:'Remo mancuerna 1 brazo',series:'4×12-10-10-8',id:'gar-remo1b-c',unidad:'kg'},
+        {nombre:'Tirones al pecho en polea',series:'4×12-10-10-8',id:'gar-polea-c',unidad:'kg'},
+      ]},
+      { nombre:'CIRCUITO 2 · Cadena posterior sin compresión', ejercicios:[
+        {nombre:'Elevación de caderas en fitball',series:'4×12-20',id:'gar-elev-c',unidad:'reps'},
+        {nombre:'Flexión de isquios en fitball',series:'4×12-15',id:'gar-isq-c',unidad:'reps'},
+        {nombre:'Alcances posterior 1 pierna',series:'4×8-15 c/lado',id:'gar-alc-c',unidad:'reps'},
+      ]},
+      { nombre:'ZONA MEDIA', ejercicios:[
+        {nombre:'Rotación 1 pierna med ball transversal',series:'4×12-20 c/lado',id:'gar-rot1p-c',unidad:'reps'},
+        {nombre:'Plancha lateral pierna arriba',series:'4×30-60 seg c/lado',id:'gar-planch-c',unidad:'seg'},
+        {nombre:'Flexión de brazos en fitball',series:'4×8-15',id:'gar-flex-c',unidad:'reps'},
+      ]},
+    ]},
+  ],
+  'Riello': [
+    { label:'Día 1', bloques:[
+      { nombre:'ENTRADA EN CALOR', ejercicios:[
+        {nombre:'Movilidad y activación de core y cintura escapular',series:'',id:'kev-mov-1',unidad:'✓'},
+      ]},
+      { nombre:'PLIOMETRÍA', nota:'Velocidad y explosividad', ejercicios:[
+        {nombre:'Drop jump 40cm + salto al cajón',series:'3×2 p/l → 4×2 → 3×3 → 4×3 → 5×3',id:'kev-dropjump-1',unidad:'reps'},
+        {nombre:'Saltos pogo pasando conos tortuga + salto horizontal',series:'2 pasadas ×3 → ×4 → ×5 / 3 pasadas ×3 → ×4',id:'kev-pogo-1',unidad:'reps'},
+      ]},
+      { nombre:'RUTINA · RIR 1-2', ejercicios:[
+        {nombre:'1A · Sentadilla (cadera por debajo de rodilla)',series:'3×3 100kg → 3×5 → 1-2-3 110kg → 3×3 → 3×4',id:'kev-sq-1',unidad:'kg'},
+        {nombre:'1B · Press inclinado con barra',series:'3×6 → 4×6 → 3×8 → 4×8 → 3×5 (más pesado)',id:'kev-pinc-1',unidad:'kg'},
+        {nombre:'2B · Remo 1 brazo con mancuerna',series:'3×8 p/l → 4×8 → 3×10 → 4×10 → 3×6 (más pesado)',id:'kev-remo1b-1',unidad:'kg'},
+        {nombre:'1C · Tríceps con polea alta',series:'3×10 → 3×12 → 3×8 (más pesado) → 3×8-10 → 3×10-12',id:'kev-tri-1',unidad:'kg'},
+        {nombre:'2C · Dominadas en máquina toma prona',series:'3×10 → 3×12 → 3×8 (más pesado) → 3×8-10 → 3×10-12',id:'kev-dom-1',unidad:'reps'},
+        {nombre:'1D · Vuelos laterales (1 seg. pausa arriba)',series:'4×8 → 3×10 → 3×12 → 3×12-15',id:'kev-vuelat-1',unidad:'kg'},
+        {nombre:'2D · Press paloff con polea',series:'4×5 p/l → 3×6 → 3×8 → 3×10 → 3×6 (más pesado)',id:'kev-paloff-1',unidad:'kg'},
+      ]},
+    ]},
+    { label:'Día 2', bloques:[
+      { nombre:'ENTRADA EN CALOR', ejercicios:[
+        {nombre:'Movilidad y activación de core y cintura escapular',series:'',id:'kev-mov-2',unidad:'✓'},
+      ]},
+      { nombre:'DLO', nota:'Velocidad y explosividad', ejercicios:[
+        {nombre:'DKB ×2 + hang DKB clean (grabate)',series:'3×3 → 4×3 → 3×1 (más pesado)',id:'kev-dkb-2',unidad:'kg'},
+      ]},
+      { nombre:'RUTINA · RIR 1-2', ejercicios:[
+        {nombre:'1A · Press plano con mancuernas',series:'3×8 → 3×10 → 4×10 → 3×6 (más pesado) → 4×6',id:'kev-pb-2',unidad:'kg'},
+        {nombre:'1B · Banco de isquiotibiales 1 pierna',series:'3×8 p/l → 3×10 → 3×12 → 3×8 (más pesado) → 3×8-10',id:'kev-isqui-2',unidad:'kg'},
+        {nombre:'2B · Dominadas en máquina 1 brazo',series:'3×8 p/l → 3×10 → 3×12 → 3×8 (más pesado) → 3×8-10',id:'kev-dom1b-2',unidad:'reps'},
+        {nombre:'1C · Sentadilla cosaco',series:'3×4 p/l → 4×4 → 3×5 → 3×6 → 2×8',id:'kev-cosaco-2',unidad:'reps'},
+        {nombre:'2C · Press militar sentado con mancuernas',series:'3×8 → 3×10 → 3×12 → 3×12-15 → 3×8 (más pesado)',id:'kev-pm-2',unidad:'kg'},
+        {nombre:'1D · Bíceps con barra toma prona',series:'3×10 → 3×12 → 3×12-15 → 3×15 → 4×10 (más pesado)',id:'kev-bic-2',unidad:'kg'},
+      ]},
+    ]},
+    { label:'Día 3', bloques:[
+      { nombre:'ENTRADA EN CALOR', ejercicios:[
+        {nombre:'Movilidad y activación de core y cintura escapular',series:'',id:'kev-mov-3',unidad:'✓'},
+      ]},
+      { nombre:'DLO', nota:'Velocidad y explosividad', ejercicios:[
+        {nombre:'Jerk (grabate)',series:'3×3 → 4×3 → 3×1 (más pesado)',id:'kev-jerk-3',unidad:'kg'},
+      ]},
+      { nombre:'RUTINA · RIR 1-2', ejercicios:[
+        {nombre:'1A · Remo landmine',series:'3×5 → 4×5 → 3×6 → 4×6 → 3×8',id:'kev-landmine-3',unidad:'kg'},
+        {nombre:'1B · Swing de cadera con kettlebell pesado',series:'3×6 → 3×8 → 4×8 → 3×10 → 3×5 (más pesado)',id:'kev-swing-3',unidad:'kg'},
+        {nombre:'2B · Curl francés con mancuernas en banco inclinado',series:'3×8 → 3×10 → 4×10 → 3×12 → 3×8 (más pesado)',id:'kev-curlfranc-3',unidad:'kg'},
+        {nombre:'1C · Lunge barbell over shoulders',series:'4×3 p/l → 3×3 → 4×3 → 3×4 → 3×5',id:'kev-lunge-3',unidad:'kg'},
+        {nombre:'2C · Lanzamientos 1 brazo contra pared (simulando béisbol)',series:'4×1 p/l → 3×2 → 4×2 → 3×3 → 4×3',id:'kev-lanzbeisbol-3',unidad:'reps'},
+        {nombre:'1D · Accesorio libre',series:'a definir',id:'kev-acc-3',unidad:'kg'},
+      ]},
+    ]},
+    { label:'Día 4', bloques:[
+      { nombre:'ENTRADA EN CALOR', ejercicios:[
+        {nombre:'Movilidad y activación de core y cintura escapular',series:'',id:'kev-mov-4',unidad:'✓'},
+      ]},
+      { nombre:'RUTINA · RIR 1-2', ejercicios:[
+        {nombre:'1A · Press plano con taco',series:'3×3 80kg → 3×4 → 2×5 → 3×3 85kg → 3×4 85kg',id:'kev-pbtaco-4',unidad:'kg'},
+        {nombre:'2A · Slam ball',series:'3×3 → 3×4 → 2×5 → 3×5',id:'kev-slam-4',unidad:'kg'},
+        {nombre:'1B · Peso muerto con trap bar',series:'3×2 140kg → 4×2 → 3×3 → 4×3 → 2×4',id:'kev-pmtrap-4',unidad:'kg'},
+        {nombre:'2B · Saltos asistidos con banda',series:'3×3 → 4×3 → 3×4 → 3×4 → 2×5',id:'kev-saltoband-4',unidad:'reps'},
+        {nombre:'1C · Lanzamiento pitcher (2 elevaciones + lanzar en 3ra)',series:'4×1 p/l → 3×2 → 4×2 → 3×3 → 4×3',id:'kev-lanzpitch-4',unidad:'reps'},
+        {nombre:'2C · Press paloff con rotación',series:'4×4 p/l → 3×5 → 4×5 → 3×6 → 4×6',id:'kev-paloffrot-4',unidad:'kg'},
+      ]},
+    ]},
+  ],
 };
 
 // Atletas con rutina extra de otro profe
@@ -808,19 +1054,24 @@ const ATLETAS_EXTRA = {
   'Cukierman': { nombre: 'Mariano · Pitching Coach', profe: 'Entrenador Personal' },
   'Alfonso':   { nombre: 'Manuel Alfonso', profe: 'EntrenaBien B' },
   'Riello':    { nombre: 'Kevin Riello', profe: 'Entrenador Personal' },
+  'Garcia':    { nombre: 'Sebastian Garcia', profe: 'Programa Personal · Hipertrofia' },
 };
 
-function renderAtletas(lista) {
+function renderAtletas(lista, query) {
   const el = document.getElementById('atletas-list');
+  if (!query || !query.trim()) {
+    el.innerHTML = `<div class="search-hint">Escribí tu apellido arriba<br><span style="font-size:11px;color:rgba(107,184,245,0.4)">"Campeones Sudamericanos 2024 · Lima, Perú"</span></div>`;
+    return;
+  }
   if (!lista.length) {
-    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:14px">No encontrado</div>';
+    el.innerHTML = '<div class="search-hint">No encontrado · revisá la ortografía</div>';
     return;
   }
   el.innerHTML = lista.map(a => `
     <div class="atleta-item" onclick="entrar('${a.ap}')">
       <div>
         <div class="ai-nombre">${a.ap}, ${a.nom}</div>
-        <div class="ai-sub">Pre-temporada 2026</div>
+        <div class="ai-sub">Pre-temporada 2026 · Los Gauchos</div>
       </div>
       <div class="ai-arrow">›</div>
     </div>
@@ -829,10 +1080,10 @@ function renderAtletas(lista) {
 
 function filtrarAtletas(q) {
   const q2 = q.toLowerCase().trim();
-  const filtrados = !q2 ? ATLETAS : ATLETAS.filter(a =>
+  const filtrados = !q2 ? [] : ATLETAS.filter(a =>
     a.ap.toLowerCase().includes(q2) || a.nom.toLowerCase().includes(q2)
   );
-  renderAtletas(filtrados);
+  renderAtletas(filtrados, q);
 }
 
 // ── ENTRAR AL ENTRENAMIENTO ──────────────────────────────────────────────────
@@ -903,7 +1154,13 @@ async function cargarEntreno(tipo) {
     });
     if (resumen.total > 0) {
       const faseEl = document.getElementById('h-fecha');
-      if (faseEl) faseEl.textContent = `${fechaHoy()} · ${resumen.total}/16 sesiones`;
+      if (faseEl) {
+        const sesRestantes = Math.max(0, 16 - resumen.total);
+        const nota = ATLETAS_EXTRA[ap]
+          ? `${fechaHoy()} · ${resumen.total}/16 sesiones · ${sesRestantes} restantes hasta el 27 ago`
+          : `${fechaHoy()} · ${resumen.total}/16 sesiones`;
+        faseEl.textContent = nota;
+      }
     }
   }
 }
@@ -1000,7 +1257,7 @@ function showScreen(id) {
 function volver() {
   atletaActual = null;
   document.getElementById('search-input').value = '';
-  renderAtletas(ATLETAS);
+  renderAtletas([], "");
   showScreen('s-inicio');
 }
 
@@ -1082,7 +1339,7 @@ async function guardarFicha() {
 }
 
 
-renderAtletas(ATLETAS);
+renderAtletas([], "");
 </script>
 </body>
 </html>
