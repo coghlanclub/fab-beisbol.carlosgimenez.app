@@ -727,6 +727,85 @@ window._fbFichas = (callback) => {
     </div>
     <div id="competencias-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:24px"></div>
 
+    <!-- PLAN DE TIRO -->
+    <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px">⚾ Plan de tiro — fases y alertas</div>
+    <div id="plan-tiro-list" style="margin-bottom:28px"></div>
+
+    <!-- REPORTE BUENOS AIRES -->
+    <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px">📋 Reporte — Fecha Buenos Aires · 26 jul 2026</div>
+    <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:14px;overflow:hidden;margin-bottom:24px">
+      <div style="padding:16px 20px;background:linear-gradient(90deg,rgba(107,184,245,0.08),transparent);border-bottom:1px solid var(--border)">
+        <div style="font-family:var(--display);font-size:22px;color:var(--cel);letter-spacing:2px;margin-bottom:4px">CONCENTRACIÓN BUENOS AIRES</div>
+        <div style="font-size:12px;color:var(--muted)">26 de julio 2026 · Pre-temporada FAB · Informe técnico</div>
+      </div>
+      <div style="padding:18px 20px">
+        <!-- Contexto -->
+        <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Contexto de la fecha</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:18px">
+          La concentración de Buenos Aires se realiza en la semana 2 del programa de tiro (W2 · Mid Intensity). Los atletas estarán en fase de extensión hasta 120-150ft y Plyo al 80%. La carga de gym de esa semana debe coordinarse con el plan de campo para no generar sobrecarga acumulada.
+        </div>
+
+        <!-- Estado atletas -->
+        <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Estado del plantel a la fecha</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px">
+          <div style="background:var(--bg3);border-radius:10px;padding:12px;text-align:center">
+            <div style="font-family:var(--display);font-size:28px;color:var(--green)" id="rep-ba-sesiones">—</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.05em">Sesiones realizadas</div>
+          </div>
+          <div style="background:var(--bg3);border-radius:10px;padding:12px;text-align:center">
+            <div style="font-family:var(--display);font-size:28px;color:var(--amber)" id="rep-ba-inactivos">—</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.05em">Sin actividad</div>
+          </div>
+          <div style="background:var(--bg3);border-radius:10px;padding:12px;text-align:center">
+            <div style="font-family:var(--display);font-size:28px;color:var(--cel)" id="rep-ba-activos">—</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.05em">Activos esta semana</div>
+          </div>
+        </div>
+
+        <!-- Fases del plan de tiro -->
+        <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Plan de tiro en la fecha de la concentración</div>
+        <div style="background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.2);border-radius:10px;padding:14px;margin-bottom:18px">
+          <div style="font-size:13px;font-weight:600;color:var(--amber);margin-bottom:4px">⚠️ W2 · Mid Intensity (semana del 28/7)</div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.6">Extensión hasta 120-150ft · Plyo 80% · 9oz hasta 90ft · extensión hasta 150-180ft.<br>
+          <strong style="color:var(--white)">Acción requerida:</strong> Coordinar con entrenador de gym para reducir volumen de tren superior esa semana.</div>
+        </div>
+
+        <!-- Alertas individuales -->
+        <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Atletas a monitorear</div>
+        <div class="tbl-wrap" style="margin-bottom:16px">
+          <table>
+            <thead><tr><th>Atleta</th><th>Sesiones</th><th>Estado</th><th>Acción</th></tr></thead>
+            <tbody id="rep-ba-tabla"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px">Cargando desde Firebase...</td></tr></tbody>
+          </table>
+        </div>
+
+        <!-- Recomendaciones -->
+        <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Recomendaciones técnicas para la concentración</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:var(--bg3);border-radius:8px">
+            <span style="color:var(--green);font-size:14px;flex-shrink:0">1</span>
+            <div style="font-size:13px;color:var(--text2)">Atletas que no hayan completado al menos 2 sesiones de gym deben priorizar la carga antes de la concentración.</div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:var(--bg3);border-radius:8px">
+            <span style="color:var(--green);font-size:14px;flex-shrink:0">2</span>
+            <div style="font-size:13px;color:var(--text2)">La semana del 21/7 (W1 Low Intensity) es ideal para aumentar volumen de gym — aprovechar antes del pico de tiro.</div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:var(--bg3);border-radius:8px">
+            <span style="color:var(--amber);font-size:14px;flex-shrink:0">!</span>
+            <div style="font-size:13px;color:var(--text2)">Atletas con lesión o molestia registrada deben ser evaluados individualmente antes de la concentración. Revisar notas de sesión en Seguimiento.</div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:var(--bg3);border-radius:8px">
+            <span style="color:var(--cel);font-size:14px;flex-shrink:0">⚾</span>
+            <div style="font-size:13px;color:var(--text2)">Sebas Garcia (espalda): mantener protocolo de piernas sin carga axial. Comunicar al cuerpo técnico de campo.</div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;text-align:right">
+          <button class="btn btn-ghost" onclick="copiarReporteBsAs()" style="font-size:12px">📋 Copiar reporte para WhatsApp</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- ── MODAL AJUSTAR COMPETENCIAS ── -->
@@ -1341,7 +1420,7 @@ function goScreen(id,el){
   else document.querySelectorAll('.ni').forEach(n=>{if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes(`'${id}'`))n.classList.add('on');});
   if(id==='tests') renderTests();
   if(id==='ficha') buildFichaSelector();
-  if(id==='calendario') setTimeout(renderCompetencias,50);
+  if(id==='calendario') { setTimeout(renderCompetencias,50); setTimeout(renderPlanTiro,100); }
   const t=TITLES[id]||['',''];
   document.getElementById('pg-title').textContent=t[0];
   document.getElementById('pg-sub').textContent=t[1];
@@ -1597,9 +1676,21 @@ function cancelarFicha() {
 let competencias = [
   {id:1, nombre:'Pre-temporada',  fecha:'2026-08-27', sesSem:2, sesReales:0, estado:'activo',  nota:'Martes y jueves · 7 jul → 27 ago · 16 sesiones en total'},
   {id:2, nombre:'Copa América',   fecha:'',           sesSem:3, sesReales:0, estado:'gestion', nota:'Sede por confirmar · Objetivo principal del año'},
+  {id:3, nombre:'Fecha Buenos Aires', fecha:'2026-07-26', sesSem:2, sesReales:0, estado:'confirmado', nota:'Concentración Buenos Aires · Informe detallado disponible en Reportes'},
 ];
-let nextCompId = 3;
+let nextCompId = 4;
 let clockInterval = null;
+
+// ── PLAN DE TIRO — fases con alertas ─────────────────────────────────────────
+const PLAN_TIRO_DT = [
+  { semana:'W1', fecha:'2026-07-21', label:'Low Intensity',     desc:'Extensión hasta 120ft · HB + Plyo 70% · buscar confort · sin compresión',                          alerta:true },
+  { semana:'W2', fecha:'2026-07-28', label:'Mid Intensity',     desc:'Extensión hasta 120-150ft · Plyo 80% · 9oz hasta 90ft · extensión hasta 150-180ft',               alerta:true },
+  { semana:'W3', fecha:'2026-08-04', label:'High Intensity',    desc:'Hasta 90ft con 9oz · Máx extensión · Compresión c/4-5 lanzamientos · Weighted Balls',              alerta:true },
+  { semana:'W4', fecha:'2026-08-11', label:'PlyoVelo + Bullpen',desc:'PlyoVelo · Walking Windup · Athletic throws 90ft · 80-100%',                                       alerta:true },
+  { semana:'W5', fecha:'2026-08-18', label:'Flat Arsenal',      desc:'Flat Arsenal ×15 · Bullpen 30 lanzamientos · HA Plyo · 85%',                                       alerta:true },
+  { semana:'W6', fecha:'2026-08-25', label:'Bullpen Específico',desc:'Bullpen específico · Pitch Design · Command Focus ×15 · HB + PD',                                  alerta:true },
+  { semana:'W7', fecha:'2026-09-01', label:'Live AB',           desc:'Live AB · Drills específicos · Bullpen 40 lanzamientos · Arsenal feeling 10-15',                   alerta:true },
+];
 
 const ESTADO_COLORS = {activo:'var(--green)',gestion:'var(--amber)',confirmado:'var(--cel)',pendiente:'var(--muted)'};
 const ESTADO_BADGE  = {activo:'bg',gestion:'ba',confirmado:'bc',pendiente:'bx'};
@@ -2203,6 +2294,9 @@ function initSeguimiento(){
 
     // Guardar datos globalmente para usar en otras funciones
     window._fbDatos = { porAtleta, sesiones, hoy, hace7, inactivos };
+
+    // Actualizar reporte Buenos Aires con datos reales
+    actualizarReporteBsAs(porAtleta, sesiones, inactivos, activosSemana);
   });
 
   // ── ESCUCHAR FICHAS ─────────────────────────────────────────────────────────
@@ -2294,6 +2388,113 @@ function renderProgresionFb(ap, porAtleta) {
 window.renderProgresionFb = renderProgresionFb;
 
 setTimeout(initSeguimiento, 800);
+
+// ── PLAN DE TIRO: render en calendario ────────────────────────────────────────
+function renderPlanTiro() {
+  const el = document.getElementById('plan-tiro-list');
+  if (!el) return;
+  const hoy = new Date();
+
+  el.innerHTML = PLAN_TIRO_DT.map(fase => {
+    const fechaFase = new Date(fase.fecha);
+    const diasRest  = Math.ceil((fechaFase - hoy) / (1000*60*60*24));
+    const pasada    = diasRest < 0;
+    const enCurso   = diasRest >= 0 && diasRest <= 7;
+    const futura    = diasRest > 7;
+
+    const color = pasada ? 'var(--muted)' : enCurso ? 'var(--amber)' : 'var(--cel)';
+    const badge = pasada
+      ? `<span class="badge" style="background:var(--bg3);color:var(--muted);font-size:9px">Completada</span>`
+      : enCurso
+      ? `<span class="badge ba" style="font-size:9px">⚠ Esta semana</span>`
+      : `<span class="badge bc" style="font-size:9px">En ${diasRest} días</span>`;
+
+    return `<div style="display:flex;gap:14px;padding:12px 16px;background:var(--bg2);border:1px solid ${enCurso?'rgba(245,166,35,0.3)':pasada?'var(--border)':'var(--border)'};border-radius:10px;margin-bottom:8px;opacity:${pasada?'0.6':'1'}">
+      <div style="flex-shrink:0;text-align:center;min-width:48px">
+        <div style="font-family:var(--display);font-size:18px;color:${color};letter-spacing:1px">${fase.semana}</div>
+        <div style="font-size:10px;color:var(--muted)">${fase.fecha.slice(5).split('-').reverse().join('/')}</div>
+      </div>
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <span style="font-size:13px;font-weight:600;color:var(--white)">${fase.label}</span>
+          ${badge}
+        </div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.5">${fase.desc}</div>
+        ${enCurso ? `<div style="font-size:11px;color:var(--amber);margin-top:6px;font-weight:500">⚡ Coordinar con entrenadores de gym y campo esta semana</div>` : ''}
+        ${!pasada && diasRest <= 7 && diasRest > 0 ? `<div style="font-size:11px;color:var(--amber);margin-top:6px;font-weight:500">⚠ En ${diasRest} días — hablar con entrenadores esta semana</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── REPORTE BUENOS AIRES ───────────────────────────────────────────────────────
+function actualizarReporteBsAs(porAtleta, sesiones, inactivos, activosSemana) {
+  // Métricas
+  const totalSes = sesiones.filter(d=>d.tipo==='SESION'||!d.tipo).length;
+  const el1 = document.getElementById('rep-ba-sesiones');
+  const el2 = document.getElementById('rep-ba-inactivos');
+  const el3 = document.getElementById('rep-ba-activos');
+  if(el1) el1.textContent = totalSes;
+  if(el2) el2.textContent = inactivos ? inactivos.length : '—';
+  if(el3) el3.textContent = activosSemana ? activosSemana.size : '—';
+
+  // Tabla de atletas a monitorear (sin actividad o con lesión)
+  const tbody = document.getElementById('rep-ba-tabla');
+  if(!tbody || !porAtleta) return;
+
+  const alertas = ATLETAS.map(a => {
+    const dat = porAtleta[a.ap] || { total:0, ultimoEstado:'—', sesiones:[] };
+    const sinActividad = dat.total === 0;
+    const conLesion = dat.ultimoEstado && (dat.ultimoEstado.includes('Lesion') || dat.ultimoEstado.includes('prevención'));
+    if (!sinActividad && !conLesion) return null;
+    return { ap: a.ap, total: dat.total, estado: dat.ultimoEstado, sinActividad, conLesion };
+  }).filter(Boolean);
+
+  if (!alertas.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--green);padding:16px">✓ Todos los atletas tienen actividad y sin alertas</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = alertas.map(a => `<tr>
+    <td class="td-n">${a.ap}</td>
+    <td style="font-family:var(--mono)">${a.total} ses.</td>
+    <td style="color:${a.conLesion?'var(--red)':'var(--amber)'};font-size:12px">${a.conLesion ? a.estado : 'Sin actividad'}</td>
+    <td style="font-size:12px;color:var(--text2)">${a.conLesion ? 'Evaluar antes de concentración' : 'Completar sesiones pendientes'}</td>
+  </tr>`).join('');
+}
+
+function copiarReporteBsAs() {
+  const sesTotal = document.getElementById('rep-ba-sesiones')?.textContent || '—';
+  const inact    = document.getElementById('rep-ba-inactivos')?.textContent || '—';
+  const activos  = document.getElementById('rep-ba-activos')?.textContent || '—';
+
+  const texto = `REPORTE FAB — CONCENTRACIÓN BUENOS AIRES
+Fecha: 26 de julio 2026
+─────────────────────────────
+ESTADO DEL PLANTEL (pre-concentración)
+Sesiones totales registradas: ${sesTotal}
+Atletas sin actividad: ${inact}
+Atletas activos esta semana: ${activos}
+
+PLAN DE TIRO — semana de la concentración
+W2 Mid Intensity (28/7): Extensión 120-150ft · Plyo 80% · 9oz hasta 90ft
+ACCIÓN: Reducir volumen tren superior esa semana
+
+RECOMENDACIONES
+1. Atletas sin 2+ sesiones de gym: priorizar antes de la concentración
+2. Semana 21/7 (W1 Low): aprovechar para aumentar volumen de gym
+3. Atletas con lesión: evaluación individual previa
+4. Sebas Garcia: mantener protocolo sin carga axial
+
+─────────────────────────────
+Carlos Giménez — DT Los Gauchos
+FAB · Pre-temporada 2026`;
+
+  navigator.clipboard.writeText(texto).then(() =>
+    alert('Reporte copiado. Podés pegarlo en WhatsApp o email.')
+  );
+}
+
 
 </script>
 <div class="toast" id="toast">✓ Guardado</div>
