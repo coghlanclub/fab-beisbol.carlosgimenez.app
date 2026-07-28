@@ -295,15 +295,36 @@ select.ficha-input option{background:var(--bg2)}
     </div>
   </div>
 
+  <!-- PLANIFICACIÓN SEMANAL -->
+  <div style="padding:16px 20px 4px">
+    <div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">Planificación semanal</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+      <div style="background:rgba(107,184,245,0.07);border:1px solid rgba(107,184,245,0.15);border-radius:10px;padding:12px">
+        <div style="font-size:10px;color:var(--cel);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">Días 1 · 2 · 3</div>
+        <div style="font-size:13px;font-weight:600;color:var(--white)">Fuerza Máxima</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px;line-height:1.4">Concéntrica explosiva · serie de entrada antes de cargar</div>
+      </div>
+      <div style="background:rgba(34,201,138,0.06);border:1px solid rgba(34,201,138,0.15);border-radius:10px;padding:12px">
+        <div style="font-size:10px;color:var(--green);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">Día 4 · Recovery</div>
+        <div style="font-size:13px;font-weight:600;color:var(--white)">Capacidad Aeróbica</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px;line-height:1.4">Hasta 2 veces por semana · propósito recuperación</div>
+      </div>
+    </div>
+    <div style="background:rgba(245,166,35,0.06);border:1px solid rgba(245,166,35,0.12);border-radius:10px;padding:12px;margin-bottom:4px">
+      <div style="font-size:10px;color:var(--amber);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px">⚡ Decisión conjunta del plantel</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.5">Uno de los 2 días de recovery semanales se ejecuta como sesión aeróbica activa para mejorar las habilidades aeróbicas del plantel. <span style="color:var(--white);font-weight:500">Día 3 — sentadilla individual según programa propio.</span></div>
+    </div>
+  </div>
+
   <!-- ALERTA PLAN DE TIRO -->
-  <div id="alerta-tiro" style="display:none;margin:0 24px 16px;padding:14px 16px;border-radius:12px;border:1px solid rgba(245,166,35,0.3);background:rgba(245,166,35,0.08)">
+  <div id="alerta-tiro" style="display:none;margin:10px 20px 0;padding:14px 16px;border-radius:12px;border:1px solid rgba(245,166,35,0.3);background:rgba(245,166,35,0.08)">
     <div style="font-size:10px;font-weight:600;color:var(--amber);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px" id="alerta-tiro-semana">⚡ PLAN DE TIRO</div>
     <div style="font-size:13px;font-weight:600;color:var(--white);margin-bottom:4px" id="alerta-tiro-label">—</div>
     <div style="font-size:12px;color:var(--text2);line-height:1.5" id="alerta-tiro-msg">—</div>
   </div>
 
   <!-- FASE ACTUAL DEL PLAN DE TIRO -->
-  <div id="fase-tiro-wrap" style="display:none;margin:0 24px 10px;padding:10px 14px;border-radius:10px;border:1px solid rgba(107,184,245,0.15);background:rgba(107,184,245,0.05)">
+  <div id="fase-tiro-wrap" style="display:none;margin:8px 20px 0;padding:10px 14px;border-radius:10px;border:1px solid rgba(107,184,245,0.15);background:rgba(107,184,245,0.05)">
     <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px">Fase actual del plan de tiro</div>
     <div style="font-size:13px;font-weight:600;color:var(--cel)" id="fase-tiro-label">—</div>
     <div style="font-size:11px;color:var(--text2);margin-top:3px" id="fase-tiro-desc">—</div>
@@ -430,7 +451,7 @@ select.ficha-input option{background:var(--bg2)}
     <button onclick="cargarEntreno('fab')" style="background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:20px;text-align:left;cursor:pointer;transition:all .15s" onmousedown="this.style.borderColor='var(--cel)'">
       <div style="font-size:18px;margin-bottom:6px">⚾</div>
       <div style="font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px">FAB · Pre-temporada</div>
-      <div style="font-size:12px;color:var(--muted)">Días 1, 2, 3 y Recovery · Plan del plantel general</div>
+      <div style="font-size:12px;color:var(--muted)">3 días de fuerza máxima + Recovery aeróbico · Plan del plantel general</div>
     </button>
     <button onclick="cargarEntreno('extra')" style="background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:20px;text-align:left;cursor:pointer;transition:all .15s" onmousedown="this.style.borderColor='var(--amber)'">
       <div style="font-size:18px;margin-bottom:6px">🏋️</div>
@@ -477,7 +498,7 @@ select.ficha-input option{background:var(--bg2)}
     <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Estocada con mancuerna</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="estocada-db" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
     <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Prensa</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="prensa" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
     <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Gemelos</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="gemelos-d1" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
-    <div class="nota-bloque"><div class="nota-title">📋 Planificación · Día 1 — Fuerza General</div><div class="nota-text">Sesión central de fuerza del plantel. Fase concéntrica explosiva en compuestos — bajar lento 2 segundos, subir con intención. Hacé una serie de entrada antes de cargar tu máximo. Este es el día de empuje y tren inferior.</div></div>
+    <div class="nota-bloque"><div class="nota-title">📋 Planificación · Día 1 — Fuerza Máxima</div><div class="nota-text">Sesión de fuerza máxima. Fase concéntrica explosiva en todos los compuestos — bajar lento 2 segundos, subir con intención. Hacé una serie de entrada antes de tu carga de trabajo. Calidad sobre cantidad.</div></div>
   </div>
 
   <div id="dia-1" class="dia-content">
@@ -496,7 +517,7 @@ select.ficha-input option{background:var(--bg2)}
     <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Búlgara</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="bulgara" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
     <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Sentadilla barra hex.</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="sent-hex" inputmode="decimal"><div class="ej-input-lbl">kg</div><div class="rec-val" id="rec-hex"></div></div></div>
     <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Gemelos</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="gemelos-d2" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
-    <div class="nota-bloque"><div class="nota-title">📋 Planificación · Día 2 — Recovery General</div><div class="nota-text">Día de regeneración activa para todo el plantel. Sin cargas máximas — el objetivo es recuperar el sistema nervioso y muscular del Día 1. Movilidad, zona 2 y trabajo de hombro. El esfuerzo máximo va en los días de fuerza.</div></div>
+    <div class="nota-bloque"><div class="nota-title">📋 Planificación · Día 2 — Fuerza Máxima</div><div class="nota-text">Segundo día de fuerza máxima. Foco en tracción y cadena posterior. Misma lógica que el Día 1 — ejecutar con intención en cada repetición. Serie de entrada antes de cada ejercicio compuesto.</div></div>
   </div>
 
   <div id="dia-2" class="dia-content">
@@ -515,7 +536,7 @@ select.ficha-input option{background:var(--bg2)}
     <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Hip thrust</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="hip-thrust" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
     <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Sentadilla front DB</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="sent-front" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
     <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Gemelos</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="gemelos-d3" inputmode="decimal"><div class="ej-input-lbl">kg</div></div></div>
-    <div class="nota-bloque"><div class="nota-title">📋 Planificación · Día 3 — Fuerza Individual</div><div class="nota-text">Este es el día de sentadilla. Cada uno trabaja su patrón de sentadilla con la carga y variante que corresponde a su programa individual. Máxima concentración en técnica — este movimiento es el que más te va a devolver en el campo. Volumen alto, cargas moderadas-altas, foco en hombro y cadena posterior.</div></div>
+    <div class="nota-bloque"><div class="nota-title">📋 Planificación · Día 3 — Fuerza Máxima Individual</div><div class="nota-text">Tercer día de fuerza máxima. Este es el día de sentadilla — cada uno trabaja su patrón y variante según su programa individual. Máxima concentración en técnica. Lo que construís acá lo ves en el campo.</div></div>
   </div>
 
   <div id="dia-3" class="dia-content">
@@ -529,7 +550,7 @@ select.ficha-input option{background:var(--bg2)}
     <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Zona 2 · trote / bici</div><div class="ej-meta">15 minutos · ritmo conversacional</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="fc-z2" inputmode="numeric"><div class="ej-input-lbl">FC prom</div></div></div>
     <div class="bloque-hdr" style="color:var(--green)">Velocidad</div>
     <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Sprint 200m × 6</div><div class="ej-meta">Recuperación completa entre sprints</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="sprint-200" inputmode="decimal"><div class="ej-input-lbl">mejor seg</div></div></div>
-    <div class="nota-bloque"><div class="nota-title">📋 Planificación · Recovery Individual</div><div class="nota-text">Día de recuperación individual. Cada uno conoce su cuerpo — si algo te quedó cargado del Día 3, hoy lo trabajás. Movilidad de cadera, hombro y columna a full. Sin competir con el propio cuerpo. El que empuja en recovery después paga en el campo.</div></div>
+    <div class="nota-bloque"><div class="nota-title">📋 Planificación · Recovery — Capacidad Aeróbica</div><div class="nota-text">Este día se realizará hasta 2 veces por semana con el propósito de mejorar la capacidad aeróbica y acelerar la recuperación entre sesiones de fuerza máxima.<br><br>⚡ Por decisión conjunta del plantel, uno de los 2 días de recovery semanales se ejecutará como sesión aeróbica activa — zona 2, movilidad y trabajo de hombro preventivo. Sin competir con el propio cuerpo. El que empuja en recovery después paga en el campo.</div></div>
   </div>
 
   </div><!-- fin entreno-scroll fab -->
