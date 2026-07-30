@@ -1336,7 +1336,7 @@ function renderAt(list){
     const diff = a.pesoIdeal && a.peso ? (a.pesoIdeal - a.peso).toFixed(1) : null;
     const diffColor = diff > 0 ? 'var(--amber)' : diff < -5 ? 'var(--red)' : 'var(--green)';
     const diffText = diff > 0 ? `+${diff} kg a ganar` : diff < 0 ? `${diff} kg sobre ideal` : '';
-    return`<div class="at-card" onclick="verAtleta('${a.ap}')">
+    return`<div class="at-card" onclick="abrirFichaModal('${a.ap}')">
       <div class="at-av" style="color:${avColor(a.asist)}">#${a.num} ${a.ap.split(' ')[0].toUpperCase()}</div>
       <div class="at-name">${a.ap}, ${a.nom}</div>
       <div class="at-sub">${a.prov||'—'} · ${a.pos}</div>
@@ -2008,7 +2008,7 @@ function renderTests(){
 
     return `<tr>
       <td>
-        <div class="td-n">${a.ap}, ${a.nom}</div>
+        <div class="td-n" style="cursor:pointer" onclick="abrirFichaModal('${a.ap}')">${a.ap}, ${a.nom}</div>
         <div style="font-size:11px;color:var(--muted)">${a.prov||'—'} · ${a.pos||'—'}</div>
       </td>
       ${checks.map(c=>`<td style="text-align:center">${c}</td>`).join('')}
@@ -2154,7 +2154,7 @@ function initSeguimiento(){
       siEl.innerHTML = atletasConSesion.size === 0
         ? '<span style="color:var(--muted);font-size:12px">Nadie registró aún</span>'
         : [...atletasConSesion].sort().map(ap =>
-            `<span style="background:var(--green-bg);border:1px solid rgba(34,201,138,0.3);color:var(--green);font-size:11px;padding:3px 9px;border-radius:99px;font-weight:600">${ap}</span>`
+            `<span style="background:var(--green-bg);border:1px solid rgba(34,201,138,0.3);color:var(--green);font-size:11px;padding:3px 9px;border-radius:99px;font-weight:600;cursor:pointer" onclick="abrirFichaModal('${ap}')">${ap}</span>`
           ).join('');
     }
 
@@ -2164,7 +2164,7 @@ function initSeguimiento(){
       noEl.innerHTML = atletasSinSesion.length === 0
         ? '<span style="color:var(--green);font-size:12px">✓ Todos registraron</span>'
         : atletasSinSesion.map(a =>
-            `<span style="background:var(--red-bg);border:1px solid rgba(245,82,74,0.2);color:var(--red);font-size:11px;padding:3px 9px;border-radius:99px">${a.ap}</span>`
+            `<span style="background:var(--red-bg);border:1px solid rgba(245,82,74,0.2);color:var(--red);font-size:11px;padding:3px 9px;border-radius:99px;cursor:pointer" onclick="abrirFichaModal('${a.ap}')">${a.ap}</span>`
           ).join('');
     }
 
@@ -2517,7 +2517,141 @@ function renderPlanTiro() {
   }).join('');
 }
 
-// ── REPORTE DE SESIONES POR DÍA ───────────────────────────────────────────────
+// ── MODAL FICHA INDIVIDUAL ────────────────────────────────────────────────────
+let _modalAp = null;
+
+function abrirFichaModal(ap) {
+  _modalAp = ap;
+  const datos = window._fbDatos;
+  const a = ATLETAS.find(x => x.ap === ap);
+  if (!a) return;
+
+  const dat = datos?.porAtleta?.[ap] || { total:0, sesiones:[], pesos:{}, ultimaFecha:'—', ultimoEstado:'—', ultimaNota:'—' };
+  const pct = Math.round((dat.total / SESIONES_OBJETIVO) * 100);
+  const pctColor = pct >= 80 ? 'var(--green)' : pct >= 40 ? 'var(--amber)' : 'var(--red)';
+
+  // Nombre y sub
+  document.getElementById('modal-nombre').textContent = ap.toUpperCase();
+  document.getElementById('modal-sub').textContent = `${a.nom} · Pre-temporada 2026 · Los Gauchos`;
+
+  // Contar días
+  const ses = dat.sesiones || [];
+  const cD1  = ses.filter(s => (s.dia||'').toLowerCase().includes('1') && !(s.dia||'').toLowerCase().includes('2') && !(s.dia||'').toLowerCase().includes('3')).length;
+  const cD2  = ses.filter(s => (s.dia||'').toLowerCase().includes('2')).length;
+  const cD3  = ses.filter(s => (s.dia||'').toLowerCase().includes('3')).length;
+  const cRec = ses.filter(s => (s.dia||'').toLowerCase().includes('recovery')).length;
+
+  // Ejercicios con validación de pesos
+  const ejsHTML = Object.entries(dat.pesos || {}).filter(([,arr]) => arr?.length).map(([ej, arr]) => {
+    const sorted = arr.slice().sort((a,b) => a.fecha > b.fecha ? 1:-1);
+    const ultimo = sorted[sorted.length-1];
+    const val = parseFloat(ultimo.val);
+    const irreal = !isNaN(val) && (val > 400 || val < 0);
+    const trend = sorted.length > 1 ? (() => {
+      const p = parseFloat(sorted[0].val), u = parseFloat(ultimo.val);
+      if (isNaN(p)||isNaN(u)) return '';
+      const d = u-p;
+      return d > 0 ? `<span style="color:var(--green)">↑ +${d.toFixed(1)}</span>`
+           : d < 0 ? `<span style="color:var(--red)">↓ ${d.toFixed(1)}</span>`
+           : `<span style="color:var(--muted)">→</span>`;
+    })() : '';
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:${irreal?'rgba(245,82,74,0.08)':'var(--bg3)'};border-radius:7px;margin-bottom:4px;border:1px solid ${irreal?'rgba(245,82,74,0.3)':'transparent'}">
+      <span style="font-size:12px;color:var(--text2);text-transform:capitalize">${ej.replace(/-/g,' ')}</span>
+      <div style="display:flex;align-items:center;gap:10px">
+        ${trend}
+        <span style="font-family:var(--mono);font-size:13px;font-weight:700;color:${irreal?'var(--red)':'var(--amber)'}">${ultimo.val}${irreal?' ⚠️ REVISAR':''}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Últimas notas
+  const notas = ses.filter(s => s.reporte?.nota || s.nota).slice(-3).reverse().map(s => `
+    <div style="padding:8px 12px;background:var(--bg3);border-radius:8px;margin-bottom:6px;border-left:2px solid rgba(107,184,245,0.25)">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:3px">${s.fecha} · ${s.dia||''} · <span style="color:${ecColor(s.reporte?.estado||s.estado)}">${s.reporte?.estado||s.estado||'—'}</span> · RPE ${s.reporte?.rpe||s.rpe||'—'}</div>
+      <div style="font-size:12px;color:var(--text2);font-style:italic">"${s.reporte?.nota||s.nota}"</div>
+    </div>`).join('');
+
+  document.getElementById('modal-contenido').innerHTML = `
+    <!-- Métricas -->
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:18px">
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-family:var(--display);font-size:22px;color:${pctColor}">${dat.total}</div>
+        <div style="font-size:9px;color:var(--muted);text-transform:uppercase;margin-top:2px">Total</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-family:var(--display);font-size:22px;color:var(--cel)">${cD1}</div>
+        <div style="font-size:9px;color:var(--muted);text-transform:uppercase;margin-top:2px">Día 1</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-family:var(--display);font-size:22px;color:var(--cel)">${cD2}</div>
+        <div style="font-size:9px;color:var(--muted);text-transform:uppercase;margin-top:2px">Día 2</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-family:var(--display);font-size:22px;color:var(--cel)">${cD3}</div>
+        <div style="font-size:9px;color:var(--muted);text-transform:uppercase;margin-top:2px">Día 3</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-family:var(--display);font-size:22px;color:var(--green)">${cRec}</div>
+        <div style="font-size:9px;color:var(--muted);text-transform:uppercase;margin-top:2px">Recovery</div>
+      </div>
+    </div>
+
+    <!-- Barra progreso -->
+    <div style="margin-bottom:18px">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:5px">
+        <span>Progresión pre-temporada</span><span style="color:${pctColor};font-weight:600">${dat.total}/16 sesiones · ${pct}%</span>
+      </div>
+      <div style="background:var(--bg3);border-radius:4px;height:6px">
+        <div style="width:${pct}%;height:6px;background:${pctColor};border-radius:4px;transition:width .4s"></div>
+      </div>
+    </div>
+
+    <!-- Último estado -->
+    <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap">
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-size:12px">
+        <span style="color:var(--muted)">Último estado: </span>
+        <span style="color:${ecColor(dat.ultimoEstado)};font-weight:600">${dat.ultimoEstado}</span>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-size:12px">
+        <span style="color:var(--muted)">Última sesión: </span>
+        <span style="color:var(--white);font-family:var(--mono)">${dat.ultimaFecha||'—'}</span>
+      </div>
+    </div>
+
+    ${ejsHTML ? `
+    <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Pesos registrados · último valor</div>
+    <div style="margin-bottom:18px">${ejsHTML}</div>` : ''}
+
+    ${notas ? `
+    <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Últimas notas del atleta</div>
+    ${notas}` : ''}
+  `;
+
+  document.getElementById('modal-ficha').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function cerrarModal() {
+  document.getElementById('modal-ficha').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function abrirProgresionModal() {
+  cerrarModal();
+  goScreen('progresion', null);
+  const sel = document.getElementById('prog-atleta-sel');
+  if (sel && _modalAp) {
+    sel.value = _modalAp;
+    renderProgresionFb(_modalAp);
+  }
+}
+
+// ── HACER TODOS LOS NOMBRES CLICKEABLES ───────────────────────────────────────
+// Wrapper helper — reemplaza innerHTML de td-n con enlace clickeable
+function apLink(ap) {
+  return `<span style="cursor:pointer;color:var(--white);font-weight:600;text-decoration:underline;text-decoration-color:rgba(107,184,245,0.3);text-underline-offset:3px" onclick="abrirFichaModal('${ap}')" title="Ver ficha de ${ap}">${ap}</span>`;
+}
+
 function generarReporte() {
   const datos = window._fbDatos;
   if (!datos) { setTimeout(generarReporte, 600); return; }
@@ -2559,7 +2693,7 @@ function generarReporte() {
   const critEl = document.getElementById('rep-criticos');
   critEl.innerHTML = criticos.length === 0
     ? '<span style="color:var(--green);font-size:12px">✓ Todos tienen al menos una sesión registrada</span>'
-    : criticos.map(a => `<span style="background:var(--red-bg);border:1px solid rgba(245,82,74,0.2);color:var(--red);font-size:11px;padding:3px 10px;border-radius:99px">${a.ap}</span>`).join('');
+    : criticos.map(a => `<span style="background:var(--red-bg);border:1px solid rgba(245,82,74,0.2);color:var(--red);font-size:11px;padding:3px 10px;border-radius:99px;cursor:pointer" onclick="abrirFichaModal('${a.ap}')">${a.ap}</span>`).join('');
 
   // Tabla completa ordenada por total DESC
   const sorted = ATLETAS.slice().sort((a,b) => (conteo[b.ap]?.total||0) - (conteo[a.ap]?.total||0));
@@ -2695,5 +2829,24 @@ FAB · Pre-temporada 2026`;
 
 </script>
 <div class="toast" id="toast">✓ Guardado</div>
-<div id="prog-rows" style="display:none"></div></body>
+<div id="prog-rows" style="display:none"></div>
+
+<!-- ── MODAL FICHA INDIVIDUAL ── -->
+<div id="modal-ficha" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px)" onclick="if(event.target===this)cerrarModal()">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(700px,96vw);max-height:90vh;overflow-y:auto;background:var(--bg);border:1px solid var(--border2);border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,0.6)">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:2">
+      <div>
+        <div style="font-family:var(--display);font-size:24px;color:var(--white);letter-spacing:2px" id="modal-nombre">—</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px" id="modal-sub">—</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="abrirProgresionModal()" class="btn btn-ghost" style="font-size:11px">↗ Progresión completa</button>
+        <button onclick="cerrarModal()" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;width:32px;height:32px;color:var(--muted);font-size:20px;cursor:pointer;line-height:1">×</button>
+      </div>
+    </div>
+    <div id="modal-contenido" style="padding:20px 22px 28px"></div>
+  </div>
+</div>
+
+</body>
 </html>
