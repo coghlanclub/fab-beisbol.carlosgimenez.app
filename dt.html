@@ -356,7 +356,7 @@ window._fbFichas = (callback) => {
   <div class="topbar">
     <div>
       <div class="pg-title" id="pg-title">RESUMEN GENERAL</div>
-      <div class="pg-sub" id="pg-sub">Semana 26 · 23–29 junio 2026</div>
+      <div class="pg-sub" id="pg-sub">Pre-temporada · julio–agosto 2026</div>
     </div>
     <div class="tb-actions">
       <button class="btn btn-export" onclick="exportarExcel()">⬇ Exportar récords</button>
@@ -634,36 +634,25 @@ window._fbFichas = (callback) => {
 
   </div>
 
-  <!-- ── PROGRESIÓN ── -->
+  <!-- ── PROGRESIÓN INDIVIDUAL ── -->
   <div class="screen" id="s-progresion">
-    <!-- SELECTOR ATLETA FIREBASE -->
-    <div style="margin-bottom:16px">
-      <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Ver progresión de un atleta (datos reales Firebase)</label>
-      <select class="form-input" style="width:280px" id="prog-atleta-sel" onchange="window.renderProgresionFb&&renderProgresionFb(this.value,window._fbDatos?.porAtleta)">
-        <option value="">Seleccionar atleta...</option>
+
+    <!-- Header selector -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+      <select class="form-input" style="width:220px;font-size:14px;font-weight:600" id="prog-atleta-sel" onchange="renderProgresionFb(this.value)">
+        <option value="">— Elegí un atleta —</option>
       </select>
-    </div>
-    <div id="prog-fb-content" style="margin-bottom:20px">
-      <div style="text-align:center;padding:30px;color:var(--muted)">Seleccioná un atleta para ver su progresión real de pesos y comentarios</div>
+      <div id="prog-resumen-header" style="font-size:12px;color:var(--muted)">Seleccioná un atleta para ver su progresión completa</div>
     </div>
 
-    <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;padding-top:10px;border-top:1px solid var(--border)">Vista general (datos de tests)</div>
-    <div class="search-bar">
-      <select class="form-input" style="width:220px" id="prog-at-sel">
-        <option value="">Todos los atletas</option>
-      </select>
-      <select class="form-input" style="width:150px">
-        <option>Últimas 8 semanas</option><option>Todo 2026</option>
-      </select>
-    </div>
-    <div class="prog-wrap">
-      <div style="display:grid;grid-template-columns:200px 1fr 100px;background:var(--bg3);border-bottom:1px solid var(--border)">
-        <div style="padding:10px 16px;font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em">Ejercicio</div>
-        <div style="padding:10px 16px;font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em">Últimas 8 semanas</div>
-        <div style="padding:10px 16px;font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;text-align:right">Tendencia</div>
+    <!-- Contenido dinámico -->
+    <div id="prog-fb-content">
+      <div style="text-align:center;padding:60px 20px">
+        <div style="font-size:32px;margin-bottom:12px">📊</div>
+        <div style="font-size:14px;color:var(--muted)">Elegí un atleta arriba para ver<br>su historial completo de sesiones</div>
       </div>
-      <div id="prog-rows"></div>
     </div>
+
   </div>
 
   <!-- ── PROVINCIAS ── -->
@@ -671,25 +660,25 @@ window._fbFichas = (callback) => {
     <div class="prov-grid">
       <div class="prov-card"><div class="prov-nm">BUENOS AIRES</div><div class="prov-ref">Entrenador principal</div>
         <div class="pstat"><span style="color:var(--text2)">Atletas</span><span style="font-weight:600;color:var(--white);font-family:var(--mono)">17</span></div>
-        <div class="pstat"><span style="color:var(--text2)">Asistencia</span><span class="c-green" style="font-weight:600;font-family:var(--mono)">90%</span></div>
+        <div class="pstat"><span style="color:var(--text2)">Asistencia</span><span class="c-green" style="font-weight:600;font-family:var(--mono)">pendiente</span></div>
         <div class="pstat"><span style="color:var(--text2)">Reporte</span><span class="badge bg">Lun 08:30</span></div>
         <div class="bar-bg"><div class="bar-f bf-g" style="width:90%"></div></div>
       </div>
       <div class="prov-card warn"><div class="prov-nm">SALTA</div><div class="prov-ref"><span style="color:var(--amber)">Sin referente designado</span></div>
         <div class="pstat"><span style="color:var(--text2)">Atletas</span><span style="font-weight:600;color:var(--white);font-family:var(--mono)">7</span></div>
-        <div class="pstat"><span style="color:var(--text2)">Asistencia</span><span class="c-amber" style="font-weight:600;font-family:var(--mono)">55%</span></div>
+        <div class="pstat"><span style="color:var(--text2)">Asistencia</span><span class="c-amber" style="font-weight:600;font-family:var(--mono)">pendiente</span></div>
         <div class="pstat"><span style="color:var(--text2)">Reporte</span><span class="badge br">Pendiente</span></div>
         <div class="bar-bg"><div class="bar-f bf-a" style="width:55%"></div></div>
       </div>
       <div class="prov-card"><div class="prov-nm">CÓRDOBA</div><div class="prov-ref">Diego Mena</div>
         <div class="pstat"><span style="color:var(--text2)">Atletas</span><span style="font-weight:600;color:var(--white);font-family:var(--mono)">5</span></div>
-        <div class="pstat"><span style="color:var(--text2)">Asistencia</span><span style="font-weight:600;font-family:var(--mono)">75%</span></div>
+        <div class="pstat"><span style="color:var(--text2)">Asistencia</span><span style="font-weight:600;font-family:var(--mono)">pendiente</span></div>
         <div class="pstat"><span style="color:var(--text2)">Reporte</span><span class="badge bg">Lun 11:15</span></div>
         <div class="bar-bg"><div class="bar-f bf-g" style="width:75%"></div></div>
       </div>
     </div>
     <div class="tbl-wrap">
-      <table><thead><tr><th>Provincia</th><th>Sem 23</th><th>Sem 24</th><th>Sem 25</th><th>Sem 26</th></tr></thead>
+      <table><thead><tr><th>Provincia</th><th>Sem 1 (7 jul)</th><th>Sem 2 (14 jul)</th><th>Sem 3 (21 jul)</th><th>Sem 4 (28 jul)</th></tr></thead>
       <tbody>
         <tr><td class="td-n">Buenos Aires</td><td><span class="badge bg">✓</span></td><td><span class="badge bg">✓</span></td><td><span class="badge bg">✓</span></td><td><span class="badge bg">✓</span></td></tr>
         <tr><td class="td-n">Salta</td><td><span class="badge br">✗</span></td><td><span class="badge ba">parcial</span></td><td><span class="badge br">✗</span></td><td><span class="badge br">✗</span></td></tr>
@@ -739,6 +728,8 @@ window._fbFichas = (callback) => {
       </div>
       <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted)">
         <span id="cal-prog-ini">7 jul 2026</span>
+        <span id="cal-dias-copa" style="display:none"></span>
+        <span id="cal-fecha-copa" style="display:none"></span>
         <span id="cal-ses-resto" style="color:var(--cel);font-weight:600">0% completado</span>
         <span id="cal-prog-fin">27 ago 2026</span>
       </div>
@@ -1425,7 +1416,7 @@ function initSelects(){
 }
 
 const TITLES={
-  dashboard:['RESUMEN GENERAL','Semana 26 · 23–29 junio 2026'],
+  dashboard:['RESUMEN GENERAL','Pre-temporada · julio–agosto 2026'],
   atletas:['NÓMINA','27 atletas · 3 provincias · click para ver ficha'],
   carga:['CARGAR RUTINA','Grupo completo o override individual'],
   reporte:['NUEVO REPORTE','Asistencia y observaciones semanales'],
@@ -1782,7 +1773,6 @@ function closeModal(){
 // (versión anterior eliminada)
 
 
-function updateClock(c){ /* reloj removido */ }
 
 
 
@@ -2049,7 +2039,7 @@ function filtrarTests(tipo){
 renderAt(ATLETAS);
 initSelects();
 buildSparklines();
-buildProgRows();
+if(document.getElementById("prog-rows")) buildProgRows();
 buildFichaSelector();
 renderCompetencias();
 renderTests();
@@ -2352,67 +2342,140 @@ function initSeguimiento(){
 }
 
 // ── PROGRESIÓN POR ATLETA (Firebase) ──────────────────────────────────────────
-function renderProgresionFb(ap, porAtleta) {
-  const dat    = (porAtleta || window._fbDatos?.porAtleta)?.[ap];
+function renderProgresionFb(ap, porAtletaArg) {
+  const porAtleta = porAtletaArg || window._fbDatos?.porAtleta;
+  const dat    = porAtleta?.[ap];
   const target = document.getElementById('prog-fb-content');
+  const header = document.getElementById('prog-resumen-header');
   if(!target) return;
+
+  if(!ap) return;
+
   if(!dat || dat.total === 0) {
-    target.innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted)">Sin sesiones registradas para ${ap}</div>`;
+    target.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">Sin sesiones registradas para <strong>${ap}</strong></div>`;
+    if(header) header.textContent = `${ap} · sin sesiones aún`;
     return;
   }
 
-  const ejsConDatos = Object.entries(dat.pesos).filter(([,arr]) => arr.length > 0);
-  if(!ejsConDatos.length) {
-    target.innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted)">Sin pesos registrados aún</div>`;
-    return;
-  }
+  // Header resumen
+  const pct = Math.round(dat.total / SESIONES_OBJETIVO * 100);
+  const pctColor = pct >= 80 ? 'var(--green)' : pct >= 40 ? 'var(--amber)' : 'var(--red)';
+  if(header) header.innerHTML = `<span style="color:var(--white);font-weight:600">${ap}</span> · <span style="color:${pctColor}">${dat.total}/${SESIONES_OBJETIVO} sesiones · ${pct}%</span>`;
 
-  const rows = ejsConDatos.map(([ej, registros]) => {
-    const sorted = registros.sort((a,b) => a.fecha > b.fecha ? 1 : -1);
-    const primero = parseFloat(sorted[0].val) || sorted[0].val;
-    const ultimo  = parseFloat(sorted[sorted.length-1].val) || sorted[sorted.length-1].val;
-    const trend   = typeof primero === 'number' && typeof ultimo === 'number'
-      ? ultimo > primero ? `<span style="color:var(--green)">↑ +${(ultimo-primero).toFixed(1)}kg</span>`
-      : ultimo < primero ? `<span style="color:var(--red)">↓ ${(ultimo-primero).toFixed(1)}kg</span>`
-      : `<span style="color:var(--amber)">→ igual</span>`
-      : '—';
-    const historial = sorted.slice(-6).map(r=>`<span style="font-family:var(--mono);font-size:11px;background:var(--bg3);padding:2px 6px;border-radius:4px">${r.val}</span>`).join(' ');
-    return `<tr>
-      <td class="td-n" style="text-transform:capitalize">${ej.replace(/-/g,' ')}</td>
-      <td style="font-family:var(--mono);color:var(--muted)">${sorted[0].val}</td>
-      <td style="font-family:var(--mono);color:var(--amber);font-weight:600">${sorted[sorted.length-1].val}</td>
-      <td>${trend}</td>
-      <td style="font-size:11px">${sorted.length}</td>
-      <td>${historial}</td>
-    </tr>`;
+  // ── 1. TIMELINE DE SESIONES ────────────────────────────────────────────────
+  const sesOrdenadas = (dat.sesiones || []).slice().sort((a,b) => a.fecha > b.fecha ? 1 : -1);
+
+  const timelineHTML = sesOrdenadas.map((s, i) => {
+    const dia = (s.dia || s.diaLabel || '').toLowerCase();
+    const cat = dia.includes('recovery') ? 'Recovery' : dia.includes('3') ? 'Día 3' : dia.includes('2') ? 'Día 2' : dia.includes('1') ? 'Día 1' : 'Sesión';
+    const catColor = dia.includes('recovery') ? 'var(--green)' : 'var(--cel)';
+    const estado = s.reporte?.estado || s.estado || '—';
+    const rpe    = s.reporte?.rpe    || s.rpe    || '—';
+    const nota   = s.reporte?.nota   || s.nota   || '';
+
+    // Pesos de esa sesión
+    const pesosEj = Object.entries(s.pesos || {}).filter(([,v]) => v && v !== '—');
+    const pesosHTML = pesosEj.length
+      ? pesosEj.map(([ej, val]) => `<span style="font-size:11px;background:var(--bg3);padding:2px 8px;border-radius:4px;margin:2px;display:inline-block"><span style="color:var(--muted)">${ej.replace(/-/g,' ')}</span> <span style="color:var(--amber);font-weight:600">${val}kg</span></span>`).join('')
+      : '<span style="font-size:11px;color:var(--muted)">Sin pesos registrados</span>';
+
+    return `<div style="display:flex;gap:14px;margin-bottom:10px">
+      <!-- Línea timeline -->
+      <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
+        <div style="width:10px;height:10px;border-radius:50%;background:${catColor};margin-top:4px;flex-shrink:0"></div>
+        ${i < sesOrdenadas.length - 1 ? `<div style="width:1px;flex:1;background:var(--border);margin-top:4px"></div>` : ''}
+      </div>
+      <!-- Contenido -->
+      <div style="flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:${i < sesOrdenadas.length - 1 ? '0' : '0'}">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-family:var(--mono);font-size:13px;font-weight:600;color:var(--white)">${s.fecha}</span>
+            <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:99px;background:rgba(107,184,245,0.1);color:${catColor}">${cat}</span>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span style="font-size:11px;color:${ecColor(estado)}">${estado}</span>
+            <span style="font-size:10px;color:var(--muted);background:var(--bg3);padding:2px 6px;border-radius:4px">RPE ${rpe}</span>
+          </div>
+        </div>
+        <!-- Pesos -->
+        <div style="margin-bottom:${nota ? '8px' : '0'}">${pesosHTML}</div>
+        <!-- Nota -->
+        ${nota ? `<div style="font-size:12px;color:var(--text2);background:var(--bg3);border-radius:6px;padding:8px 10px;border-left:2px solid rgba(107,184,245,0.3);line-height:1.5;font-style:italic">"${nota}"</div>` : ''}
+      </div>
+    </div>`;
   }).join('');
 
-  // Comentarios
-  const comentarios = dat.sesiones
-    .filter(s => s.reporte?.nota && s.reporte.nota !== '—')
-    .map(s => `<div style="padding:8px 12px;background:var(--bg3);border-radius:8px;margin-bottom:6px">
-      <div style="font-size:10px;color:var(--muted);margin-bottom:3px">${s.fecha} · ${s.dia||''} · <span style="color:${ecColor(s.reporte?.estado)}">${s.reporte?.estado||''}</span> · RPE ${s.reporte?.rpe||'—'}</div>
-      <div style="font-size:13px;color:var(--text2)">${s.reporte.nota}</div>
-    </div>`).join('');
+  // ── 2. PROGRESIÓN POR EJERCICIO ────────────────────────────────────────────
+  const ejsConDatos = Object.entries(dat.pesos || {}).filter(([,arr]) => arr && arr.length > 0);
+  const progHTML = ejsConDatos.length === 0 ? '' : `
+    <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Progresión por ejercicio</div>
+    <div class="tbl-wrap" style="margin-bottom:24px">
+      <table>
+        <thead><tr>
+          <th>Ejercicio</th>
+          <th style="text-align:center">1° registro</th>
+          <th style="text-align:center">Último</th>
+          <th style="text-align:center">Diferencia</th>
+          <th style="text-align:center">Sesiones</th>
+          <th>Historial completo</th>
+        </tr></thead>
+        <tbody>${ejsConDatos.map(([ej, registros]) => {
+          const sorted = registros.slice().sort((a,b) => a.fecha > b.fecha ? 1 : -1);
+          const primero = parseFloat(sorted[0].val);
+          const ultimo  = parseFloat(sorted[sorted.length-1].val);
+          const diff    = !isNaN(primero) && !isNaN(ultimo)
+            ? ultimo - primero
+            : null;
+          const trend = diff === null ? '<span style="color:var(--muted)">—</span>'
+            : diff > 0 ? `<span style="color:var(--green)">↑ +${diff.toFixed(1)}kg</span>`
+            : diff < 0 ? `<span style="color:var(--red)">↓ ${diff.toFixed(1)}kg</span>`
+            : `<span style="color:var(--amber)">→ sin cambio</span>`;
+          const hist = sorted.map(r =>
+            `<span style="font-size:10px;font-family:var(--mono);background:var(--bg3);padding:1px 5px;border-radius:3px">${r.fecha.slice(5)} <strong>${r.val}</strong></span>`
+          ).join(' ');
+          return `<tr>
+            <td class="td-n" style="text-transform:capitalize">${ej.replace(/-/g,' ')}</td>
+            <td style="text-align:center;font-family:var(--mono);color:var(--muted)">${sorted[0].val}</td>
+            <td style="text-align:center;font-family:var(--mono);color:var(--amber);font-weight:700">${sorted[sorted.length-1].val}</td>
+            <td style="text-align:center">${trend}</td>
+            <td style="text-align:center;color:var(--muted)">${sorted.length}</td>
+            <td style="font-size:11px">${hist}</td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>`;
 
   target.innerHTML = `
-    <div style="font-size:13px;font-weight:600;color:var(--white);margin-bottom:10px">
-      ${ap} · ${dat.total}/${SESIONES_OBJETIVO} sesiones · ${Math.round(dat.total/SESIONES_OBJETIVO*100)}% completado
+    <!-- Resumen rápido -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px">
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-family:var(--display);font-size:24px;color:${pctColor}">${dat.total}</div>
+        <div style="font-size:9px;color:var(--muted);text-transform:uppercase;margin-top:2px">Sesiones</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-family:var(--display);font-size:24px;color:var(--cel)">${sesOrdenadas.filter(s=>{const d=(s.dia||'').toLowerCase();return d.includes('1')&&!d.includes('2')&&!d.includes('3')}).length}</div>
+        <div style="font-size:9px;color:var(--muted);text-transform:uppercase;margin-top:2px">Día 1</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-family:var(--display);font-size:24px;color:var(--cel)">${sesOrdenadas.filter(s=>(s.dia||'').toLowerCase().includes('2')).length}</div>
+        <div style="font-size:9px;color:var(--muted);text-transform:uppercase;margin-top:2px">Día 2</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-family:var(--display);font-size:24px;color:var(--green)">${sesOrdenadas.filter(s=>(s.dia||'').toLowerCase().includes('recovery')).length}</div>
+        <div style="font-size:9px;color:var(--muted);text-transform:uppercase;margin-top:2px">Recovery</div>
+      </div>
     </div>
-    <div class="tbl-wrap" style="margin-bottom:16px">
-      <table>
-        <thead><tr><th>Ejercicio</th><th>Primer registro</th><th>Último registro</th><th>Tendencia</th><th>Sesiones</th><th>Historial</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>
-    ${comentarios ? `
-    <div style="font-size:13px;font-weight:600;color:var(--white);margin-bottom:10px">Comentarios del atleta</div>
-    ${comentarios}` : ''}
+
+    ${progHTML}
+
+    <!-- Timeline -->
+    <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px">Historial de sesiones</div>
+    ${sesOrdenadas.length ? timelineHTML : '<div style="text-align:center;padding:20px;color:var(--muted)">Sin sesiones registradas</div>'}
   `;
 }
 
-// Exponer para que el selector de la pantalla progresión la llame
 window.renderProgresionFb = renderProgresionFb;
+
 
 setTimeout(initSeguimiento, 800);
 
@@ -2632,5 +2695,5 @@ FAB · Pre-temporada 2026`;
 
 </script>
 <div class="toast" id="toast">✓ Guardado</div>
-</body>
+<div id="prog-rows" style="display:none"></div></body>
 </html>
