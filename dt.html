@@ -337,6 +337,7 @@ window._fbFichas = (callback) => {
     <div class="ni" onclick="goScreen('progresion',this)"><span class="ni-icon">↗</span><span>Progresión</span></div>
     <div class="ni" onclick="goScreen('provincias',this)"><span class="ni-icon">⊙</span><span>Provincias</span></div>
     <div class="ni" onclick="goScreen('calendario',this)"><span class="ni-icon">◈</span><span>Calendario</span></div>
+    <div class="ni" onclick="goScreen('diagnostico',this)"><span class="ni-icon">🔍</span><span>Diagnóstico</span></div>
     <div class="nav-sec">Atletas</div>
     <div class="ni" onclick="goScreen('ficha',this)"><span class="ni-icon">◧</span><span>Ficha del atleta</span></div>
     <div class="ni" onclick="goScreen('tests',this)"><span class="ni-icon">✓</span><span>Tests</span></div>
@@ -389,6 +390,7 @@ window._fbFichas = (callback) => {
       <div class="metric"><div class="metric-val c-amber" id="dash-dias-resto">20</div><div class="metric-lbl">Días al fin</div><div class="metric-note" style="color:var(--muted)">Pre-temporada · 27 ago</div></div>
     </div>
 
+    <div id="diag-nombres" style="display:none"></div>
     <!-- ASISTENCIA POR NOMBRE -->
     <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:16px 18px;margin-bottom:16px">
       <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
@@ -1435,7 +1437,8 @@ function goScreen(id,el){
   if(id==='tests') renderTests();
   if(id==='ficha') buildFichaSelector();
   if(id==='calendario') { setTimeout(renderCompetencias,50); setTimeout(renderPlanTiro,100); }
-  if(id==='reporte')    setTimeout(generarReporte, 100);
+  if(id==='reporte')      setTimeout(generarReporte, 100);
+  if(id==='diagnostico')  setTimeout(runDiagnostico, 100);
   const t=TITLES[id]||['',''];
   document.getElementById('pg-title').textContent=t[0];
   document.getElementById('pg-sub').textContent=t[1];
@@ -2066,10 +2069,32 @@ function initSeguimiento(){
     const hoy      = new Date().toLocaleDateString('es-AR');
     const hace7    = new Date(Date.now() - 7*24*60*60*1000).toLocaleDateString('es-AR');
 
+    // ── NORMALIZACIÓN FLEXIBLE DE NOMBRES ─────────────────────────────────────
+    // Maneja variantes: "Brahim", "Shahir", "Brahim, Shahir", "shahir brahim", etc.
+    function normalizarAp(d) {
+      const raw = normalizarAp(d);
+      if (!raw) return '';
+      // Match exacto
+      if (ATLETAS.find(a => a.ap === raw)) return raw;
+      // Match case-insensitive
+      const ci = ATLETAS.find(a => a.ap.toLowerCase() === raw.toLowerCase());
+      if (ci) return ci.ap;
+      // Si guardó el nombre en vez del apellido (ej: "Shahir" en vez de "Brahim")
+      const porNom = ATLETAS.find(a => a.nom.toLowerCase().startsWith(raw.toLowerCase()));
+      if (porNom) return porNom.ap;
+      // Si guardó "Apellido Nombre" junto
+      const fullMatch = ATLETAS.find(a =>
+        `${a.ap} ${a.nom}`.toLowerCase().includes(raw.toLowerCase()) ||
+        raw.toLowerCase().includes(a.ap.toLowerCase())
+      );
+      if (fullMatch) return fullMatch.ap;
+      return raw; // devuelve lo que vino si no matchea
+    }
+
     // ── MÉTRICAS POR ATLETA ────────────────────────────────────────────────────
     const porAtleta = {};
     sesiones.forEach(d => {
-      const ap = d.apellido || (d.atleta||'').split(',')[0].trim();
+      const ap = normalizarAp(d);
       if(!porAtleta[ap]) porAtleta[ap] = { total:0, sesiones:[], ultimaFecha:'', ultimoEstado:'—', ultimaNota:'—', ultimaHora:'', pesos:{} };
       porAtleta[ap].total++;
       porAtleta[ap].sesiones.push(d);
@@ -2086,6 +2111,7 @@ function initSeguimiento(){
         });
       }
     });
+
 
     // ── FECHAS DE SESIONES PRE-TEMPORADA (martes y jueves 7jul→27ago) ──────────
     const SESIONES_FECHAS = [
@@ -2108,19 +2134,34 @@ function initSeguimiento(){
     const mSes = document.getElementById('m-ses-hechas');
     if(mSes) mSes.textContent = sesionesHechas + '/16';
 
-    // ── VARIABLES QUE SE USAN EN TODO EL BLOQUE ───────────────────────────────
+    // ── DIAGNÓSTICO: detectar nombres que no matchean con ATLETAS ─────────────
+    const apsConocidos = new Set(ATLETAS.map(a => a.ap));
+    const apsEnFirebase = new Set(sesiones.map(d => normalizarAp(d)));
+    const apsHuerfanos = [...apsEnFirebase].filter(ap => ap && !apsConocidos.has(ap));
+    if (apsHuerfanos.length > 0) {
+      console.warn('⚠️ Nombres en Firebase que NO matchean con ATLETAS:', apsHuerfanos);
+      // Mostrar en dashboard si existe el elemento
+      const diagEl = document.getElementById('diag-nombres');
+      if (diagEl) {
+        diagEl.style.display = 'block';
+        diagEl.innerHTML = `<div style="font-size:11px;color:var(--amber);padding:10px 14px;background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.2);border-radius:8px;margin-bottom:12px">
+          ⚠️ Sesiones con nombres no reconocidos (no se cuentan): <strong>${apsHuerfanos.join(', ')}</strong>
+        </div>`;
+      }
+    }
+
     const inactivos = ATLETAS.filter(a => {
       const dat = porAtleta[a.ap];
       return !dat || !dat.ultimaFecha || dat.ultimaFecha < hace7;
     });
-    const activosHoy    = new Set(sesiones.filter(d => d.fecha === hoy).map(d => d.apellido || (d.atleta||'').split(',')[0].trim()));
-    const activosSemana = new Set(sesiones.filter(d => d.fecha >= hace7).map(d => d.apellido || (d.atleta||'').split(',')[0].trim()));
+    const activosHoy    = new Set(sesiones.filter(d => d.fecha === hoy).map(d => normalizarAp(d)));
+    const activosSemana = new Set(sesiones.filter(d => d.fecha >= hace7).map(d => normalizarAp(d)));
 
     // ── ASISTENCIA REAL POR ATLETA ────────────────────────────────────────────
     const atletasConSesion = new Set(
       sesiones
         .filter(d => FECHAS_ENTRENO.has(d.fecha))
-        .map(d => d.apellido || (d.atleta||'').split(',')[0].trim())
+        .map(d => normalizarAp(d))
     );
     const atletasSinSesion = ATLETAS.filter(a => !atletasConSesion.has(a.ap));
 
@@ -2652,6 +2693,73 @@ function apLink(ap) {
   return `<span style="cursor:pointer;color:var(--white);font-weight:600;text-decoration:underline;text-decoration-color:rgba(107,184,245,0.3);text-underline-offset:3px" onclick="abrirFichaModal('${ap}')" title="Ver ficha de ${ap}">${ap}</span>`;
 }
 
+// ── DIAGNÓSTICO FIREBASE ──────────────────────────────────────────────────────
+function runDiagnostico() {
+  const datos = window._fbDatos;
+  if (!datos) { setTimeout(runDiagnostico, 600); return; }
+  const { sesiones } = datos;
+  const apsConocidos = new Set(ATLETAS.map(a => a.ap));
+
+  // Contar raw por apellido field
+  const conteoRaw = {};
+  const nombresEncontrados = new Set();
+  sesiones.forEach(d => {
+    const apRaw = d.apellido || (d.atleta||'').split(',')[0].trim() || '(vacío)';
+    nombresEncontrados.add(apRaw);
+    conteoRaw[apRaw] = (conteoRaw[apRaw] || 0) + 1;
+  });
+
+  const ok  = [...nombresEncontrados].filter(n => apsConocidos.has(n));
+  const mal = [...nombresEncontrados].filter(n => !apsConocidos.has(n));
+
+  const elOk  = document.getElementById('diag-nombres-ok');
+  const elMal = document.getElementById('diag-nombres-mal');
+  if(elOk) elOk.innerHTML =
+    (ok.length ? '<span style="font-size:10px;color:var(--green);font-weight:600;margin-right:6px">✓ RECONOCIDOS:</span>' : '') +
+    ok.map(n=>`<span style="background:var(--green-bg);color:var(--green);font-size:11px;padding:2px 8px;border-radius:99px">${n} (${conteoRaw[n]})</span>`).join('');
+  if(elMal) elMal.innerHTML =
+    (mal.length ? '<span style="font-size:10px;color:var(--red);font-weight:600;margin-right:6px">⚠ NO RECONOCIDOS:</span>' : '') +
+    mal.map(n=>`<span style="background:var(--red-bg);color:var(--red);font-size:11px;padding:2px 8px;border-radius:99px">${n} (${conteoRaw[n]})</span>`).join('');
+
+  const conteoEl = document.getElementById('diag-conteo');
+  if(conteoEl) conteoEl.innerHTML = Object.entries(conteoRaw).sort((a,b)=>b[1]-a[1]).map(([ap,total])=>{
+    const c = apsConocidos.has(ap);
+    return `<div><span style="color:${c?'var(--white)':'var(--red)'}">${c?'✓':'⚠'} ${ap}</span> → <span style="color:var(--amber);font-weight:700">${total}</span>${!c?' ← NO MATCHEA':''}</div>`;
+  }).join('');
+
+  const tbody = document.getElementById('diag-tabla');
+  if(tbody) tbody.innerHTML = sesiones.map((d,i)=>{
+    const apRaw = d.apellido||'(sin apellido)';
+    const ok2   = apsConocidos.has(apRaw) || apsConocidos.has((d.atleta||'').split(',')[0].trim());
+    const regs  = d.registros ? Object.entries(d.registros).map(([k,v])=>`${k}:${v}`).join(' · ') : '—';
+    return `<tr style="${!ok2?'background:rgba(245,82,74,0.06)':''}">
+      <td style="font-family:var(--mono);color:var(--muted);font-size:11px">${i+1}</td>
+      <td style="color:${apsConocidos.has(apRaw)?'var(--green)':'var(--red)'};font-weight:600">${apRaw}</td>
+      <td style="color:var(--text2);font-size:12px">${d.atleta||'—'}</td>
+      <td style="font-size:12px;color:var(--text2)">${d.dia||'—'}</td>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${d.fecha||'—'}</td>
+      <td style="font-size:10px;color:var(--muted);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${regs}</td>
+    </tr>`;
+  }).join('');
+
+  window._diagData = { sesiones, conteoRaw, ok, mal };
+}
+
+function copiarDiagnostico() {
+  const d = window._diagData;
+  if (!d) { alert('Actualizá primero'); return; }
+  let txt = `DIAGNÓSTICO FIREBASE — ${new Date().toLocaleString('es-AR')}\n`;
+  txt += `TOTAL: ${d.sesiones.length} documentos\n\n`;
+  txt += `RECONOCIDOS:\n${d.ok.map(n=>`  ✓ ${n}: ${d.conteoRaw[n]} ses.`).join('\n')}\n\n`;
+  if(d.mal.length) txt += `NO RECONOCIDOS:\n${d.mal.map(n=>`  ⚠ "${n}": ${d.conteoRaw[n]} ses.`).join('\n')}\n\n`;
+  txt += `DETALLE:\n`;
+  d.sesiones.forEach((s,i)=>{
+    txt += `${i+1}. apellido="${s.apellido||''}" atleta="${s.atleta||''}" dia="${s.dia||''}" fecha="${s.fecha||''}"\n`;
+  });
+  navigator.clipboard.writeText(txt).then(()=>alert('Copiado — pegalo en el chat con Carlos'));
+}
+
+// ── REPORTE DE SESIONES POR DÍA ───────────────────────────────────────────────
 function generarReporte() {
   const datos = window._fbDatos;
   if (!datos) { setTimeout(generarReporte, 600); return; }
@@ -2830,6 +2938,42 @@ FAB · Pre-temporada 2026`;
 </script>
 <div class="toast" id="toast">✓ Guardado</div>
 <div id="prog-rows" style="display:none"></div>
+
+<!-- ── DIAGNÓSTICO ── -->
+<div class="screen" id="s-diagnostico">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+    <div>
+      <div style="font-size:18px;font-weight:700;color:var(--white)">Diagnóstico Firebase</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px">Todos los documentos crudos · colección sesiones</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost" onclick="runDiagnostico()" style="font-size:12px">↻ Actualizar</button>
+      <button class="btn btn-ghost" onclick="copiarDiagnostico()" style="font-size:12px">📋 Copiar para Carlos</button>
+    </div>
+  </div>
+
+  <!-- Nombres encontrados -->
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px">
+    <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Nombres en Firebase vs Lista oficial</div>
+    <div id="diag-nombres-ok" style="margin-bottom:8px;display:flex;flex-wrap:wrap;gap:5px"></div>
+    <div id="diag-nombres-mal" style="display:flex;flex-wrap:wrap;gap:5px"></div>
+  </div>
+
+  <!-- Conteo por atleta -->
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px">
+    <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Sesiones contadas por atleta (raw Firebase)</div>
+    <div id="diag-conteo" style="font-family:var(--mono);font-size:12px;color:var(--text2);line-height:1.8"></div>
+  </div>
+
+  <!-- Tabla raw -->
+  <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Todos los documentos</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>#</th><th>apellido (campo)</th><th>atleta (campo)</th><th>dia</th><th>fecha</th><th>registros</th></tr></thead>
+      <tbody id="diag-tabla"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:30px">Cargando...</td></tr></tbody>
+    </table>
+  </div>
+</div>
 
 <!-- ── MODAL FICHA INDIVIDUAL ── -->
 <div id="modal-ficha" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px)" onclick="if(event.target===this)cerrarModal()">
