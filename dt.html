@@ -300,7 +300,7 @@ const db  = getFirestore(app);
 
 // Escuchar sesiones en tiempo real
 window._fbEscuchar = (callback) => {
-  const q = query(collection(db, 'sesiones'), orderBy('timestamp','desc'), limit(100));
+  const q = query(collection(db, 'sesiones'), orderBy('timestamp','desc'), limit(500));
   return onSnapshot(q, snap => {
     const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     callback(docs);
