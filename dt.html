@@ -2072,7 +2072,7 @@ function initSeguimiento(){
     // ── NORMALIZACIÓN FLEXIBLE DE NOMBRES ─────────────────────────────────────
     // Maneja variantes: "Brahim", "Shahir", "Brahim, Shahir", "shahir brahim", etc.
     function normalizarAp(d) {
-      const raw = normalizarAp(d);
+      const raw = (d.apellido || (d.atleta||'').split(',')[0]).trim();
       if (!raw) return '';
       // Match exacto
       if (ATLETAS.find(a => a.ap === raw)) return raw;
@@ -2082,13 +2082,13 @@ function initSeguimiento(){
       // Si guardó el nombre en vez del apellido (ej: "Shahir" en vez de "Brahim")
       const porNom = ATLETAS.find(a => a.nom.toLowerCase().startsWith(raw.toLowerCase()));
       if (porNom) return porNom.ap;
-      // Si guardó "Apellido Nombre" junto
+      // Match parcial
       const fullMatch = ATLETAS.find(a =>
         `${a.ap} ${a.nom}`.toLowerCase().includes(raw.toLowerCase()) ||
         raw.toLowerCase().includes(a.ap.toLowerCase())
       );
       if (fullMatch) return fullMatch.ap;
-      return raw; // devuelve lo que vino si no matchea
+      return raw;
     }
 
     // ── MÉTRICAS POR ATLETA ────────────────────────────────────────────────────
