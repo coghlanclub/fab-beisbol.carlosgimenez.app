@@ -334,6 +334,7 @@ window._fbFichas = (callback) => {
     <div class="ni" onclick="goScreen('reporte',this)"><span class="ni-icon">◎</span><span>Nuevo reporte</span></div>
     <div class="nav-sec">Análisis</div>
     <div class="ni" onclick="goScreen('seguimiento',this)"><span class="ni-icon">◉</span><span>Seguimiento</span></div>
+    <div class="ni" onclick="goScreen('potencia',this)"><span class="ni-icon">⚡</span><span>Potencia</span></div>
     <div class="ni" onclick="goScreen('progresion',this)"><span class="ni-icon">↗</span><span>Progresión</span></div>
     <div class="ni" onclick="goScreen('provincias',this)"><span class="ni-icon">⊙</span><span>Provincias</span></div>
     <div class="ni" onclick="goScreen('calendario',this)"><span class="ni-icon">◈</span><span>Calendario</span></div>
@@ -915,6 +916,31 @@ window._fbFichas = (callback) => {
           </tr>
         </thead>
         <tbody id="tests-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── POTENCIA (macrociclo Sep-Dic 2026) ── -->
+  <div class="screen" id="s-potencia">
+    <div id="pot-fase-banner" style="margin-bottom:18px;padding:12px 16px;background:var(--cel-dim);border:1px solid var(--border2);border-radius:12px;font-size:12px;color:var(--text2);line-height:1.5">Calculando fase actual...</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+      <div class="metric"><div class="metric-val c-cel" id="pot-total">—</div><div class="metric-lbl">Sesiones Potencia</div></div>
+      <div class="metric"><div class="metric-val c-green" id="pot-activos">—</div><div class="metric-lbl">Atletas activos (7 días)</div></div>
+      <div class="metric"><div class="metric-val" id="pot-dia1">—</div><div class="metric-lbl">Día 1 · Lun registrados</div></div>
+      <div class="metric"><div class="metric-val" id="pot-dia2">—</div><div class="metric-lbl">Día 2/3 · Mié/Vie registrados</div></div>
+    </div>
+    <div style="font-size:13px;font-weight:600;color:var(--white);margin-bottom:10px">Por atleta</div>
+    <div class="tbl-wrap" style="margin-bottom:20px">
+      <table>
+        <thead><tr><th>Atleta</th><th>Día 1</th><th>Día 2</th><th>Día 3</th><th>Total</th><th>Última sesión</th><th>Último press banca</th><th>Última sentadilla 90%</th></tr></thead>
+        <tbody id="pot-atletas-tbody"><tr><td colspan="8" style="text-align:center;color:var(--muted);padding:30px">Conectando con Firebase...</td></tr></tbody>
+      </table>
+    </div>
+    <div style="font-size:13px;font-weight:600;color:var(--white);margin-bottom:10px">Últimas sesiones de Potencia</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Atleta</th><th>Día</th><th>Fecha</th><th>Hora</th><th>Estado</th><th>RPE</th><th>Ejercicios</th></tr></thead>
+        <tbody id="pot-tbody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px">Conectando con Firebase...</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -2268,6 +2294,100 @@ function initSeguimiento(){
         }).join('');
       }
     }
+
+    // ── POTENCIA: MACROCICLO SEP-DIC 2026 ──────────────────────────────────────
+    (function renderPotencia(){
+      const potSesiones = docs.filter(d => d.rutina === 'potencia');
+
+      // Banner de fase (misma lógica que index.html)
+      const bannerEl = document.getElementById('pot-fase-banner');
+      if (bannerEl) {
+        const POTENCIA_INICIO = '2026-09-01';
+        const POTENCIA_FASES = [
+          { mes:'Septiembre', tipo:'Fase excéntrica', detalle:'Bajada controlada 4→5→6 seg', pct:'80→87%', descarga:'Semana 4' },
+          { mes:'Octubre',    tipo:'Fase isométrica',  detalle:'Sostén en punto crítico 3→4→5 seg', pct:'85→92%', descarga:'Semana 8' },
+          { mes:'Noviembre',  tipo:'Fase concéntrica', detalle:'Subida a máxima velocidad', pct:'88→95%', descarga:'Semana 12' },
+          { mes:'Diciembre',  tipo:'Clusters pico',    detalle:'Series en clusters · tests de cierre sem 15 · semana libre 16', pct:'92→102%', descarga:'—' },
+        ];
+        const hoyD = new Date();
+        const inicioD = new Date(POTENCIA_INICIO);
+        const semana = Math.floor((hoyD - inicioD) / (1000*60*60*24*7)) + 1;
+        const mesIdx = semana <= 0 ? -1 : Math.min(3, Math.floor((semana - 1) / 4));
+        if (mesIdx < 0) {
+          bannerEl.textContent = `⚡ El macrociclo de Potencia arranca el 01/09/2026 (Semana 1). Método: Contraste Francés / Triphasic Training (Cal Dietz).`;
+        } else {
+          const f = POTENCIA_FASES[mesIdx];
+          bannerEl.textContent = `⚡ Semana ${semana} · ${f.mes} — ${f.tipo} (${f.detalle}) · Intensidad ${f.pct}${f.descarga!=='—' ? ' · Descarga: ' + f.descarga : ''}`;
+        }
+      }
+
+      // Métricas generales
+      const hoy = new Date().toLocaleDateString('es-AR');
+      const hace7 = new Date(Date.now() - 7*24*60*60*1000).toLocaleDateString('es-AR');
+      const totalEl = document.getElementById('pot-total');
+      if (totalEl) totalEl.textContent = potSesiones.length;
+      const activosEl = document.getElementById('pot-activos');
+      if (activosEl) activosEl.textContent = new Set(potSesiones.filter(d => d.fecha >= hace7).map(d => (d.apellido||(d.atleta||'').split(',')[0]).trim())).size;
+      const d1El = document.getElementById('pot-dia1');
+      if (d1El) d1El.textContent = potSesiones.filter(d => (d.dia||'').includes('Lun') || d.diaNum === 0).length;
+      const d2El = document.getElementById('pot-dia2');
+      if (d2El) d2El.textContent = potSesiones.filter(d => (d.dia||'').includes('Mié') || (d.dia||'').includes('Vie') || d.diaNum === 1 || d.diaNum === 2).length;
+
+      // Por atleta
+      const porAtletaPot = {};
+      potSesiones.forEach(d => {
+        const ap = (d.apellido || (d.atleta||'').split(',')[0]).trim();
+        if (!porAtletaPot[ap]) porAtletaPot[ap] = { dias:[false,false,false], total:0, ultimaFecha:'', ultimaHora:'', registros:{} };
+        porAtletaPot[ap].total++;
+        if (typeof d.diaNum === 'number' && d.diaNum >=0 && d.diaNum <=2) porAtletaPot[ap].dias[d.diaNum] = true;
+        if (!porAtletaPot[ap].ultimaFecha || (d.fecha||'') >= porAtletaPot[ap].ultimaFecha) {
+          porAtletaPot[ap].ultimaFecha = d.fecha||'';
+          porAtletaPot[ap].ultimaHora = d.hora||'';
+        }
+        Object.assign(porAtletaPot[ap].registros, d.registros||{});
+      });
+      const atletasBody = document.getElementById('pot-atletas-tbody');
+      if (atletasBody) {
+        const conDatos = Object.keys(porAtletaPot);
+        if (!conDatos.length) {
+          atletasBody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:30px">Sin sesiones de Potencia registradas aún</td></tr>';
+        } else {
+          atletasBody.innerHTML = conDatos.sort().map(ap => {
+            const dat = porAtletaPot[ap];
+            const chk = i => dat.dias[i] ? '<span style="color:var(--green)">✓</span>' : '<span style="color:var(--muted)">—</span>';
+            return `<tr>
+              <td class="td-n">${ap}</td>
+              <td>${chk(0)}</td><td>${chk(1)}</td><td>${chk(2)}</td>
+              <td style="font-family:var(--mono)">${dat.total}</td>
+              <td style="font-family:var(--mono);font-size:11px">${dat.ultimaFecha||'—'}</td>
+              <td style="font-family:var(--mono);font-size:11px">${dat.registros['pot-press-banca']||'—'}</td>
+              <td style="font-family:var(--mono);font-size:11px">${dat.registros['pot-sentadilla']||'—'}</td>
+            </tr>`;
+          }).join('');
+        }
+      }
+
+      // Últimas sesiones
+      const potTbody = document.getElementById('pot-tbody');
+      if (potTbody) {
+        if (!potSesiones.length) {
+          potTbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px">Sin sesiones de Potencia registradas aún</td></tr>';
+        } else {
+          potTbody.innerHTML = potSesiones.slice(0,100).map(d => {
+            const ejs = d.registros ? Object.entries(d.registros).slice(0,4).map(([k,v])=>`<b style="color:var(--white)">${v}</b><span style="color:var(--muted);font-size:10px"> ${k.replace(/^pot-/,'').replace(/-/g,' ')}</span>`).join(' · ') : '—';
+            return `<tr>
+              <td class="td-n">${d.atleta||'—'}</td>
+              <td><span class="badge bc" style="font-size:10px">${(d.dia||'—').split(' · ')[1]||d.dia||'—'}</span></td>
+              <td style="font-family:var(--mono);font-size:11px">${d.fecha||'—'}</td>
+              <td style="font-family:var(--mono);font-size:11px">${d.hora||'—'}</td>
+              <td style="color:${ecColor(d.reporte?.estado)};font-size:12px">${d.reporte?.estado||'—'}</td>
+              <td style="font-family:var(--mono);font-size:11px">${d.reporte?.rpe||'—'}</td>
+              <td style="font-size:11px;color:var(--text2)">${ejs}</td>
+            </tr>`;
+          }).join('');
+        }
+      }
+    })();
 
     // ── NÓMINA: MÉTRICAS COMPLETAS POR ATLETA ──────────────────────────────────
     const nominaBody = document.getElementById('nomina-fb-tbody');
