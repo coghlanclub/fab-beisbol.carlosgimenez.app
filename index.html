@@ -96,7 +96,7 @@ window._fbResumenAtleta = async (apellido) => {
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;overflow-x:hidden}
 
 /* ── PANTALLAS ── */
-.screen{display:none;min-height:100vh;flex-direction:column}
+.screen{display:none;min-height:100vh;min-height:100dvh;flex-direction:column}
 .screen.on{display:flex}
 
 /* ── PANTALLA 1: INICIO FUTURISTA ── */
@@ -177,7 +177,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .search-hint{text-align:center;padding:40px 20px;color:var(--muted);font-size:13px;line-height:1.7}
 
 /* ── PANTALLA 2: ENTRENAMIENTO ── */
-#s-entreno{background:var(--bg);display:flex;flex-direction:column;height:100vh}
+#s-entreno{background:var(--bg);flex-direction:column;height:100vh;height:100dvh}
 .entreno-header{background:var(--bg2);border-bottom:1px solid var(--border);padding:0;flex-shrink:0}
 .entreno-scroll{flex:1;overflow-y:auto}
 .entreno-bottom{flex-shrink:0;background:var(--bg)}
@@ -305,9 +305,9 @@ select.ficha-input option{background:var(--bg2)}
         <div style="font-size:11px;color:var(--text2);margin-top:3px;line-height:1.4">Concéntrica explosiva · serie de entrada antes de cargar</div>
       </div>
       <div style="background:rgba(34,201,138,0.06);border:1px solid rgba(34,201,138,0.15);border-radius:10px;padding:12px">
-        <div style="font-size:10px;color:var(--green);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">Día 4 · Recovery</div>
+        <div style="font-size:10px;color:var(--green);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">Recovery 1 · Recovery 2</div>
         <div style="font-size:13px;font-weight:600;color:var(--white)">Capacidad Aeróbica</div>
-        <div style="font-size:11px;color:var(--text2);margin-top:3px;line-height:1.4">Hasta 2 veces por semana · propósito recuperación</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px;line-height:1.4">2 veces por semana · Recovery 2 es sesión aeróbica activa</div>
       </div>
     </div>
     <div style="background:rgba(245,166,35,0.06);border:1px solid rgba(245,166,35,0.12);border-radius:10px;padding:12px;margin-bottom:4px">
@@ -335,6 +335,13 @@ select.ficha-input option{background:var(--bg2)}
     <div style="font-size:10px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px" id="alerta-potencia-tag">⚡ MACROCICLO POTENCIA</div>
     <div style="font-size:13px;font-weight:600;color:var(--white);margin-bottom:4px" id="alerta-potencia-label">—</div>
     <div style="font-size:12px;color:var(--text2);line-height:1.5" id="alerta-potencia-msg">—</div>
+  </div>
+
+  <!-- AVISO GRANDE · TESTEOS -->
+  <div id="alerta-testeos" style="display:none;margin:10px 20px 0;padding:18px 16px;border-radius:14px;border:2px solid var(--red);background:rgba(245,82,74,0.12);text-align:center">
+    <div style="font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">🚨 TESTEOS</div>
+    <div style="font-family:var(--display);font-size:28px;color:var(--red);letter-spacing:1px;line-height:1.1" id="alerta-testeos-label">—</div>
+    <div style="font-size:12px;color:var(--text2);margin-top:6px" id="alerta-testeos-fecha">—</div>
   </div>
 
   <!-- BUSCADOR -->
@@ -470,6 +477,11 @@ select.ficha-input option{background:var(--bg2)}
       <div style="font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px">Macrociclo Potencia</div>
       <div style="font-size:12px;color:var(--muted)">Contraste Francés · Sep-Dic 2026</div>
     </button>
+    <button id="btn-sel-testeos" onclick="cargarEntreno('testeos')" style="display:none;background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:20px;text-align:left;cursor:pointer;transition:all .15s" onmousedown="this.style.borderColor='var(--red)'">
+      <div style="font-size:18px;margin-bottom:6px">🧪</div>
+      <div style="font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px">Testeos</div>
+      <div style="font-size:12px;color:var(--muted)">Cargá los resultados de tu jornada de testeo</div>
+    </button>
   </div>
   <div style="padding:0 20px">
     <button onclick="volver()" style="width:100%;background:transparent;border:1px solid var(--border);border-radius:12px;padding:12px;font-size:13px;color:var(--muted);font-family:Inter,sans-serif;cursor:pointer">← Volver a la lista</button>
@@ -487,10 +499,12 @@ select.ficha-input option{background:var(--bg2)}
       <button class="dia-tab" id="tab-0" onclick="selDia(0)">Día 1<span class="hoy-badge" id="hoy-0" style="display:none">HOY</span></button>
       <button class="dia-tab" id="tab-1" onclick="selDia(1)">Día 2<span class="hoy-badge" id="hoy-1" style="display:none">HOY</span></button>
       <button class="dia-tab" id="tab-2" onclick="selDia(2)">Día 3<span class="hoy-badge" id="hoy-2" style="display:none">HOY</span></button>
-      <button class="dia-tab" id="tab-3" onclick="selDia(3)">Recovery<span class="hoy-badge" id="hoy-3" style="display:none">HOY</span></button>
+      <button class="dia-tab" id="tab-3" onclick="selDia(3)">Recovery 1<span class="hoy-badge" id="hoy-3" style="display:none">HOY</span></button>
+      <button class="dia-tab" id="tab-4" onclick="selDia(4)">Recovery 2<span class="hoy-badge" id="hoy-4" style="display:none">HOY</span></button>
     </div>
     <div class="dia-tabs" id="tabs-extra" style="display:none"></div>
     <div class="dia-tabs" id="tabs-potencia" style="display:none"></div>
+    <div class="dia-tabs" id="tabs-testeos" style="display:none"></div>
     <div id="banner-potencia" style="display:none;margin:10px 20px 0;padding:10px 12px;background:var(--cel-dim);border:1px solid var(--border2);border-radius:10px;font-size:11px;color:var(--text2);line-height:1.5"></div>
   </div>
 
@@ -564,7 +578,18 @@ select.ficha-input option{background:var(--bg2)}
     <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Zona 2 · trote / bici</div><div class="ej-meta">15 minutos · ritmo conversacional</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="fc-z2" inputmode="numeric"><div class="ej-input-lbl">FC prom</div></div></div>
     <div class="bloque-hdr" style="color:var(--green)">Velocidad</div>
     <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Sprint 200m × 6</div><div class="ej-meta">Recuperación completa entre sprints</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="sprint-200" inputmode="decimal"><div class="ej-input-lbl">mejor seg</div></div></div>
-    <div class="nota-bloque"><div class="nota-title">📋 Planificación · Recovery — Capacidad Aeróbica</div><div class="nota-text">Este día se realizará hasta 2 veces por semana con el propósito de mejorar la capacidad aeróbica y acelerar la recuperación entre sesiones de fuerza máxima.<br><br>⚡ Por decisión conjunta del plantel, uno de los 2 días de recovery semanales se ejecutará como sesión aeróbica activa — zona 2, movilidad y trabajo de hombro preventivo. Sin competir con el propio cuerpo. El que empuja en recovery después paga en el campo.</div></div>
+    <div class="nota-bloque"><div class="nota-title">📋 Planificación · Recovery 1 — Capacidad Aeróbica</div><div class="nota-text">Este día se realizará hasta 2 veces por semana con el propósito de mejorar la capacidad aeróbica y acelerar la recuperación entre sesiones de fuerza máxima. Sesión completa: movilidad, abs, zona 2 y velocidad.</div></div>
+  </div>
+
+  <div id="dia-4" class="dia-content">
+    <div class="bloque-hdr" style="color:var(--green)">Movilidad articular</div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Hombros</div><div class="ej-meta">Trabajo preventivo</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="✓" data-ej="mov-hom-r2" style="width:56px;font-size:20px"><div class="ej-input-lbl">ok</div></div></div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Cadera</div><div class="ej-meta">Apertura y flexión</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="✓" data-ej="mov-cad-r2" style="width:56px;font-size:20px"><div class="ej-input-lbl">ok</div></div></div>
+    <div class="bloque-hdr" style="color:var(--green)">Hombro preventivo</div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Manguito rotador — banda</div><div class="ej-meta">2 × 15 liviano</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="✓" data-ej="manguito-r2" style="width:56px;font-size:20px"><div class="ej-input-lbl">ok</div></div></div>
+    <div class="bloque-hdr" style="color:var(--green)">Cardio zona 2 · activo</div>
+    <div class="ej-row"><div class="ej-info"><div class="ej-nombre">Zona 2 · trote / bici</div><div class="ej-meta">15-20 minutos · ritmo conversacional</div></div><div class="ej-input-wrap"><input class="ej-input" placeholder="—" data-ej="fc-z2-r2" inputmode="numeric"><div class="ej-input-lbl">FC prom</div></div></div>
+    <div class="nota-bloque"><div class="nota-title">📋 Planificación · Recovery 2 — Sesión Aeróbica Activa</div><div class="nota-text">⚡ Por decisión conjunta del plantel, este segundo día de recovery semanal se ejecuta como sesión aeróbica activa — zona 2, movilidad y trabajo de hombro preventivo. Sin sprint ni carga de fuerza. Sin competir con el propio cuerpo. El que empuja en recovery después paga en el campo.</div></div>
   </div>
 
   </div><!-- fin entreno-scroll fab -->
@@ -574,6 +599,9 @@ select.ficha-input option{background:var(--bg2)}
 
   <!-- ÁREA SCROLLABLE: ejercicios POTENCIA (macrociclo Sep-Dic) -->
   <div class="entreno-scroll" id="dias-potencia" style="display:none"></div>
+
+  <!-- ÁREA SCROLLABLE: TESTEOS -->
+  <div class="entreno-scroll" id="dias-testeos" style="display:none"></div>
 
   <!-- PARTE FIJA ABAJO: solo botón guardar, nota aparece después -->
   <div class="entreno-bottom">
@@ -595,6 +623,16 @@ select.ficha-input option{background:var(--bg2)}
   </div>
 
   <div style="flex:1;overflow-y:auto;padding:20px 20px 120px">
+
+    <!-- Tipo de entrenamiento -->
+    <div style="margin-bottom:20px">
+      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">¿Qué tipo de entrenamiento hiciste?</div>
+      <div style="display:flex;gap:8px" id="tipo-btns">
+        <button onclick="selTipo(this,'Hibrido')" class="tipo-btn" style="flex:1;padding:14px 4px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">Hibrido</button>
+        <button onclick="selTipo(this,'Recovery')" class="tipo-btn" style="flex:1;padding:14px 4px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">Recovery</button>
+        <button onclick="selTipo(this,'Completo')" class="tipo-btn" style="flex:1;padding:14px 4px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">Completo</button>
+      </div>
+    </div>
 
     <!-- Estado físico -->
     <div style="margin-bottom:20px">
@@ -753,20 +791,24 @@ function mostrarTabsFAB() {
   document.getElementById('tabs-fab').style.display = 'flex';
   document.getElementById('tabs-extra').style.display = 'none';
   document.getElementById('tabs-potencia').style.display = 'none';
+  document.getElementById('tabs-testeos').style.display = 'none';
   document.getElementById('banner-potencia').style.display = 'none';
   document.getElementById('dias-fab').style.display = 'block';
   document.getElementById('dias-extra').style.display = 'none';
   document.getElementById('dias-potencia').style.display = 'none';
+  document.getElementById('dias-testeos').style.display = 'none';
 }
 
 function mostrarTabsExtra(ap) {
   document.getElementById('tabs-fab').style.display = 'none';
   document.getElementById('tabs-extra').style.display = 'flex';
   document.getElementById('tabs-potencia').style.display = 'none';
+  document.getElementById('tabs-testeos').style.display = 'none';
   document.getElementById('banner-potencia').style.display = 'none';
   document.getElementById('dias-fab').style.display = 'none';
   document.getElementById('dias-extra').style.display = 'block';
   document.getElementById('dias-potencia').style.display = 'none';
+  document.getElementById('dias-testeos').style.display = 'none';
 
   // Mostrar días según el atleta
   const diasAtleta = RUTINAS_EXTRA[ap] || [];
@@ -811,6 +853,24 @@ function renderDiaExtra(dia) {
 
 
 // ── MACROCICLO POTENCIA · Sep-Dic 2026 · Contraste Francés / Triphasic (Cal Dietz) ──
+// ── TESTEOS · JORNADAS DE EVALUACIÓN ─────────────────────────────────────────
+// ⚠️ EDITÁ ESTA FECHA con la fecha real de la primera jornada de testeos.
+const TESTEOS_FECHA = '2026-08-31'; // ← poné acá la fecha real (YYYY-MM-DD)
+function getAlertaTesteos() {
+  const hoy = new Date();
+  const fecha = new Date(TESTEOS_FECHA);
+  const dias = Math.ceil((fecha - hoy) / (1000*60*60*24));
+  if (dias < -1) return null; // ya pasó hace más de 1 día, dejamos de mostrar el aviso
+  if (dias === 0) return { label: '¡LOS TESTEOS SON HOY!', fecha: TESTEOS_FECHA };
+  if (dias === 1) return { label: 'LOS TESTEOS SON MAÑANA', fecha: TESTEOS_FECHA };
+  if (dias < 0)   return { label: 'TESTEOS EN CURSO', fecha: TESTEOS_FECHA };
+  if (dias <= 21) {
+    const texto = dias === 7 ? 'QUEDA 1 SEMANA PARA LOS TESTEOS' : `FALTAN ${dias} DÍAS PARA LOS TESTEOS`;
+    return { label: texto, fecha: TESTEOS_FECHA };
+  }
+  return null;
+}
+
 const POTENCIA_INICIO = '2026-09-01'; // Semana 1
 const POTENCIA_FASES = [
   { mes:'Septiembre', tipo:'Fase excéntrica', detalle:'Bajada controlada 4→5→6 seg', pct:'80→87%', descarga:'Semana 4' },
@@ -928,9 +988,11 @@ function mostrarTabsPotencia() {
   document.getElementById('tabs-fab').style.display = 'none';
   document.getElementById('tabs-extra').style.display = 'none';
   document.getElementById('tabs-potencia').style.display = 'flex';
+  document.getElementById('tabs-testeos').style.display = 'none';
   document.getElementById('dias-fab').style.display = 'none';
   document.getElementById('dias-extra').style.display = 'none';
   document.getElementById('dias-potencia').style.display = 'block';
+  document.getElementById('dias-testeos').style.display = 'none';
 
   const tabsEl = document.getElementById('tabs-potencia');
   tabsEl.innerHTML = POTENCIA_DIAS.map((d,i) =>
@@ -949,6 +1011,73 @@ function selDiaPotencia(idx) {
   diaActual = idx;
   document.querySelectorAll('#tabs-potencia .dia-tab').forEach((t,i) => t.classList.toggle('on', i===idx));
   document.querySelectorAll('[id^="dia-pot-"]').forEach((d,i) => d.classList.toggle('on', i===idx));
+  window.scrollTo(0,0);
+}
+
+// ── TESTEOS · 11 tests en 3 jornadas ─────────────────────────────────────────
+const TESTEOS_DIAS = [
+  { label:'Gym', bloques:[
+    { nombre:'FUERZA MÁXIMA', ejercicios:[
+      {nombre:'Sentadilla 1RM', series:'test', id:'test-sent-1rm', unidad:'kg'},
+      {nombre:'Peso muerto 1RM', series:'test', id:'test-pm-1rm', unidad:'kg'},
+      {nombre:'Press banca 1RM', series:'test', id:'test-press-1rm', unidad:'kg'},
+    ]},
+    { nombre:'FUERZA DE AGARRE', ejercicios:[
+      {nombre:'Grip strength (mano derecha)', series:'test', id:'test-grip-der', unidad:'kg'},
+      {nombre:'Grip strength (mano izquierda)', series:'test', id:'test-grip-izq', unidad:'kg'},
+    ]},
+  ]},
+  { label:'Campo', bloques:[
+    { nombre:'VELOCIDAD', ejercicios:[
+      {nombre:'Sprint 30m', series:'test', id:'test-sprint-30', unidad:'seg'},
+      {nombre:'Sprint 60 yardas', series:'test', id:'test-sprint-60y', unidad:'seg'},
+    ]},
+    { nombre:'SALTO Y ELASTICIDAD', ejercicios:[
+      {nombre:'CMJ (Countermovement Jump)', series:'test', id:'test-cmj', unidad:'cm'},
+      {nombre:'SJ (Squat Jump)', series:'test', id:'test-sj', unidad:'cm'},
+      {nombre:'Drop Jump (RSI)', series:'test', id:'test-rsi', unidad:'✓'},
+    ]},
+    { nombre:'ESPECÍFICOS DE BÉISBOL', ejercicios:[
+      {nombre:'Bat speed', series:'test', id:'test-bat-speed', unidad:'✓'},
+      {nombre:'Velocidad de lanzamiento', series:'test', id:'test-vel-lanz', unidad:'✓'},
+    ]},
+  ]},
+  { label:'Especialistas', bloques:[
+    { nombre:'FISIOLÓGICO', ejercicios:[
+      {nombre:'Lactato', series:'test', id:'test-lactato', unidad:'✓'},
+    ]},
+    { nombre:'VISUAL', ejercicios:[
+      {nombre:'Visión deportiva', series:'test', id:'test-vision', unidad:'✓'},
+    ]},
+  ]},
+];
+
+function mostrarTabsTesteos() {
+  document.getElementById('tabs-fab').style.display = 'none';
+  document.getElementById('tabs-extra').style.display = 'none';
+  document.getElementById('tabs-potencia').style.display = 'none';
+  document.getElementById('tabs-testeos').style.display = 'flex';
+  document.getElementById('banner-potencia').style.display = 'none';
+  document.getElementById('dias-fab').style.display = 'none';
+  document.getElementById('dias-extra').style.display = 'none';
+  document.getElementById('dias-potencia').style.display = 'none';
+  document.getElementById('dias-testeos').style.display = 'block';
+
+  const tabsEl = document.getElementById('tabs-testeos');
+  tabsEl.innerHTML = TESTEOS_DIAS.map((d,i) =>
+    `<button class="dia-tab ${i===0?'on':''}" onclick="selDiaTesteos(${i})">${d.label}</button>`
+  ).join('');
+
+  const diasEl = document.getElementById('dias-testeos');
+  diasEl.innerHTML = TESTEOS_DIAS.map((d,i) =>
+    `<div id="dia-test-${i}" class="dia-content ${i===0?'on':''}">${renderDiaExtra(d)}</div>`
+  ).join('');
+}
+
+function selDiaTesteos(idx) {
+  diaActual = idx;
+  document.querySelectorAll('#tabs-testeos .dia-tab').forEach((t,i) => t.classList.toggle('on', i===idx));
+  document.querySelectorAll('[id^="dia-test-"]').forEach((d,i) => d.classList.toggle('on', i===idx));
   window.scrollTo(0,0);
 }
 
@@ -1350,10 +1479,11 @@ async function entrar(ap) {
   atletaActual = ATLETAS.find(a => a.ap === ap);
   if (!atletaActual) return;
 
-  // Siempre mostramos el selector (FAB / Mi entrenador / Potencia) — Potencia se puede repasar aunque todavía no haya arrancado
+  // Siempre mostramos el selector (FAB / Mi entrenador / Potencia / Testeos)
   document.getElementById('sel-nombre').textContent = atletaActual.ap.toUpperCase() + ', ' + atletaActual.nom;
   document.getElementById('sel-profe').textContent = ATLETAS_EXTRA[ap] ? ATLETAS_EXTRA[ap].profe : 'Rutina personalizada';
   document.getElementById('btn-sel-potencia').style.display = 'block';
+  document.getElementById('btn-sel-testeos').style.display = 'block';
   showScreen('s-selector');
 }
 
@@ -1370,6 +1500,8 @@ async function cargarEntreno(tipo) {
     mostrarTabsExtra(atletaActual.ap);
   } else if (tipo === 'potencia') {
     mostrarTabsPotencia();
+  } else if (tipo === 'testeos') {
+    mostrarTabsTesteos();
   } else {
     mostrarTabsFAB();
   }
@@ -1377,7 +1509,7 @@ async function cargarEntreno(tipo) {
   // Detectar día de hoy para FAB
   if (tipo === 'fab') {
     const diaHoy = diaDeHoy();
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 5; i++) {
       const hoyEl = document.getElementById('hoy-' + i);
       if (hoyEl) hoyEl.style.display = (i === diaHoy) ? 'block' : 'none';
     }
@@ -1412,7 +1544,7 @@ async function cargarEntreno(tipo) {
       const faseEl = document.getElementById('h-fecha');
       if (faseEl) {
         const sesRestantes = Math.max(0, 16 - resumen.total);
-        const nota = ATLETAS_EXTRA[ap]
+        const nota = ATLETAS_EXTRA[atletaActual.ap]
           ? `${fechaHoy()} · ${resumen.total}/16 sesiones · ${sesRestantes} restantes hasta el 27 ago`
           : `${fechaHoy()} · ${resumen.total}/16 sesiones`;
         faseEl.textContent = nota;
@@ -1433,7 +1565,7 @@ function selDia(idx) {
 async function guardarSesion() {
   if (!atletaActual) return;
 
-  const diaNames = ['Día 1 · Empuje', 'Día 2 · Tracción', 'Día 3 · Sarcoplasmática', 'Recovery'];
+  const diaNames = ['Día 1 · Empuje', 'Día 2 · Tracción', 'Día 3 · Sarcoplasmática', 'Recovery 1', 'Recovery 2'];
   const fecha = new Date().toLocaleDateString('es-AR');
   const hora  = new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'});
 
@@ -1443,6 +1575,8 @@ async function guardarSesion() {
     diaEl = document.getElementById('dia-extra-' + diaActual);
   } else if (rutinaActual === 'potencia') {
     diaEl = document.getElementById('dia-pot-' + diaActual);
+  } else if (rutinaActual === 'testeos') {
+    diaEl = document.getElementById('dia-test-' + diaActual);
   } else {
     diaEl = document.getElementById('dia-' + diaActual);
   }
@@ -1457,6 +1591,7 @@ async function guardarSesion() {
   const reporte = {
     estado: estadoActual || '—',
     rpe:    rpeActual    || '—',
+    tipo:   tipoActual   || '—',
     nota:   notaLibre    || '—',
   };
 
@@ -1464,6 +1599,8 @@ async function guardarSesion() {
     ? `Mi entrenador · Día ${diaActual+1}`
     : rutinaActual === 'potencia'
     ? `Potencia · ${POTENCIA_DIAS[diaActual].label}`
+    : rutinaActual === 'testeos'
+    ? `Testeos · ${TESTEOS_DIAS[diaActual].label}`
     : diaNames[diaActual];
 
   const datos = {
@@ -1491,9 +1628,9 @@ async function guardarSesion() {
     fetch(GOOGLE_SCRIPT_URL + '?' + params.toString(), {method:'GET', mode:'no-cors'}).catch(()=>{});
   }
 
-  estadoActual = ''; rpeActual = '';
+  estadoActual = ''; rpeActual = ''; tipoActual = '';
   if (document.getElementById('nota-libre')) document.getElementById('nota-libre').value = '';
-  document.querySelectorAll('.estado-btn,.rpe-btn').forEach(b => {
+  document.querySelectorAll('.estado-btn,.rpe-btn,.tipo-btn').forEach(b => {
     b.style.background='transparent'; b.style.color='var(--text2)'; b.style.borderColor='var(--border)';
   });
 
@@ -1523,11 +1660,13 @@ function volver() {
 
 function mostrarNota() {
   if (!atletaActual) return;
-  const diaNames = ['Día 1 · Empuje', 'Día 2 · Tracción', 'Día 3 · Sarcoplasmática', 'Recovery'];
+  const diaNames = ['Día 1 · Empuje', 'Día 2 · Tracción', 'Día 3 · Sarcoplasmática', 'Recovery 1', 'Recovery 2'];
   const label = rutinaActual === 'extra'
     ? `Mi entrenador · Día ${diaActual+1}`
     : rutinaActual === 'potencia'
     ? `Potencia · ${POTENCIA_DIAS[diaActual].label}`
+    : rutinaActual === 'testeos'
+    ? `Testeos · ${TESTEOS_DIAS[diaActual].label}`
     : diaNames[diaActual];
   const info = document.getElementById('nota-atleta-info');
   if (info) info.textContent = `${atletaActual.ap} · ${label}`;
@@ -1537,6 +1676,7 @@ function mostrarNota() {
 
 let estadoActual = '';
 let rpeActual = '';
+let tipoActual = '';
 
 function selEstado(btn, val) {
   estadoActual = val;
@@ -1560,6 +1700,18 @@ function selRpe(btn, val) {
   btn.style.background = 'var(--amber-bg)';
   btn.style.color = 'var(--amber)';
   btn.style.borderColor = 'var(--amber)';
+}
+
+function selTipo(btn, val) {
+  tipoActual = val;
+  document.querySelectorAll('.tipo-btn').forEach(b => {
+    b.style.background = 'transparent';
+    b.style.color = 'var(--text2)';
+    b.style.borderColor = 'var(--border)';
+  });
+  btn.style.background = 'var(--cel-dim)';
+  btn.style.color = 'var(--cel)';
+  btn.style.borderColor = 'var(--cel)';
 }
 
 
@@ -1653,6 +1805,20 @@ renderAtletas([], "");
       tag.textContent = alertaPot.enCurso ? '⚡ MACROCICLO POTENCIA · EN CURSO' : '⚡ MACROCICLO POTENCIA · PRÓXIMAMENTE';
       lbl.textContent = alertaPot.label;
       msg.textContent = alertaPot.msg;
+    }
+  }
+
+  // Aviso grande de Testeos
+  const alertaTest = getAlertaTesteos();
+  if (alertaTest) {
+    const el  = document.getElementById('alerta-testeos');
+    const lbl = document.getElementById('alerta-testeos-label');
+    const fec = document.getElementById('alerta-testeos-fecha');
+    if (el) {
+      el.style.display = 'block';
+      lbl.textContent = alertaTest.label;
+      const fechaFmt = new Date(alertaTest.fecha + 'T00:00:00').toLocaleDateString('es-AR', {weekday:'long', day:'numeric', month:'long'});
+      fec.textContent = fechaFmt;
     }
   }
 })();
