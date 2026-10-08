@@ -386,7 +386,7 @@ window._fbFichas = (callback) => {
       <div id="fb-alertas" style="color:var(--muted);font-size:13px">Conectando...</div>
     </div>
     <div class="metrics">
-      <div class="metric"><div class="metric-val" id="m-nomina">39</div><div class="metric-lbl">Atletas en nómina</div><div class="metric-note" style="color:var(--muted)">pre-temporada 2026</div></div>
+      <div class="metric"><div class="metric-val" id="m-nomina">40</div><div class="metric-lbl">Atletas en nómina</div><div class="metric-note" style="color:var(--muted)">pre-temporada 2026</div></div>
       <div class="metric"><div class="metric-val c-cel" id="m-ses-hechas">—</div><div class="metric-lbl">Sesiones realizadas</div><div class="metric-note" style="color:var(--muted)">7 jul → 27 ago</div></div>
       <div class="metric"><div class="metric-val c-amber" id="dash-dias-resto">20</div><div class="metric-lbl">Días al fin</div><div class="metric-note" style="color:var(--muted)">Pre-temporada · 27 ago</div></div>
     </div>
@@ -1298,6 +1298,7 @@ const ATLETAS=[
   {ap:"Gimenez",       nom:"Carlos (DT)",   prov:"",pos:"DT",asist:0,num:22,altura:180,peso:92, pesoIdeal:89.0},
   {ap:"Borras",         nom:"Juan",          prov:"Córdoba",pos:"",asist:0,num:0,altura:0,  peso:0,  pesoIdeal:0},
   {ap:"Cukierman",      nom:"Mariano (PC)",  prov:"",pos:"Pitching Coach",asist:0,num:0,altura:0,peso:0,pesoIdeal:0},
+  {ap:"Galindo",         nom:"Álvaro",        prov:"",pos:"Pitcher",asist:0,num:0,altura:0,peso:0,pesoIdeal:0},
 ];
 
 // ── DATOS DE TESTS (desde TEST_Bs_As_-_ARGENTINA.xlsx) ────────────────────
@@ -2203,7 +2204,7 @@ function initSeguimiento(){
     // Actualizar métricas
     document.getElementById('m-activos')   && (document.getElementById('m-activos').textContent   = activosSemana.size);
     document.getElementById('m-inactivos') && (document.getElementById('m-inactivos').textContent = inactivos.length);
-    document.getElementById('m-hoy-n')     && (document.getElementById('m-hoy-n').textContent     = `de 39 atletas · ${perfectos.length} sin faltas`);
+    document.getElementById('m-hoy-n')     && (document.getElementById('m-hoy-n').textContent     = `de ${ATLETAS.length} atletas · ${perfectos.length} sin faltas`);
 
     // Resumen header
     const mResumen = document.getElementById('m-asist-resumen');
