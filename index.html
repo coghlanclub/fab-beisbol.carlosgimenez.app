@@ -185,8 +185,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .btn-back{background:transparent;border:none;color:var(--muted);font-size:22px;cursor:pointer;padding:4px;line-height:1}
 .header-nombre{font-family:var(--display);font-size:28px;color:var(--cel);letter-spacing:2px;text-align:center;flex:1}
 .header-fase{font-size:10px;color:var(--muted);text-align:center;text-transform:uppercase;letter-spacing:.08em;padding:4px 0 14px}
-.dia-tabs{display:flex;border-top:1px solid var(--border)}
-.dia-tab{flex:1;padding:12px 6px;text-align:center;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;background:none;border-left:none;border-right:none;border-top:none;font-family:'Inter',sans-serif}
+.dia-tabs{display:flex;border-top:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch}
+.dia-tab{flex:1;white-space:nowrap;padding:12px 10px;text-align:center;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;background:none;border-left:none;border-right:none;border-top:none;font-family:'Inter',sans-serif}
 .dia-tab.on{color:var(--cel);border-bottom-color:var(--cel)}
 
 /* DÍA HOY badge */
@@ -722,6 +722,7 @@ const ATLETAS = [
   {ap:"Contreras",    nom:"Emilio",       pressMax:"—",  sentMax:"—",   pmMax:"—"},
   {ap:"Gimenez",      nom:"Carlos (DT)",  pressMax:"—",  sentMax:"—",   pmMax:"—"},
   {ap:"Borras",       nom:"Juan",         pressMax:"—",  sentMax:"—",   pmMax:"—"},
+  {ap:"Galindo",      nom:"Álvaro",       pressMax:"—",  sentMax:"—",   pmMax:"—"},
   {ap:"Cukierman",    nom:"Mariano (PC)", pressMax:"—",  sentMax:"—",   pmMax:"—"},
 ];
 
@@ -821,6 +822,116 @@ function mostrarTabsExtra(ap) {
   diasEl.innerHTML = diasAtleta.map((d,i) =>
     `<div id="dia-extra-${i}" class="dia-content ${i===0?'on':''}">${renderDiaExtra(d)}</div>`
   ).join('');
+
+  // Alvaro: panel "Esta semana soy: Abridor / Relevista" arriba de los días
+  if (ap === 'Galindo') {
+    cargarPlanSemana();
+    diasEl.insertAdjacentHTML('afterbegin',
+      '<div id="plan-semana-alvaro" style="margin:12px 20px 0;padding:14px;border:1px solid var(--border2);border-radius:12px;background:var(--bg2)"></div>');
+    renderPlanSemana();
+  }
+}
+
+
+// ── PLAN DE LA SEMANA (Alvaro) · "Esta semana soy: Abridor / Relevista" ──────
+// Jornada 0 = el día que lanzás. Los días de gym remiten a las pestañas Día 1/2/3 de la app.
+const D1_INF='Día 1 · solo tren inferior', D1_SUP='Día 1 · solo tren superior', D1_TODO='Día 1 · completo (inferior + superior)';
+const D2_INF='Día 2 · solo tren inferior', D2_SUP='Día 2 · solo tren superior', D2_TODO='Día 2 · completo (inferior + superior)';
+const D3_A='Día 3 · Acondicionamiento A', D3_B='Día 3 · Acondicionamiento B';
+const PLAN_SEMANA = {
+  abridor: { titulo:'Abridor', variantes:[
+    { id:'7', nombre:'Rotación de 7 días', filas:[
+      ['J0','Lanzás el partido', D3_A+' (post-partido)'],
+      ['J1','Tolerancia', D1_INF],
+      ['J2','Flat ground', D1_SUP],
+      ['J3','Tolerancia', D3_B],
+      ['J4','Bullpen', D2_INF+', o '+D2_TODO+' (post-bullpen)'],
+      ['J5','Tolerancia', D2_SUP+', o '+D3_A],
+      ['J6','Flat ground liviano','Descanso'],
+    ]},
+    { id:'6', nombre:'Rotación de 6 días', filas:[
+      ['J0','Lanzás el partido', D3_A+' o '+D1_INF+' (post-partido)'],
+      ['J1','Tolerancia', D1_TODO+', o '+D1_SUP],
+      ['J2','Flat ground liviano', D3_B],
+      ['J3','Bullpen', D2_INF+', o '+D2_TODO+' (post-bullpen)'],
+      ['J4','Tolerancia', D2_SUP+', o '+D3_A],
+      ['J5','Flat ground liviano','Descanso'],
+    ]},
+    { id:'5', nombre:'Rotación de 5 días', filas:[
+      ['J0','Lanzás el partido', D3_A+' o '+D1_INF+' (post-partido)'],
+      ['J1','Tolerancia', D1_TODO+', o '+D1_SUP],
+      ['J2','Bullpen', D3_B+' (post-bullpen)'],
+      ['J3','Tolerancia','Día 2 liviano (inferior + superior, menos series)'],
+      ['J4','Flat ground liviano','Descanso'],
+    ]},
+  ]},
+  relevista: { titulo:'Relevista', variantes:[
+    { id:'medio', nombre:'Medio (lanzás cada ~3 días)', filas:[
+      ['J0','Tolerancia pre-partido · lanzás 3-4 innings', D3_A+' (post-partido)'],
+      ['J1','Tolerancia', D1_TODO],
+      ['J2','Flat ground / bullpen liviano de 15 lanzamientos', D3_B+' (pre-partido)'],
+      ['J3','Tolerancia · no lanzaste','Descanso'],
+      ['J4','Tolerancia pre-partido · lanzás 1-2 innings', D3_A+' (post-partido)'],
+      ['J5','Tolerancia', D2_TODO],
+      ['J6','Flat ground / bullpen liviano de 15 lanzamientos', D3_B+' (pre-partido)'],
+    ]},
+    { id:'cierre', nombre:'Cierre (lanzás cada ~2 días)', filas:[
+      ['J0','Tolerancia pre-partido · lanzás 1-2 innings', D1_TODO+' (post-partido)'],
+      ['J1','Tolerancia', D3_A],
+      ['J2','Tolerancia · no lanzaste','Descanso'],
+      ['J3','Tolerancia pre-partido · lanzás 1 inning', D2_INF+' (post-partido)'],
+      ['J4','Tolerancia', D3_B],
+      ['J5','Tolerancia pre-partido · lanzás 1 inning', D2_SUP+' (post-partido)'],
+      ['J6','Tolerancia', D3_A],
+    ]},
+  ]},
+};
+let planSemana = { rol:null, variante:null };
+function claveSemana() {
+  const d = new Date(); const dow = (d.getDay()+6)%7; d.setDate(d.getDate()-dow);
+  return d.toISOString().slice(0,10); // lunes de esta semana
+}
+function cargarPlanSemana() {
+  try {
+    const g = JSON.parse(localStorage.getItem('alvaro-plan-semana') || 'null');
+    if (g && g.semana === claveSemana()) planSemana = { rol:g.rol, variante:g.variante };
+    else planSemana = { rol:null, variante:null };
+  } catch(e) { planSemana = { rol:null, variante:null }; }
+}
+function guardarPlanSemana() {
+  try { localStorage.setItem('alvaro-plan-semana', JSON.stringify({ semana:claveSemana(), rol:planSemana.rol, variante:planSemana.variante })); } catch(e) {}
+}
+function selRolSemana(rol) {
+  planSemana = { rol, variante: PLAN_SEMANA[rol].variantes[0].id };
+  guardarPlanSemana(); renderPlanSemana();
+}
+function selVarSemana(id) { planSemana.variante = id; guardarPlanSemana(); renderPlanSemana(); }
+function btnPlan(activo, onclick, texto) {
+  const st = activo
+    ? 'background:var(--cel-dim);color:var(--cel);border:1px solid var(--cel)'
+    : 'background:transparent;color:var(--text2);border:1px solid var(--border)';
+  return `<button onclick="${onclick}" style="flex:1;padding:10px 6px;border-radius:10px;font-size:12px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;${st}">${texto}</button>`;
+}
+function renderPlanSemana() {
+  const el = document.getElementById('plan-semana-alvaro');
+  if (!el) return;
+  let html = `<div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Esta semana soy</div>
+    <div style="display:flex;gap:8px;margin-bottom:8px">${btnPlan(planSemana.rol==='abridor',"selRolSemana('abridor')",'Abridor')}${btnPlan(planSemana.rol==='relevista',"selRolSemana('relevista')",'Relevista')}</div>`;
+  if (!planSemana.rol) {
+    html += `<div style="font-size:12px;color:var(--text2);line-height:1.5">Elegí cómo lanzás esta semana y te muestro qué día de gym te toca después de cada jornada.</div>`;
+  } else {
+    const rol = PLAN_SEMANA[planSemana.rol];
+    const v = rol.variantes.find(x => x.id === planSemana.variante) || rol.variantes[0];
+    html += `<div style="display:flex;gap:6px;margin-bottom:10px">${rol.variantes.map(x => btnPlan(x.id===v.id,`selVarSemana('${x.id}')`,x.nombre)).join('')}</div>
+      <div style="display:grid;grid-template-columns:34px 1fr 1.2fr;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:10px;overflow:hidden;font-size:11px;line-height:1.35">
+        <div style="background:var(--bg3);padding:6px;color:var(--muted);font-weight:600">J</div>
+        <div style="background:var(--bg3);padding:6px;color:var(--muted);font-weight:600">Lanzamiento</div>
+        <div style="background:var(--bg3);padding:6px;color:var(--muted);font-weight:600">Gym (pestaña de la app)</div>
+        ${v.filas.map(f => `<div style="background:var(--bg2);padding:6px;color:var(--cel);font-weight:700">${f[0]}</div><div style="background:var(--bg2);padding:6px;color:var(--text2)">${f[1]}</div><div style="background:var(--bg2);padding:6px;color:var(--white)">${f[2]}</div>`).join('')}
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-top:8px;line-height:1.5">J0 = el día que lanzás. Si el brazo no está listo para un bullpen liviano, no lo hagas; si tenés que cortar series, cortá. En competencia: sin fallo y ~85-90% del peso habitual.</div>`;
+  }
+  el.innerHTML = html;
 }
 
 function selDiaExtra(idx, btn) {
@@ -1238,7 +1349,111 @@ const RUTINAS_EXTRA = {
     ]},
   ],
 
+  'Galindo': [
+    { label:'Día 1', bloques:[
+      { nombre:'ENTRADA EN CALOR', ejercicios:[
+        {nombre:'Foam roll, entrada en calor dinámica y prehab/correctivos propios',series:'',id:'alv-mov-1',unidad:'✓'},
+      ]},
+      { nombre:'TREN INFERIOR A', nota:'Sin llegar al fallo. Usá ~85-90% del peso habitual para ese rango de reps', ejercicios:[
+        {nombre:'A · Sentadilla frontal',series:'hasta 2 series de 5-8 reps',id:'alv-sentfront-1',unidad:'kg',nota:'Alternativas: sentadilla en cajón con safety bar, sentadilla buffalo bar en cajón, sentadilla con cinturón'},
+        {nombre:'B · Arrastre de trineo lateral (10-15 yardas)',series:'2 series de 6-8 por lado',id:'alv-trineo-1',unidad:'kg',nota:'Alternativas: zancada lateral goblet, paso cruzado'},
+        {nombre:'C · Peso muerto rumano con barra',series:'2 series de 6-8 reps',id:'alv-pmr-1',unidad:'kg',nota:'Alternativas: elevación glúteo-isquio natural, reverse hyper (15-20 reps)'},
+        {nombre:'D · Caminata monster con banda (10 yardas)',series:'2 series de 12-15 reps',id:'alv-monster-1',unidad:'reps',nota:'Alternativas: clamshell sentado con banda, pull-through en polea'},
+        {nombre:'E · Plancha frontal con peso',series:'2 series de 8-12 reps o 30 seg',id:'alv-plancha-1',unidad:'seg',nota:'Alternativas: bodysaw en valslide'},
+        {nombre:'F · Plancha lateral (variantes)',series:'2 series de 8-12 reps o 30 seg',id:'alv-planchalat-1',unidad:'seg',nota:'Alternativas: flexión lateral con mancuerna'},
+      ]},
+      { nombre:'TREN SUPERIOR A', nota:'Sin llegar al fallo. Usá ~85-90% del peso habitual para ese rango de reps', ejercicios:[
+        {nombre:'A1 · Remo con mancuerna apoyado en el pecho',series:'2 series de 6-10 reps',id:'alv-remo-1',unidad:'kg',nota:'Alternativas: remo invertido con blast strap, remo TRX a 1 brazo'},
+        {nombre:'A2 · Press de banco con mancuernas, agarre neutro',series:'2 series de 5-8 reps',id:'alv-pressb-1',unidad:'kg',nota:'Alternativas: flexión con peso agarre neutro, press con mancuernas esfuerzo dinámico'},
+        {nombre:'B1 · Press inclinado a 1 brazo con mancuerna',series:'2 series de 8-10 reps',id:'alv-pinc-1',unidad:'kg',nota:'Alternativas: press landmine medio arrodillado, press inclinado alternado'},
+        {nombre:'B2 · Jalón a 1 brazo medio arrodillado',series:'2 series de 10-12 reps',id:'alv-jalon-1',unidad:'kg',nota:'Alternativas: face pull a 1 brazo con rotación externa'},
+        {nombre:'C · YTL inclinado',series:'2-3 series de 15 reps totales',id:'alv-ytl-1',unidad:'reps',nota:'Alternativas: YTL prono a 1 brazo'},
+        {nombre:'D · No-money supino con banda (manguito)',series:'2-3 series de 8-12 reps',id:'alv-nomoney-1',unidad:'reps',nota:'Alternativas: caminata en pared con banda, waiter walk con kettlebell bottoms-up'},
+      ]},
+    ]},
+    { label:'Día 2', bloques:[
+      { nombre:'ENTRADA EN CALOR', ejercicios:[
+        {nombre:'Foam roll, entrada en calor dinámica y prehab/correctivos propios',series:'',id:'alv-mov-2',unidad:'✓'},
+      ]},
+      { nombre:'TREN INFERIOR B', nota:'Sin llegar al fallo. Usá ~85-90% del peso habitual para ese rango de reps', ejercicios:[
+        {nombre:'A · Peso muerto con trap bar',series:'hasta 2-3 series de 5-8 reps',id:'alv-trap-2',unidad:'kg',nota:'Alternativas: peso muerto con barra (doble agarre), tirón desde rack agarre snatch, hip thrust con isométrico'},
+        {nombre:'B · Zancada reversa con barra, agarre frontal',series:'2 series de 5-8 por lado',id:'alv-zancada-2',unidad:'kg',nota:'Alternativas: búlgara con agarre frontal, step-up a cajón paralelo'},
+        {nombre:'C · Curl de isquios con pelota suiza',series:'2 series de 8-12 por lado',id:'alv-curlisq-2',unidad:'reps',nota:'Alternativas: curl en valslide, peso muerto a 1 pierna'},
+        {nombre:'D · Caminata monster con banda (10 yardas)',series:'2 series de 15-20 reps',id:'alv-monster-2',unidad:'reps',nota:'Alternativas: pull-through en polea, clamshell sentado con banda'},
+        {nombre:'E · Plancha frontal con peso',series:'2 series de 8-12 reps o 30 seg',id:'alv-plancha-2',unidad:'seg',nota:'Alternativas: bodysaw en valslide, rollout con pelota'},
+        {nombre:'F · Landmine con rotación de cadera',series:'2 series de 8-12 por lado',id:'alv-landmine-2',unidad:'kg',nota:'Alternativas: chops en polea medio arrodillado'},
+      ]},
+      { nombre:'TREN SUPERIOR B', nota:'Sin llegar al fallo. Usá ~85-90% del peso habitual para ese rango de reps', ejercicios:[
+        {nombre:'A1 · Remo a 1 brazo con mancuerna',series:'2-3 series de 8-12 reps',id:'alv-remo-2',unidad:'kg',nota:'Alternativas: remo compuesto en polea a 1 brazo, remo en polea medio arrodillado'},
+        {nombre:'A2 · Flexión con banda, agarre neutro',series:'2-3 series de 6-8 reps',id:'alv-flexb-2',unidad:'reps',nota:'Alternativas: press a 1 brazo con mancuerna'},
+        {nombre:'B1 · Flexión con mancuerna offset y toque',series:'2 series de 8-12 reps totales',id:'alv-flexoff-2',unidad:'reps',nota:'Alternativas: flexión yoga, flexión a 1 brazo con apoyo'},
+        {nombre:'B2 · Pulldown de brazos rectos arrodillado',series:'2 series de 10-12 reps',id:'alv-pulldown-2',unidad:'kg',nota:'Alternativas: pullover con banda supino'},
+        {nombre:'C · TRX Y',series:'2 series de 15 reps totales',id:'alv-trxy-2',unidad:'reps',nota:'Alternativas: vuelo posterior en 3 vías'},
+        {nombre:'D · Limpiaparabrisas en pared (manguito)',series:'2-3 series de 8-12 reps o 15 seg',id:'alv-wiper-2',unidad:'reps',nota:'Alternativas: estabilizaciones rítmicas, carry overhead con kettlebell bottoms-up'},
+      ]},
+    ]},
+    { label:'Día 3', bloques:[
+      { nombre:'ENTRADA EN CALOR', ejercicios:[
+        {nombre:'Foam roll, entrada en calor dinámica y prehab/correctivos propios',series:'',id:'alv-mov-3',unidad:'✓'},
+      ]},
+      { nombre:'ACONDICIONAMIENTO A · intensidad moderada', nota:'Tempo run: 100 m al 70%, volver caminando hasta la línea de 20 yardas', ejercicios:[
+        {nombre:'Intervalos 20 seg on / 20 seg off al ~70% del esfuerzo',series:'12-16 repeticiones',id:'alv-acondA-3',unidad:'✓',nota:'Alternativas: skaters en slideboard, bici fija, remo / elíptico / cinta'},
+      ]},
+      { nombre:'ACONDICIONAMIENTO B · velocidad / potencia', nota:'Si ya hacés acondicionamiento con el equipo, seguí lo del equipo y no agregues', ejercicios:[
+        {nombre:'Arrastre de trineo pesado: 8 seg a máximo esfuerzo, 52 seg de descanso',series:'8 repeticiones (sumar 1 por semana hasta 12 y volver a empezar)',id:'alv-acondB-3',unidad:'✓',nota:'Alternativas: sprints en cuesta suave, saltos con mancuernas (5×8) o saltos laterales alternados (5×10)'},
+      ]},
+    ]},
+  ],
   'Riello': [
+    { label:'Nuevo Día 1', bloques:[
+      { nombre:'ENTRADA EN CALOR', ejercicios:[
+        {nombre:'Movilidad y activación de core y cintura escapular',series:'',id:'kn-mov-1',unidad:'✓'},
+      ]},
+      { nombre:'RUTINA · RIR 1-2', nota:'Buscas velocidad y explosividad en los balísticos, DLO y saltos. En accesorios y básicos RIR 1-2', ejercicios:[
+        {nombre:'1A · Sentadilla (grábate)',series:'3x3 120k / en base a la sesión anterior te digo',id:'kn-sq-1',unidad:'kg'},
+        {nombre:'1B · Press plano con mancuernas (un recorrido completo bajando todo lo que puedas) (grábate)',series:'4x8 / en base a la sesión anterior te digo',id:'kn-pb-1',unidad:'kg'},
+        {nombre:'2B · Remo con mancuernas acostado en banco inclinado',series:'4x8 / 3x10 / 3x12 / 3x12-15 / 3x8-10 (más pesado)',id:'kn-remo-1',unidad:'kg'},
+        {nombre:'1C · Peso muerto rumano (grábate)',series:'3x8 (con el peso de la semana pasada) / en base a la sesión anterior te digo',id:'kn-pmr-1',unidad:'kg'},
+        {nombre:'2C · Tríceps tras nuca con polea baja (soga) a 1 brazo',series:'3x10 p/l / 3x12 p/l / 3x8 p/l / 4x8 p/l / 3x8-10 p/l',id:'kn-tri-1',unidad:'kg'},
+        {nombre:'1D · Vuelos laterales completos',series:'3x8 / 3x10 / 4x10 / 3x12 / 3x12-15',id:'kn-vuelos-1',unidad:'kg'},
+        {nombre:'2D · Remo en estocada con polea alta',series:'3x8 p/l / 4x8 p/l / 3x10 p/l / 3x12 p/l / 3x8 p/l (más pesado)',id:'kn-remoest-1',unidad:'kg'},
+      ]},
+    ]},
+    { label:'Nuevo Día 2', bloques:[
+      { nombre:'ENTRADA EN CALOR', ejercicios:[
+        {nombre:'Movilidad y activación de core y cintura escapular',series:'',id:'kn-mov-2',unidad:'✓'},
+      ]},
+      { nombre:'PLIOMETRÍA', ejercicios:[
+        {nombre:'Drop a 1 pierna (desde 10-15 cm) y saltos pasando 3 conos + salto horizontal a 1 pierna',series:'5x1 p/l / 3x2 p/l / 4x2 p/l / 5x2 p/l / 3x3 p/l',id:'kn-plio-2',unidad:'reps'},
+      ]},
+      { nombre:'DLO', ejercicios:[
+        {nombre:'Hang clean',series:'5x1 60k / 2x2 60k / 4x2 60k / 2x3 60k / 3x3 60k',id:'kn-hangclean-2',unidad:'kg'},
+      ]},
+      { nombre:'RUTINA · RIR 1-2', nota:'Buscas velocidad y explosividad en los balísticos, DLO y saltos. En accesorios y básicos RIR 1-2', ejercicios:[
+        {nombre:'1A · Peso muerto con trap bar (barras para arriba; si molesta la espalda podés subir la altura de los discos)',series:'3x4 135k / 4x4 135k / 1-2-3 142.5k / 3x3 142.5k / 1-2-3 150k',id:'kn-trap-2',unidad:'kg'},
+        {nombre:'1B · Fondos en paralelas (grábate)',series:'3x5-8 / en base a la sesión anterior te digo',id:'kn-fondos-2',unidad:'reps'},
+        {nombre:'2B · Remo en TRX con pies en cajón',series:'3x6-8 / 4x6-8 / 3x10 / 3x6 (más pesado) / 3x6-8',id:'kn-trx-2',unidad:'reps'},
+        {nombre:'1C · Press plano con barra cadencia 3-2-1',series:'3x5 70% / 3x3 75% / 3x4 75% / 4x4 75% / 3x5 75%',id:'kn-pbbarra-2',unidad:'kg'},
+        {nombre:'2C · Press paloff con rotación + medicine ball abrazada',series:'3x4 p/l / 4x4 p/l / 3x5 p/l / 4x5 p/l / 3x6 p/l',id:'kn-paloff-2',unidad:'kg'},
+        {nombre:'1D · Estocadas en el lugar con déficit (2 a 5 cm)',series:'4x4 p/l / 3x5 p/l / 3x6 p/l / 4x6 p/l / 3x8 p/l',id:'kn-estocada-2',unidad:'kg'},
+      ]},
+    ]},
+    { label:'Nuevo Día 3', bloques:[
+      { nombre:'ENTRADA EN CALOR', ejercicios:[
+        {nombre:'Movilidad y activación de core y cintura escapular',series:'',id:'kn-mov-3',unidad:'✓'},
+      ]},
+      { nombre:'DLO', ejercicios:[
+        {nombre:'Hang snatch',series:'3x2 45k / 4x2 45k / 2x3 45k / 3x1 50k / en base a la sesión anterior te digo',id:'kn-hangsnatch-3',unidad:'kg'},
+      ]},
+      { nombre:'RUTINA · RIR 1-2', nota:'Buscas velocidad y explosividad en los balísticos, DLO y saltos. En accesorios y básicos RIR 1-2', ejercicios:[
+        {nombre:'1A · Pistolas al banco (fémur casi paralelo al piso) con peso',series:'3x4 p/l / 3x5 p/l / 2x6 p/l / 3x3 p/l (más pesado) / 3x4 p/l',id:'kn-pistola-3',unidad:'kg'},
+        {nombre:'2A · Drop jump desde banco de 40-50 cm',series:'3x2 p/l / 3x3 p/l / 2x3 p/l / 3x4 p/l / 3x4 p/l',id:'kn-dropjump-3',unidad:'reps'},
+        {nombre:'1B · Press plano con barra (probar si el rango completo no molesta)',series:'3x2 80% / 3x3 80% / 3-2x4 80% / 3x2 85% / 4x2',id:'kn-pbbarra-3',unidad:'kg'},
+        {nombre:'2B · Lanzamiento horizontal contra la pared con los 2 brazos (ponete cerca para recibir el rebote y volver a tirar rápido)',series:'3x4 / 3x5 / 3x5 / 3x6 / 4x6',id:'kn-lanz-3',unidad:'reps'},
+        {nombre:'1C · Peso muerto a 1 pierna + flexión de pierna (al momento de extender la cadera)',series:'3x4 p/l / 3x5 p/l / 3x6 p/l / 3x4 p/l (más pesado) / 4x4 p/l',id:'kn-pm1p-3',unidad:'kg'},
+        {nombre:'2C · Press cubano acostado',series:'3x8 / 3x10 / 3x12 / 3x6 (más pesado) / 4x6-8',id:'kn-cubano-3',unidad:'kg'},
+      ]},
+    ]},
     { label:'Día 1', bloques:[
       { nombre:'ENTRADA EN CALOR', ejercicios:[
         {nombre:'Movilidad y activación de core y cintura escapular',series:'',id:'kev-mov-1',unidad:'✓'},
@@ -1370,71 +1585,6 @@ const RUTINAS_EXTRA = {
       ]},
     ]},
   ],
-  'Riello': [
-    { label:'Día 1', bloques:[
-      { nombre:'ENTRADA EN CALOR', ejercicios:[
-        {nombre:'Movilidad y activación de core y cintura escapular',series:'',id:'kev-mov-1',unidad:'✓'},
-      ]},
-      { nombre:'PLIOMETRÍA', nota:'Velocidad y explosividad', ejercicios:[
-        {nombre:'Drop jump 40cm + salto al cajón',series:'3×2 p/l → 4×2 → 3×3 → 4×3 → 5×3',id:'kev-dropjump-1',unidad:'reps'},
-        {nombre:'Saltos pogo pasando conos tortuga + salto horizontal',series:'2 pasadas ×3 → ×4 → ×5 / 3 pasadas ×3 → ×4',id:'kev-pogo-1',unidad:'reps'},
-      ]},
-      { nombre:'RUTINA · RIR 1-2', ejercicios:[
-        {nombre:'1A · Sentadilla (cadera por debajo de rodilla)',series:'3×3 100kg → 3×5 → 1-2-3 110kg → 3×3 → 3×4',id:'kev-sq-1',unidad:'kg'},
-        {nombre:'1B · Press inclinado con barra',series:'3×6 → 4×6 → 3×8 → 4×8 → 3×5 (más pesado)',id:'kev-pinc-1',unidad:'kg'},
-        {nombre:'2B · Remo 1 brazo con mancuerna',series:'3×8 p/l → 4×8 → 3×10 → 4×10 → 3×6 (más pesado)',id:'kev-remo1b-1',unidad:'kg'},
-        {nombre:'1C · Tríceps con polea alta',series:'3×10 → 3×12 → 3×8 (más pesado) → 3×8-10 → 3×10-12',id:'kev-tri-1',unidad:'kg'},
-        {nombre:'2C · Dominadas en máquina toma prona',series:'3×10 → 3×12 → 3×8 (más pesado) → 3×8-10 → 3×10-12',id:'kev-dom-1',unidad:'reps'},
-        {nombre:'1D · Vuelos laterales (1 seg. pausa arriba)',series:'4×8 → 3×10 → 3×12 → 3×12-15',id:'kev-vuelat-1',unidad:'kg'},
-        {nombre:'2D · Press paloff con polea',series:'4×5 p/l → 3×6 → 3×8 → 3×10 → 3×6 (más pesado)',id:'kev-paloff-1',unidad:'kg'},
-      ]},
-    ]},
-    { label:'Día 2', bloques:[
-      { nombre:'ENTRADA EN CALOR', ejercicios:[
-        {nombre:'Movilidad y activación de core y cintura escapular',series:'',id:'kev-mov-2',unidad:'✓'},
-      ]},
-      { nombre:'DLO', nota:'Velocidad y explosividad', ejercicios:[
-        {nombre:'DKB ×2 + hang DKB clean (grabate)',series:'3×3 → 4×3 → 3×1 (más pesado)',id:'kev-dkb-2',unidad:'kg'},
-      ]},
-      { nombre:'RUTINA · RIR 1-2', ejercicios:[
-        {nombre:'1A · Press plano con mancuernas',series:'3×8 → 3×10 → 4×10 → 3×6 (más pesado) → 4×6',id:'kev-pb-2',unidad:'kg'},
-        {nombre:'1B · Banco de isquiotibiales 1 pierna',series:'3×8 p/l → 3×10 → 3×12 → 3×8 (más pesado) → 3×8-10',id:'kev-isqui-2',unidad:'kg'},
-        {nombre:'2B · Dominadas en máquina 1 brazo',series:'3×8 p/l → 3×10 → 3×12 → 3×8 (más pesado) → 3×8-10',id:'kev-dom1b-2',unidad:'reps'},
-        {nombre:'1C · Sentadilla cosaco',series:'3×4 p/l → 4×4 → 3×5 → 3×6 → 2×8',id:'kev-cosaco-2',unidad:'reps'},
-        {nombre:'2C · Press militar sentado con mancuernas',series:'3×8 → 3×10 → 3×12 → 3×12-15 → 3×8 (más pesado)',id:'kev-pm-2',unidad:'kg'},
-        {nombre:'1D · Bíceps con barra toma prona',series:'3×10 → 3×12 → 3×12-15 → 3×15 → 4×10 (más pesado)',id:'kev-bic-2',unidad:'kg'},
-      ]},
-    ]},
-    { label:'Día 3', bloques:[
-      { nombre:'ENTRADA EN CALOR', ejercicios:[
-        {nombre:'Movilidad y activación de core y cintura escapular',series:'',id:'kev-mov-3',unidad:'✓'},
-      ]},
-      { nombre:'DLO', nota:'Velocidad y explosividad', ejercicios:[
-        {nombre:'Jerk (grabate)',series:'3×3 → 4×3 → 3×1 (más pesado)',id:'kev-jerk-3',unidad:'kg'},
-      ]},
-      { nombre:'RUTINA · RIR 1-2', ejercicios:[
-        {nombre:'1A · Remo landmine',series:'3×5 → 4×5 → 3×6 → 4×6 → 3×8',id:'kev-landmine-3',unidad:'kg'},
-        {nombre:'1B · Swing de cadera con kettlebell pesado',series:'3×6 → 3×8 → 4×8 → 3×10 → 3×5 (más pesado)',id:'kev-swing-3',unidad:'kg'},
-        {nombre:'2B · Curl francés con mancuernas en banco inclinado',series:'3×8 → 3×10 → 4×10 → 3×12 → 3×8 (más pesado)',id:'kev-curlfranc-3',unidad:'kg'},
-        {nombre:'1C · Lunge barbell over shoulders',series:'4×3 p/l → 3×3 → 4×3 → 3×4 → 3×5',id:'kev-lunge-3',unidad:'kg'},
-        {nombre:'2C · Lanzamientos 1 brazo contra pared (simulando béisbol)',series:'4×1 p/l → 3×2 → 4×2 → 3×3 → 4×3',id:'kev-lanzbeisbol-3',unidad:'reps'},
-        {nombre:'1D · Accesorio libre',series:'a definir',id:'kev-acc-3',unidad:'kg'},
-      ]},
-    ]},
-    { label:'Día 4', bloques:[
-      { nombre:'ENTRADA EN CALOR', ejercicios:[
-        {nombre:'Movilidad y activación de core y cintura escapular',series:'',id:'kev-mov-4',unidad:'✓'},
-      ]},
-      { nombre:'RUTINA · RIR 1-2', ejercicios:[
-        {nombre:'1A · Press plano con taco',series:'3×3 80kg → 3×4 → 2×5 → 3×3 85kg → 3×4 85kg',id:'kev-pbtaco-4',unidad:'kg'},
-        {nombre:'2A · Slam ball',series:'3×3 → 3×4 → 2×5 → 3×5',id:'kev-slam-4',unidad:'kg'},
-        {nombre:'1B · Peso muerto con trap bar',series:'3×2 140kg → 4×2 → 3×3 → 4×3 → 2×4',id:'kev-pmtrap-4',unidad:'kg'},
-        {nombre:'2B · Saltos asistidos con banda',series:'3×3 → 4×3 → 3×4 → 3×4 → 2×5',id:'kev-saltoband-4',unidad:'reps'},
-        {nombre:'1C · Lanzamiento pitcher (2 elevaciones + lanzar en 3ra)',series:'4×1 p/l → 3×2 → 4×2 → 3×3 → 4×3',id:'kev-lanzpitch-4',unidad:'reps'},
-        {nombre:'2C · Press paloff con rotación',series:'4×4 p/l → 3×5 → 4×5 → 3×6 → 4×6',id:'kev-paloffrot-4',unidad:'kg'},
-      ]},
-    ]},
-  ],
 };
 
 // Atletas con rutina extra de otro profe
@@ -1442,6 +1592,7 @@ const ATLETAS_EXTRA = {
   'Cukierman': { nombre: 'Mariano · Pitching Coach', profe: 'Entrenador Personal' },
   'Alfonso':   { nombre: 'Manuel Alfonso', profe: 'EntrenaBien B' },
   'Riello':    { nombre: 'Kevin Riello', profe: 'Entrenador Personal' },
+  'Galindo':   { nombre: 'Álvaro Galindo', profe: 'Entrenador Personal' },
   'Garcia':    { nombre: 'Sebastian Garcia', profe: 'Programa Personal · Hipertrofia' },
 };
 
@@ -1458,7 +1609,7 @@ function renderAtletas(lista, query) {
   el.innerHTML = lista.map(a => `
     <div class="atleta-item" onclick="entrar('${a.ap}')">
       <div>
-        <div class="ai-nombre">${a.ap}, ${a.nom}</div>
+        <div class="ai-nombre">${a.nom ? a.ap + ', ' + a.nom : a.ap}</div>
         <div class="ai-sub">Pre-temporada 2026 · Los Gauchos</div>
       </div>
       <div class="ai-arrow">›</div>
@@ -1466,11 +1617,16 @@ function renderAtletas(lista, query) {
   `).join('');
 }
 
+// Búsqueda sin tildes ni mayúsculas, con nombre y apellido juntos o en cualquier orden
+function normBusq(t) {
+  return String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9ñ ]/g, ' ').replace(/\s+/g, ' ').trim();
+}
 function filtrarAtletas(q) {
-  const q2 = q.toLowerCase().trim();
-  const filtrados = !q2 ? [] : ATLETAS.filter(a =>
-    a.ap.toLowerCase().includes(q2) || a.nom.toLowerCase().includes(q2)
-  );
+  const palabras = normBusq(q).split(' ').filter(Boolean);
+  const filtrados = !palabras.length ? [] : ATLETAS.filter(a => {
+    const texto = normBusq(a.ap + ' ' + a.nom);
+    return palabras.every(w => texto.includes(w));
+  });
   renderAtletas(filtrados, q);
 }
 
@@ -1480,7 +1636,7 @@ async function entrar(ap) {
   if (!atletaActual) return;
 
   // Siempre mostramos el selector (FAB / Mi entrenador / Potencia / Testeos)
-  document.getElementById('sel-nombre').textContent = atletaActual.ap.toUpperCase() + ', ' + atletaActual.nom;
+  document.getElementById('sel-nombre').textContent = atletaActual.ap.toUpperCase() + (atletaActual.nom ? ', ' + atletaActual.nom : '');
   document.getElementById('sel-profe').textContent = ATLETAS_EXTRA[ap] ? ATLETAS_EXTRA[ap].profe : 'Rutina personalizada';
   document.getElementById('btn-sel-potencia').style.display = 'block';
   document.getElementById('btn-sel-testeos').style.display = 'block';
@@ -1606,12 +1762,16 @@ async function guardarSesion() {
   const datos = {
     tipo:     'SESION',
     rutina:   rutinaActual,
-    atleta:   atletaActual.ap + ', ' + atletaActual.nom,
+    atleta:   atletaActual.nom ? atletaActual.ap + ', ' + atletaActual.nom : atletaActual.ap,
     apellido: atletaActual.ap,
     dia:      diaLabel,
     diaNum:   diaActual,
     fecha, hora, registros, reporte,
   };
+
+  if (atletaActual.ap === 'Galindo' && rutinaActual === 'extra' && planSemana.rol) {
+    datos.rolSemana = PLAN_SEMANA[planSemana.rol].titulo + ' · ' + planSemana.variante;
+  }
 
   document.getElementById('ok-msg').textContent =
     `${atletaActual.ap} · ${diaLabel} · ${fecha}`;
@@ -1646,7 +1806,7 @@ function showScreen(id) {
   if (id === 's-ficha' && atletaActual) {
     const nombreInput = document.getElementById('f-nombre');
     if (nombreInput && !nombreInput.value) {
-      nombreInput.value = atletaActual.ap + ', ' + atletaActual.nom;
+      nombreInput.value = atletaActual.nom ? atletaActual.ap + ', ' + atletaActual.nom : atletaActual.ap;
     }
   }
 }
