@@ -492,6 +492,7 @@ select.ficha-input option{background:var(--bg2)}
     <div style="font-size:12px;color:var(--text2);margin-top:8px"><span id="sel-perfil">—</span> · <a href="#" onclick="cambiarPerfil();return false" style="color:var(--cel)">cambiar</a></div>
   </div>
   <div style="padding:24px 20px;display:flex;flex-direction:column;gap:14px">
+    <div id="semana-tipo-sel" style="padding:14px;border:1px solid var(--cel);border-radius:14px;background:var(--bg2)"></div>
     <button onclick="cargarEntreno('fab')" style="background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:20px;text-align:left;cursor:pointer;transition:all .15s" onmousedown="this.style.borderColor='var(--cel)'">
       <div style="font-size:18px;margin-bottom:6px">⚾</div>
       <div style="font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px">FAB · Pre-temporada</div>
@@ -1668,14 +1669,14 @@ const SEMANA_A = [['Día 1','Completo'],['Día 2','Híbrido'],['Día 3','Complet
 const SEMANA_B = [['Día 1','Completo'],['Día 2','Híbrido'],['Día 3','Híbrido'],['Recovery 1','Recovery'],['Recovery 2','Recovery']]; // 1 Completo + 2 Híbrido + 2 Recovery
 const OPC_SEMANA = {
   pitcher: [
-    { id:'abridor',   txt:'Abridor',   plan:SEMANA_A },
-    { id:'relevista', txt:'Relevista', plan:SEMANA_B },
+    { id:'abridor',   txt:'Esta semana soy Abridor',   plan:SEMANA_A },
+    { id:'relevista', txt:'Esta semana soy Relevista', plan:SEMANA_B },
   ],
   posicion: [
-    { id:'0-1', txt:'0-1 partidos', plan:SEMANA_A },
-    { id:'2',   txt:'2 partidos',   plan:SEMANA_A },
-    { id:'3',   txt:'3 partidos',   plan:SEMANA_B },
-    { id:'4+',  txt:'4 o más',      plan:SEMANA_B },
+    { id:'3',   txt:'Juego 3 veces esta semana', plan:SEMANA_B },
+    { id:'2',   txt:'Juego 2 veces esta semana', plan:SEMANA_A },
+    { id:'0-1', txt:'Juego 1 vez o ninguna',     plan:SEMANA_A },
+    { id:'4+',  txt:'Juego 4 veces o más',       plan:SEMANA_B },
   ],
 };
 let perfilActual = null; // 'pitcher' | 'posicion'
@@ -1709,6 +1710,7 @@ function abrirSelector() {
   document.getElementById('sel-profe').textContent = ATLETAS_EXTRA[atletaActual.ap] ? ATLETAS_EXTRA[atletaActual.ap].profe : 'Rutina personalizada';
   document.getElementById('btn-sel-potencia').style.display = 'block';
   document.getElementById('btn-sel-testeos').style.display = 'block';
+  renderSemanaTipo();
   showScreen('s-selector');
 }
 function cargarSemanaTipo() {
@@ -1724,20 +1726,24 @@ function elegirSemanaTipo(id) {
   renderSemanaTipo();
 }
 function renderSemanaTipo() {
-  const el = document.getElementById('semana-tipo');
+  renderSemanaEn('semana-tipo', true);
+  renderSemanaEn('semana-tipo-sel', false);
+}
+function renderSemanaEn(id, soloFab) {
+  const el = document.getElementById(id);
   if (!el) return;
-  if (rutinaActual !== 'fab' || !perfilActual) { el.style.display = 'none'; return; }
+  if (!perfilActual || (soloFab && rutinaActual !== 'fab')) { el.style.display = 'none'; return; }
   el.style.display = 'block';
   const opc = OPC_SEMANA[perfilActual];
-  const tit = perfilActual === 'pitcher' ? 'Esta semana soy' : 'Esta semana juego';
   const col = { Completo:'var(--cel)', 'Híbrido':'var(--amber)', Recovery:'var(--green)' };
-  let h = `<div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">${tit}</div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">${opc.map(o => btnPlan(o.id===semanaTipo,`elegirSemanaTipo('${o.id}')`,o.txt)).join('')}</div>`;
+  let h = `<div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Tu semana</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">${opc.map(o => btnPlan(o.id===semanaTipo,`elegirSemanaTipo('${o.id}')`,o.txt)).join('')}</div>`;
   const sel = opc.find(o => o.id === semanaTipo);
   if (!sel) {
-    h += `<div style="font-size:12px;color:var(--text2);line-height:1.5">Elegí y te muestro qué tipo de día va en cada pestaña.</div>`;
+    h += `<div style="font-size:12px;color:var(--text2);line-height:1.5">Elegí una opción y te muestro la planificación sugerida por Carlos.</div>`;
   } else {
-    h += sel.plan.map(f => `<div style="display:flex;justify-content:space-between;padding:7px 0;border-top:1px solid var(--border);font-size:12px"><span style="color:var(--white);font-weight:600">${f[0]}</span><span style="color:${col[f[1]]};font-weight:700">${f[1]}</span></div>`).join('');
+    h += `<div style="font-size:11px;color:var(--cel);font-weight:700;margin:4px 0">Planificación sugerida por Carlos</div>` +
+      sel.plan.map(f => `<div style="display:flex;justify-content:space-between;padding:7px 0;border-top:1px solid var(--border);font-size:12px"><span style="color:var(--white);font-weight:600">${f[0]}</span><span style="color:${col[f[1]]};font-weight:700">${f[1]}</span></div>`).join('');
   }
   el.innerHTML = h;
 }
