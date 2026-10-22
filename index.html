@@ -1195,6 +1195,54 @@ const TESTEOS_DIAS = [
   ]},
 ];
 
+// Test físicos FAB (planilla Test_fisicos_FAB.xlsx) · solo para los atletas listados acá
+const TESTEOS_EXTRA = {
+  Amma: { label:'Test físicos', bloques:[
+    { nombre:'ENTRADA EN CALOR', ejercicios:[
+      {nombre:'Trote, movilidad, A skip, B skip, vallas bajas, 3 progresivos 70-80-90%', series:'Orden 0', id:'test-ff-cal', unidad:'✓'},
+    ]},
+    { nombre:'1 · CMJ · objetivo 50 cm o más', ejercicios:[
+      {nombre:'CMJ · intento 1', series:'manos en la cintura · pausa 30 s', id:'test-ff-cmj1', unidad:'cm'},
+      {nombre:'CMJ · intento 2', series:'manos en la cintura · pausa 30 s', id:'test-ff-cmj2', unidad:'cm'},
+      {nombre:'CMJ · intento 3', series:'manos en la cintura · pausa 30 s', id:'test-ff-cmj3', unidad:'cm'},
+    ]},
+    { nombre:'2 · BROAD JUMP · objetivo 2.90 m', ejercicios:[
+      {nombre:'Broad jump · intento 1', series:'pausa 45 s · talón más atrasado', id:'test-ff-bj1', unidad:'m'},
+      {nombre:'Broad jump · intento 2', series:'pausa 45 s · talón más atrasado', id:'test-ff-bj2', unidad:'m'},
+      {nombre:'Broad jump · intento 3', series:'pausa 45 s · talón más atrasado', id:'test-ff-bj3', unidad:'m'},
+    ]},
+    { nombre:'3 · SPRINT 30 YD CON PARCIALES · pausa 3 min', ejercicios:[
+      {nombre:'Sprint 30 yd · Int 1 · 10 yd', series:'obj 10 yd 1.55 s · 30 yd 3.8-3.9 s', id:'test-ff-s1-10yd', unidad:'seg'},
+      {nombre:'Sprint 30 yd · Int 1 · 10 m', series:'obj 10 yd 1.55 s · 30 yd 3.8-3.9 s', id:'test-ff-s1-10m', unidad:'seg'},
+      {nombre:'Sprint 30 yd · Int 1 · 20 m', series:'obj 10 yd 1.55 s · 30 yd 3.8-3.9 s', id:'test-ff-s1-20m', unidad:'seg'},
+      {nombre:'Sprint 30 yd · Int 1 · 30 yd', series:'obj 10 yd 1.55 s · 30 yd 3.8-3.9 s', id:'test-ff-s1-30yd', unidad:'seg'},
+      {nombre:'Sprint 30 yd · Int 2 · 10 yd', series:'obj 10 yd 1.55 s · 30 yd 3.8-3.9 s', id:'test-ff-s2-10yd', unidad:'seg'},
+      {nombre:'Sprint 30 yd · Int 2 · 10 m', series:'obj 10 yd 1.55 s · 30 yd 3.8-3.9 s', id:'test-ff-s2-10m', unidad:'seg'},
+      {nombre:'Sprint 30 yd · Int 2 · 20 m', series:'obj 10 yd 1.55 s · 30 yd 3.8-3.9 s', id:'test-ff-s2-20m', unidad:'seg'},
+      {nombre:'Sprint 30 yd · Int 2 · 30 yd', series:'obj 10 yd 1.55 s · 30 yd 3.8-3.9 s', id:'test-ff-s2-30yd', unidad:'seg'},
+      {nombre:'Sprint 30 yd · Int 3 · 10 yd', series:'obj 10 yd 1.55 s · 30 yd 3.8-3.9 s', id:'test-ff-s3-10yd', unidad:'seg'},
+      {nombre:'Sprint 30 yd · Int 3 · 10 m', series:'obj 10 yd 1.55 s · 30 yd 3.8-3.9 s', id:'test-ff-s3-10m', unidad:'seg'},
+      {nombre:'Sprint 30 yd · Int 3 · 20 m', series:'obj 10 yd 1.55 s · 30 yd 3.8-3.9 s', id:'test-ff-s3-20m', unidad:'seg'},
+      {nombre:'Sprint 30 yd · Int 3 · 30 yd', series:'obj 10 yd 1.55 s · 30 yd 3.8-3.9 s', id:'test-ff-s3-30yd', unidad:'seg'},
+    ]},
+    { nombre:'4 · VELOCIDAD MÁXIMA · FLYING 10 M · objetivo 1.14 s (8.8 m/s)', ejercicios:[
+      {nombre:'Flying 10 m · intento 1', series:'20 m de lanzamiento + 10 m · pausa 4 min', id:'test-ff-fly1', unidad:'seg'},
+      {nombre:'Flying 10 m · intento 2', series:'20 m de lanzamiento + 10 m · pausa 4 min', id:'test-ff-fly2', unidad:'seg'},
+      {nombre:'Flying 10 m · intento 3', series:'20 m de lanzamiento + 10 m · pausa 4 min', id:'test-ff-fly3', unidad:'seg'},
+    ]},
+    { nombre:'5 · HOME A PRIMERA · objetivo 4.1 s', ejercicios:[
+      {nombre:'Home a primera · intento 1', series:'desde el contacto hasta pisar la 1ra · pausa 3 min', id:'test-ff-h1-1', unidad:'seg'},
+      {nombre:'Home a primera · intento 2', series:'desde el contacto hasta pisar la 1ra · pausa 3 min', id:'test-ff-h1-2', unidad:'seg'},
+      {nombre:'Home a primera · intento 3', series:'desde el contacto hasta pisar la 1ra · pausa 3 min', id:'test-ff-h1-3', unidad:'seg'},
+    ]},
+  ]},
+};
+// Días de Testeos de un atleta: los generales + los propios si tiene
+function diasTesteos() {
+  const x = atletaActual && TESTEOS_EXTRA[atletaActual.ap];
+  return x ? TESTEOS_DIAS.concat([x]) : TESTEOS_DIAS;
+}
+
 function mostrarTabsTesteos() {
   document.getElementById('tabs-fab').style.display = 'none';
   document.getElementById('tabs-extra').style.display = 'none';
@@ -1207,12 +1255,12 @@ function mostrarTabsTesteos() {
   document.getElementById('dias-testeos').style.display = 'block';
 
   const tabsEl = document.getElementById('tabs-testeos');
-  tabsEl.innerHTML = TESTEOS_DIAS.map((d,i) =>
+  tabsEl.innerHTML = diasTesteos().map((d,i) =>
     `<button class="dia-tab ${i===0?'on':''}" onclick="selDiaTesteos(${i})">${d.label}</button>`
   ).join('');
 
   const diasEl = document.getElementById('dias-testeos');
-  diasEl.innerHTML = TESTEOS_DIAS.map((d,i) =>
+  diasEl.innerHTML = diasTesteos().map((d,i) =>
     `<div id="dia-test-${i}" class="dia-content ${i===0?'on':''}">${renderDiaExtra(d)}</div>`
   ).join('');
 }
@@ -1699,6 +1747,14 @@ function elegirPerfil(perfil) {
   guardarPerfil(perfil);
   abrirSelector();
 }
+function cambiarPerfilRapido(perfil) {
+  if (perfil === perfilActual) return;
+  perfilActual = perfil;
+  guardarPerfil(perfil);
+  cargarSemanaTipo();
+  const sp = document.getElementById('sel-perfil'); if (sp) sp.textContent = nombrePerfil(perfil);
+  renderSemanaTipo();
+}
 function cambiarPerfil() {
   document.getElementById('perfil-nombre').textContent = atletaActual.ap.toUpperCase();
   showScreen('s-perfil');
@@ -1736,7 +1792,9 @@ function renderSemanaEn(id, soloFab) {
   el.style.display = 'block';
   const opc = OPC_SEMANA[perfilActual];
   const col = { Completo:'var(--cel)', 'Híbrido':'var(--amber)', Recovery:'var(--green)' };
-  let h = `<div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Tu semana</div>
+  let h = `<div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">¿Qué jugador sos?</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">${btnPlan(perfilActual==='pitcher',"cambiarPerfilRapido('pitcher')",'Soy pitcher')}${btnPlan(perfilActual==='posicion',"cambiarPerfilRapido('posicion')",'Soy jugador de posición')}</div>
+    <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Tu semana</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">${opc.map(o => btnPlan(o.id===semanaTipo,`elegirSemanaTipo('${o.id}')`,o.txt)).join('')}</div>`;
   const sel = opc.find(o => o.id === semanaTipo);
   if (!sel) {
@@ -1879,7 +1937,7 @@ async function guardarSesion() {
     : rutinaActual === 'potencia'
     ? `Potencia · ${POTENCIA_DIAS[diaActual].label}`
     : rutinaActual === 'testeos'
-    ? `Testeos · ${TESTEOS_DIAS[diaActual].label}`
+    ? `Testeos · ${diasTesteos()[diaActual].label}`
     : diaNames[diaActual];
 
   const datos = {
@@ -1952,7 +2010,7 @@ function mostrarNota() {
     : rutinaActual === 'potencia'
     ? `Potencia · ${POTENCIA_DIAS[diaActual].label}`
     : rutinaActual === 'testeos'
-    ? `Testeos · ${TESTEOS_DIAS[diaActual].label}`
+    ? `Testeos · ${diasTesteos()[diaActual].label}`
     : diaNames[diaActual];
   const info = document.getElementById('nota-atleta-info');
   if (info) info.textContent = `${atletaActual.ap} · ${label}`;
