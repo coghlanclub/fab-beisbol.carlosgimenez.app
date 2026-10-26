@@ -33,20 +33,21 @@ window._fbGuardar = async (coleccion, datos) => {
   }
 };
 
+// Sesiones de un atleta, de la más nueva a la más vieja.
+// Se ordena acá y no en la consulta: where + orderBy pide un índice compuesto que no existe en Firestore.
+async function sesionesDe(apellido) {
+  const snap = await getDocs(query(collection(db, 'sesiones'), where('apellido', '==', apellido)));
+  const ts = x => (x.timestamp && x.timestamp.seconds) || 0;
+  return snap.docs.map(d => d.data()).sort((a, b) => ts(b) - ts(a));
+}
+
 // Leer últimas sesiones de un atleta para mostrar últimos pesos
 window._fbUltimoPesos = async (apellido) => {
   try {
-    const q = query(
-      collection(db, 'sesiones'),
-      where('apellido', '==', apellido),
-      orderBy('timestamp', 'desc'),
-      limit(10)
-    );
-    const snap = await getDocs(q);
+    const sesiones = (await sesionesDe(apellido)).slice(0, 10);
     // Consolidar el último peso de cada ejercicio
     const ultimos = {};
-    snap.docs.forEach(d => {
-      const data = d.data();
+    sesiones.forEach(data => {
       if (data.registros) {
         Object.entries(data.registros).forEach(([ej, val]) => {
           if (!ultimos[ej] && val && val !== '') ultimos[ej] = val;
@@ -73,13 +74,7 @@ window._fbPerfil = async (apellido) => {
 // Leer resumen de sesiones del atleta (cantidad, última fecha)
 window._fbResumenAtleta = async (apellido) => {
   try {
-    const q = query(
-      collection(db, 'sesiones'),
-      where('apellido', '==', apellido),
-      orderBy('timestamp', 'desc')
-    );
-    const snap = await getDocs(q);
-    const sesiones = snap.docs.map(d => d.data());
+    const sesiones = await sesionesDe(apellido);
     return {
       total: sesiones.length,
       ultimaFecha: sesiones[0]?.fecha || '—',
@@ -256,6 +251,139 @@ select.ficha-input option{background:var(--bg2)}
 .ok-sub{font-size:15px;color:var(--text2);line-height:1.6;margin-bottom:6px}
 .ok-muted{font-size:12px;color:var(--muted);margin-bottom:32px}
 .btn-nuevo{background:var(--bg2);border:1px solid var(--border2);color:var(--text2);border-radius:12px;padding:14px 28px;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer}
+
+/* ══ AJUSTES VISUALES ══════════════════════════════════════════════════════ */
+:root{--cel-dim:rgba(107,184,245,0.12);--radius:14px;--shadow:0 8px 24px rgba(0,0,0,0.28)}
+body{background:radial-gradient(120% 60% at 50% -10%,#13284a 0%,var(--bg) 60%) fixed,var(--bg)}
+.screen{background:transparent}
+.screen.on{animation:entrar .22s ease-out}
+@keyframes entrar{from{opacity:0}to{opacity:1}} /* sin transform: rompería las barras position:fixed durante la animación */
+button{font-family:'Inter',sans-serif}
+:focus-visible{outline:2px solid var(--cel);outline-offset:2px}
+::selection{background:rgba(107,184,245,0.3)}
+
+/* Portada */
+.fab-wordmark{text-shadow:0 0 28px rgba(107,184,245,0.25)}
+.stats-band{background:rgba(17,31,56,0.55)}
+.stat-n{font-size:24px}
+.search-input{box-shadow:inset 0 1px 0 rgba(255,255,255,0.03)}
+.atleta-item{gap:12px;justify-content:flex-start;background:linear-gradient(180deg,var(--bg2),rgba(17,31,56,0.7))}
+.atleta-item:hover{border-color:var(--border2)}
+.ai-av{width:38px;height:38px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:17px;letter-spacing:1px;color:var(--cel);background:var(--cel-dim);border:1px solid var(--border2)}
+.ai-arrow{margin-left:auto}
+
+/* Tarjetas de elección (perfil y rutina) */
+.card-btn{--acc:var(--cel);position:relative;display:block;width:100%;background:linear-gradient(180deg,var(--bg2),rgba(17,31,56,0.75));border:1px solid var(--border2);border-left:3px solid var(--acc);border-radius:var(--radius);padding:18px 44px 18px 18px;text-align:left;cursor:pointer;color:inherit;transition:transform .12s,border-color .15s,box-shadow .15s}
+.card-btn[data-acc="amber"]{--acc:var(--amber)}
+.card-btn[data-acc="green"]{--acc:var(--green)}
+.card-btn[data-acc="red"]{--acc:var(--red)}
+.card-btn::after{content:'›';position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:24px;color:var(--acc);opacity:.6}
+.card-btn:hover{border-color:var(--acc);box-shadow:var(--shadow)}
+.card-btn:active{transform:scale(.985)}
+.card-ico{font-size:20px;margin-bottom:6px}
+.card-tit{font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px}
+
+/* Pantalla de entrenamiento */
+.entreno-header{background:rgba(17,31,56,0.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.dia-tabs{scrollbar-width:none}
+.dia-tabs::-webkit-scrollbar{display:none}
+.dia-tab{transition:color .15s,border-color .15s,background .15s}
+.dia-tab.on{background:linear-gradient(180deg,transparent,rgba(107,184,245,0.08))}
+.bloque-hdr{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.bloque-hdr::before{content:'';width:3px;height:12px;border-radius:2px;background:currentColor;opacity:.8}
+.ej-input{transition:border-color .15s,background .15s,box-shadow .15s}
+.ej-input:focus{box-shadow:0 0 0 3px rgba(245,166,35,0.15)}
+.ej-input:not(:placeholder-shown){border-color:rgba(245,166,35,0.45)}
+.nota-bloque{margin:12px 16px;border:1px solid var(--border);border-radius:12px}
+.entreno-bottom{background:linear-gradient(180deg,transparent,var(--bg) 30%)}
+.entreno-bottom > div{padding-bottom:max(24px,env(safe-area-inset-bottom))!important}
+.btn-guardar{background:linear-gradient(180deg,#86c6f8,var(--cel));box-shadow:0 6px 18px rgba(107,184,245,0.25);transition:transform .1s,opacity .15s}
+.btn-guardar:disabled,#btn-confirmar:disabled{opacity:.6;cursor:wait}
+
+/* Reporte de sesión: opciones */
+.opt{padding:14px 6px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;text-align:center;transition:background .15s,border-color .15s,color .15s,transform .1s}
+.opt:active{transform:scale(.97)}
+#tipo-btns .opt,#rpe-btns .opt{flex:1}
+.opt-sub{font-size:10px;color:var(--muted);font-weight:400;margin-top:3px}
+.tipo-btn.sel{background:var(--cel-dim);color:var(--cel);border-color:var(--cel)}
+.estado-btn.sel{background:var(--green-bg);color:var(--green);border-color:var(--green)}
+.rpe-btn.sel{background:var(--amber-bg);color:var(--amber);border-color:var(--amber)}
+.rpe-btn.sel .opt-sub{color:var(--amber)}
+#nota-libre:focus{border-color:var(--cel)!important}
+
+/* Barras fijas inferiores: respetar la zona del gesto en iPhone */
+.save-bar,#s-nota > div:last-child{padding-bottom:max(28px,env(safe-area-inset-bottom))!important;background:rgba(10,22,40,0.94)!important;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+
+/* Guardado OK */
+.ok-icon{width:96px;height:96px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:48px;background:var(--green-bg);border:1px solid rgba(34,201,138,0.35);box-shadow:0 0 40px rgba(34,201,138,0.2);animation:pop .35s cubic-bezier(.2,1.4,.4,1)}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}
+.ok-pend{display:none;max-width:320px;margin:-18px auto 28px;padding:10px 14px;border-radius:10px;background:var(--amber-bg);border:1px solid rgba(245,166,35,0.35);color:var(--amber);font-size:12px;line-height:1.5}
+
+
+/* ── CHARLA: presentación + encuesta ── */
+#s-charla{height:100vh;height:100dvh}
+.ch-head{flex-shrink:0;background:rgba(17,31,56,0.92);border-bottom:1px solid var(--border)}
+.ch-body{flex:1;overflow-y:auto;min-height:0}
+#ch-pres{flex-direction:column;overflow:hidden}
+.sl-track{flex:1;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;min-height:0}
+.sl-track::-webkit-scrollbar{display:none}
+.sl{flex:0 0 100%;scroll-snap-align:start;overflow-y:auto;padding:26px 22px 20px;display:flex;flex-direction:column;gap:12px}
+.sl p{font-size:15px;line-height:1.55;color:var(--text2)}
+.sl-portada{justify-content:center;text-align:center;background:radial-gradient(80% 50% at 50% 20%,rgba(107,184,245,0.12),transparent)}
+.sl-kicker{font-size:11px;font-weight:600;letter-spacing:.14em;color:var(--cel);text-transform:uppercase}
+.sl-big{font-family:var(--display);font-size:46px;line-height:1;letter-spacing:1.5px;color:var(--white);font-weight:400}
+.sl-lead{font-size:17px!important;color:var(--text)!important}
+.sl-tit{font-family:var(--display);font-size:34px;line-height:1.05;letter-spacing:1px;color:var(--white);font-weight:400}
+.sl-sub{font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px}
+.sl-sub em{font-style:normal;font-weight:500;color:var(--cel);font-size:12px;margin-left:6px}
+.sl-sub2{font-size:13px;color:var(--amber);font-weight:600;margin-top:-6px}
+.sl-strong{color:var(--white)!important;font-weight:600}
+.sl-box{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--cel);border-radius:12px;padding:14px}
+.sl-acc-green{border-left-color:var(--green)}.sl-acc-amber{border-left-color:var(--amber)}
+.sl-nivel{display:flex;gap:12px;align-items:flex-start;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px}
+.sl-num{flex-shrink:0;width:30px;height:30px;border-radius:50%;background:var(--cel-dim);border:1px solid var(--border2);color:var(--cel);font-family:var(--display);font-size:18px;display:flex;align-items:center;justify-content:center}
+.sl-flecha{text-align:center;font-size:13px;font-weight:600;color:var(--cel);padding-top:4px}
+.sl-piramide{display:flex;flex-direction:column;align-items:center;gap:6px;margin:6px 0}
+.sl-esc{text-align:center;border-radius:10px;padding:10px;background:var(--cel-dim);border:1px solid var(--border2)}
+.sl-esc b{display:block;color:var(--white);font-size:15px}.sl-esc span{font-size:12px;color:var(--text2)}
+.sl-esc-3{width:60%;border-color:var(--amber);background:var(--amber-bg)}.sl-esc-2{width:80%}.sl-esc-1{width:100%;background:var(--green-bg);border-color:rgba(34,201,138,0.4)}
+.sl-list{list-style:none;display:flex;flex-direction:column;gap:8px}
+.sl-list li{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px 12px 36px;position:relative;font-size:15px;color:var(--text)}
+.sl-list li::before{content:'✓';position:absolute;left:13px;color:var(--cel);font-weight:700}
+.sl-mito{background:var(--red-bg);border:1px solid rgba(245,82,74,0.35);border-radius:12px;padding:14px;font-size:16px;font-weight:600;color:var(--white)}
+.sl-mito span{display:block;font-size:10px;letter-spacing:.14em;color:var(--red);margin-bottom:4px}
+.sl-cita{font-size:11px!important;color:var(--muted)!important;margin-top:8px}
+.sl-nav{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:10px 16px 4px}
+.sl-btn{width:44px;height:44px;border-radius:50%;border:1px solid var(--border2);background:var(--bg2);color:var(--cel);font-size:24px;cursor:pointer}
+.sl-dots{display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:center}
+.sl-dot{width:6px;height:6px;border-radius:50%;background:var(--border2)}.sl-dot.on{background:var(--cel);width:16px;border-radius:3px}
+.sl-cnt{font-family:var(--mono);font-size:11px;color:var(--muted);margin-left:6px}
+.sl-pie{flex-shrink:0;text-align:center;font-size:10px;color:var(--muted);padding:4px 0 max(14px,env(safe-area-inset-bottom))}
+
+.enc-intro{padding:20px 20px 4px}
+.enc-titulo{font-family:var(--display);font-size:28px;letter-spacing:1px;color:var(--white);line-height:1.05}
+.enc-meta{font-size:12px;color:var(--muted);margin-top:4px}
+.enc-q{margin:14px 16px;padding:16px;background:var(--bg2);border:1px solid var(--border);border-radius:14px;position:relative}
+.enc-qn{position:absolute;top:-10px;left:14px;width:24px;height:24px;border-radius:50%;background:var(--cel);color:var(--bg);font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center}
+.enc-qt{font-size:15px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px}
+.enc-ayuda{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:10px}
+.enc-col{display:flex;flex-direction:column;gap:7px}
+.enc-grid2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.enc-chip{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:11px 12px;color:var(--text2);font-size:13px;font-weight:600;text-align:left;cursor:pointer;line-height:1.35;transition:background .12s,border-color .12s,color .12s}
+.enc-chip span{display:block;font-size:11px;font-weight:400;color:var(--muted);margin-top:3px}
+.enc-chip.sel{background:var(--cel-dim);border-color:var(--cel);color:var(--white)}
+.enc-chip.sel span{color:var(--text2)}
+.enc-txt{width:100%;margin-top:10px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:12px;font-size:15px;color:var(--white);font-family:'Inter',sans-serif;resize:none;min-height:70px;outline:none}
+.enc-txt:focus{border-color:var(--cel)}
+.enc-dia{border-top:1px solid var(--border);padding:10px 0 4px}
+.enc-dia-n{font-family:var(--display);font-size:20px;letter-spacing:1px;color:var(--cel);margin-bottom:6px}
+.enc-fila{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:7px}
+.enc-fila > span{width:100%;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.enc-fila .enc-chip{padding:8px 11px;font-size:12px}
+.enc-error{display:none;margin:4px 16px 10px;padding:12px 14px;border-radius:10px;background:var(--red-bg);border:1px solid rgba(245,82,74,0.4);color:var(--red);font-size:13px;line-height:1.5}
+.enc-nota{text-align:center;font-size:12px;color:var(--muted);padding:6px 24px 14px}
+#btn-enc:disabled{opacity:.6;cursor:wait}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
@@ -472,12 +600,12 @@ select.ficha-input option{background:var(--bg2)}
     <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">¿Qué sos?</div>
   </div>
   <div style="padding:24px 20px;display:flex;flex-direction:column;gap:14px">
-    <button onclick="elegirPerfil('pitcher')" style="background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:20px;text-align:left;cursor:pointer">
-      <div style="font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px">⚾ Soy pitcher</div>
+    <button onclick="elegirPerfil('pitcher')" class="card-btn" data-acc="cel">
+      <div class="card-tit">⚾ Soy pitcher</div>
       <div style="font-size:12px;color:var(--muted)">Cada semana elegís si sos Abridor o Relevista</div>
     </button>
-    <button onclick="elegirPerfil('posicion')" style="background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:20px;text-align:left;cursor:pointer">
-      <div style="font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px">🧤 Soy jugador de posición</div>
+    <button onclick="elegirPerfil('posicion')" class="card-btn" data-acc="cel">
+      <div class="card-tit">🧤 Soy jugador de posición</div>
       <div style="font-size:12px;color:var(--muted)">Cada semana elegís cuántos partidos jugás</div>
     </button>
     <div style="font-size:11px;color:var(--muted);text-align:center;line-height:1.5">Queda guardado en tu ficha personal con historial. Lo podés cambiar cuando quieras.</div>
@@ -493,25 +621,30 @@ select.ficha-input option{background:var(--bg2)}
   </div>
   <div style="padding:24px 20px;display:flex;flex-direction:column;gap:14px">
     <div id="semana-tipo-sel" style="padding:14px;border:1px solid var(--cel);border-radius:14px;background:var(--bg2)"></div>
-    <button onclick="cargarEntreno('fab')" style="background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:20px;text-align:left;cursor:pointer;transition:all .15s" onmousedown="this.style.borderColor='var(--cel)'">
-      <div style="font-size:18px;margin-bottom:6px">⚾</div>
-      <div style="font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px">FAB · Pre-temporada</div>
+    <button onclick="cargarEntreno('fab')" class="card-btn" data-acc="cel">
+      <div class="card-ico">⚾</div>
+      <div class="card-tit">FAB · Pre-temporada</div>
       <div style="font-size:12px;color:var(--muted)">3 días de fuerza máxima + Recovery aeróbico · Plan del plantel general</div>
     </button>
-    <button onclick="cargarEntreno('extra')" style="background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:20px;text-align:left;cursor:pointer;transition:all .15s" onmousedown="this.style.borderColor='var(--amber)'">
-      <div style="font-size:18px;margin-bottom:6px">🏋️</div>
-      <div style="font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px">Mi entrenador</div>
+    <button onclick="cargarEntreno('extra')" class="card-btn" data-acc="amber">
+      <div class="card-ico">🏋️</div>
+      <div class="card-tit">Mi entrenador</div>
       <div style="font-size:12px;color:var(--muted)" id="sel-profe">Rutina personalizada</div>
     </button>
-    <button id="btn-sel-potencia" onclick="cargarEntreno('potencia')" style="display:none;background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:20px;text-align:left;cursor:pointer;transition:all .15s" onmousedown="this.style.borderColor='var(--cel)'">
-      <div style="font-size:18px;margin-bottom:6px">⚡</div>
-      <div style="font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px">Macrociclo Potencia</div>
+    <button id="btn-sel-potencia" onclick="cargarEntreno('potencia')" class="card-btn" data-acc="green" style="display:none">
+      <div class="card-ico">⚡</div>
+      <div class="card-tit">Macrociclo Potencia</div>
       <div style="font-size:12px;color:var(--muted)">Contraste Francés · Sep-Dic 2026</div>
     </button>
-    <button id="btn-sel-testeos" onclick="cargarEntreno('testeos')" style="display:none;background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:20px;text-align:left;cursor:pointer;transition:all .15s" onmousedown="this.style.borderColor='var(--red)'">
-      <div style="font-size:18px;margin-bottom:6px">🧪</div>
-      <div style="font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px">Testeos</div>
+    <button id="btn-sel-testeos" onclick="cargarEntreno('testeos')" class="card-btn" data-acc="red" style="display:none">
+      <div class="card-ico">🧪</div>
+      <div class="card-tit">Testeos</div>
       <div style="font-size:12px;color:var(--muted)">Cargá los resultados de tu jornada de testeo</div>
+    </button>
+    <button onclick="abrirCharla()" class="card-btn" data-acc="amber">
+      <div class="card-ico">🎤</div>
+      <div class="card-tit">Charla · ¿En qué parte de mi proceso estoy?</div>
+      <div style="font-size:12px;color:var(--muted)">Presentación + encuesta</div>
     </button>
   </div>
   <div style="padding:0 20px">
@@ -644,6 +777,143 @@ select.ficha-input option{background:var(--bg2)}
 
 </div>
 
+<!-- ── PANTALLA CHARLA: PRESENTACIÓN + ENCUESTA ── -->
+<div class="screen" id="s-charla">
+  <div class="ch-head">
+    <div class="header-top">
+      <button class="btn-back" onclick="abrirSelector()">←</button>
+      <div class="header-nombre" id="ch-nombre">—</div>
+      <div style="width:30px"></div>
+    </div>
+    <div class="header-fase">Habilidades motoras · Los Gauchos</div>
+    <div class="dia-tabs">
+      <button class="dia-tab on" id="ch-tab-0" onclick="chTab(0)">Presentación</button>
+      <button class="dia-tab" id="ch-tab-1" onclick="chTab(1)">Encuesta</button>
+    </div>
+  </div>
+
+  <!-- PRESENTACIÓN -->
+  <div class="ch-body" id="ch-pres">
+    <div class="sl-track" id="sl-track" onscroll="slScroll()">
+
+      <section class="sl sl-portada">
+        <div class="sl-kicker">LOS GAUCHOS · INFORME PRE-TEMPORADA 2026</div>
+        <h2 class="sl-big">¿En qué parte de tu proceso estás?</h2>
+        <p class="sl-lead">Lo que vimos en 16 sesiones.</p>
+      </section>
+
+      <section class="sl">
+        <h3 class="sl-tit">Lo que vimos en 16 sesiones</h3>
+        <div class="sl-box"><div class="sl-sub">Un plantel heterogéneo</div><p>Hay atletas muy adelantados, con cargas altas y buena adherencia al programa, y otros que están dando sus primeros pasos en el gimnasio. Ambos escenarios son esperables y forman parte del proceso.</p></div>
+        <div class="sl-box sl-acc-green"><div class="sl-sub">Lo más valioso</div><p>Empezaron a hacer preguntas: qué ejercicios sirven para mejorar tal gesto, cómo recuperarse mejor, qué necesita el cuerpo antes de un juego.</p><p class="sl-strong">Ese cambio de actitud es el resultado más valioso de esta etapa.</p></div>
+      </section>
+
+      <section class="sl">
+        <h3 class="sl-tit">Tipos de habilidades motoras</h3>
+        <div class="sl-nivel"><span class="sl-num">1</span><div><div class="sl-sub">Básicas <em>La base de todo deporte</em></div><p>Correr, saltar, lanzar, atrapar, empujar, rotar. Patrones de movimiento fundamentales.</p></div></div>
+        <div class="sl-nivel"><span class="sl-num">2</span><div><div class="sl-sub">Específicas <em>Nivel de club</em></div><p>Las básicas aplicadas al deporte: swing, tiro, fildeo. Es el nivel de quien juega en un club, incluso en primera división.</p></div></div>
+        <div class="sl-nivel"><span class="sl-num">3</span><div><div class="sl-sub">Especializadas <em>Nivel profesional</em></div><p>Alto rendimiento. Va más allá de ser habilidoso. El gesto sale automático y eficiente, y se sostiene con cansancio, presión y en el juego.</p></div></div>
+        <div class="sl-flecha">Básicas → Específicas → Especializadas</div>
+      </section>
+
+      <section class="sl">
+        <h3 class="sl-tit">¿En qué nivel estás vos?</h3>
+        <div class="sl-piramide">
+          <div class="sl-esc sl-esc-3"><b>Especializadas</b><span>Profesional y alto rendimiento</span></div>
+          <div class="sl-esc sl-esc-2"><b>Específicas</b><span>Nivel de club</span></div>
+          <div class="sl-esc sl-esc-1"><b>Básicas</b><span>La base de todo deporte</span></div>
+        </div>
+        <p class="sl-strong">No hay respuestas correctas ni incorrectas.</p>
+        <p>Cada uno se ubica en el nivel en el que considera que está hoy.</p>
+      </section>
+
+      <section class="sl">
+        <div class="sl-kicker">NIVEL</div>
+        <h3 class="sl-tit">Básicas</h3>
+        <div class="sl-sub2">En proceso de adaptación</div>
+        <div class="sl-sub">¿Te pasa esto?</div>
+        <ul class="sl-list"><li>Estoy dando mis primeros pasos en el gimnasio.</li><li>Tengo molestias musculares seguido.</li><li>Me cuesta la movilidad en algunos ejercicios.</li><li>Todavía no estoy habituado a este estímulo.</li></ul>
+      </section>
+
+      <section class="sl">
+        <div class="sl-kicker">NIVEL</div>
+        <h3 class="sl-tit">Específicas</h3>
+        <div class="sl-sub2">Adelantados y encaminados</div>
+        <div class="sl-sub">¿Te pasa esto?</div>
+        <ul class="sl-list"><li>Levanto cargas altas y progreso.</li><li>Cumplo con el programa.</li><li>Entiendo la lógica del entrenamiento.</li><li>Pero no sé bien qué día me conviene hacer fuerza y cuál recovery.</li></ul>
+      </section>
+
+      <section class="sl">
+        <div class="sl-kicker">NIVEL</div>
+        <h3 class="sl-tit">Especializadas</h3>
+        <div class="sl-sub2">Atleta de élite</div>
+        <div class="sl-sub">¿Te pasa esto?</div>
+        <ul class="sl-list"><li>Sé por qué entreno.</li><li>Escucho lo que me dice el cuerpo.</li><li>Organizo fuerza, recovery y campo con mi trabajo, estudio y vida.</li><li>Hago seguimiento de mi estado físico.</li></ul>
+      </section>
+
+      <section class="sl">
+        <h3 class="sl-tit">Lo que frena el avance</h3>
+        <div class="sl-mito"><span>MITO</span>"No levanto pesado porque me pongo lento."</div>
+        <div class="sl-mito"><span>MITO</span>"Si corro mucho pierdo fuerza."</div>
+        <p>La ciencia los tiene ampliamente refutados. Frenan el avance de algunos atletas y retrasan el enfoque correcto de sus rutinas.</p>
+        <p class="sl-strong">Menos mitos, más datos.</p>
+      </section>
+
+      <section class="sl">
+        <h3 class="sl-tit">Preguntas para cada uno</h3>
+        <div class="sl-nivel"><span class="sl-num">1</span><p>¿Qué día de la semana me conviene hacer fuerza y cuál es mejor para recovery?</p></div>
+        <div class="sl-nivel"><span class="sl-num">2</span><p>¿Qué es lo que me hace bien al cuerpo el día previo a un juego?</p></div>
+        <div class="sl-nivel"><span class="sl-num">3</span><p>¿Qué tecnología y recursos accesibles existen para hacer seguimiento de mi estado físico?</p></div>
+        <div class="sl-nivel"><span class="sl-num">4</span><p>¿Estoy invirtiendo tiempo y atención en entender qué necesita mi cuerpo como atleta?</p></div>
+      </section>
+
+      <section class="sl">
+        <h3 class="sl-tit">El modelo: tres pilares</h3>
+        <div class="sl-box sl-acc-green"><div class="sl-sub">Recovery</div><p>Dos sesiones semanales de recuperación activa para sostener la capacidad de trabajo y prevenir lesiones.</p></div>
+        <div class="sl-box sl-acc-amber"><div class="sl-sub">Entrenamiento híbrido</div><p>Combinar la fuerza con la demanda aeróbica del béisbol. No son opuestos: son complementarios.</p></div>
+        <div class="sl-box"><div class="sl-sub">Fuerza y potencia</div><p>Tres sesiones semanales de estímulo intenso para construir la base física que se traduce en el campo.</p></div>
+      </section>
+
+      <section class="sl">
+        <h3 class="sl-tit">Bloque de Potencia · Sept–Dic 2026</h3>
+        <div class="sl-box"><div class="sl-sub">Contraste Francés</div><p>Triphasic Training (Cal Dietz). Tres días de fuerza que recorren toda la curva fuerza-velocidad.</p></div>
+        <div class="sl-box"><div class="sl-sub">Testeo sept y dic</div><p>Sentadilla, peso muerto, banca, salto, sprint 60 yardas, bat speed y velocidad de lanzamiento.</p></div>
+        <div class="sl-box"><div class="sl-sub">Seguimiento individual</div><p>Cada uno registra sus pesos desde el celular al terminar la sesión.</p></div>
+        <div class="sl-box"><div class="sl-sub">Educación del atleta</div><p>Que cada uno entienda su propio proceso. Menos rutina, más planificación inteligente.</p></div>
+      </section>
+
+      <section class="sl sl-portada">
+        <h2 class="sl-big">Un atleta de élite no es solo el que entrena más.</h2>
+        <p class="sl-lead">Es el que entiende por qué entrena, escucha lo que le dice el cuerpo y toma decisiones inteligentes con los recursos que tiene.</p>
+        <p class="sl-strong">Ese es el atleta que buscamos construir en este bloque de potencia.</p>
+        <p class="sl-cita">Niveles de habilidad motora: Gallahue · Etapas del aprendizaje motor: Fitts y Posner</p>
+        <button class="btn-guardar" style="margin-top:22px;width:100%" onclick="chTab(1)">Ir a la encuesta →</button>
+      </section>
+
+    </div>
+    <div class="sl-nav">
+      <button class="sl-btn" onclick="slIr(-1)" aria-label="Anterior">‹</button>
+      <div class="sl-dots" id="sl-dots"></div>
+      <button class="sl-btn" onclick="slIr(1)" aria-label="Siguiente">›</button>
+    </div>
+    <div class="sl-pie">Carlos Gimenez · Los Gauchos · Informe Pre-temporada 2026</div>
+  </div>
+
+  <!-- ENCUESTA -->
+  <div class="ch-body" id="ch-enc" style="display:none">
+    <div class="enc-intro">
+      <div class="enc-titulo">¿En qué parte de mi proceso estoy?</div>
+      <div class="enc-meta" id="enc-meta">—</div>
+    </div>
+    <div id="enc-form"></div>
+    <div class="enc-error" id="enc-error"></div>
+    <div class="enc-nota">No hay respuestas correctas ni incorrectas. Contestá con sinceridad, es para vos.</div>
+    <div style="padding:6px 20px 120px">
+      <button class="btn-guardar" id="btn-enc" style="width:100%" onclick="enviarEncuesta()">Enviar encuesta ✓</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── PANTALLA NOTA DE SESIÓN ── -->
 <div class="screen" id="s-nota">
   <div style="background:var(--bg2);padding:20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px">
@@ -660,9 +930,9 @@ select.ficha-input option{background:var(--bg2)}
     <div style="margin-bottom:20px">
       <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">¿Qué tipo de entrenamiento hiciste?</div>
       <div style="display:flex;gap:8px" id="tipo-btns">
-        <button onclick="selTipo(this,'Hibrido')" class="tipo-btn" style="flex:1;padding:14px 4px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">Hibrido</button>
-        <button onclick="selTipo(this,'Recovery')" class="tipo-btn" style="flex:1;padding:14px 4px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">Recovery</button>
-        <button onclick="selTipo(this,'Completo')" class="tipo-btn" style="flex:1;padding:14px 4px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">Completo</button>
+        <button onclick="selTipo(this,'Hibrido')" class="opt tipo-btn">Hibrido</button>
+        <button onclick="selTipo(this,'Recovery')" class="opt tipo-btn">Recovery</button>
+        <button onclick="selTipo(this,'Completo')" class="opt tipo-btn">Completo</button>
       </div>
     </div>
 
@@ -671,10 +941,10 @@ select.ficha-input option{background:var(--bg2)}
       <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Estado físico</div>
       <div style="font-size:12px;color:rgba(107,184,245,0.5);margin-bottom:10px">Si tenés alguna molestia, reportala — tu entrenador de gym o de pitcheo necesita saberlo</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="estado-btns">
-        <button onclick="selEstado(this,'💪 Sin molestias')" class="estado-btn" style="padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">💪 Sin molestias</button>
-        <button onclick="selEstado(this,'⚠️ Molestia leve')" class="estado-btn" style="padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">⚠️ Molestia leve</button>
-        <button onclick="selEstado(this,'🛡️ Cuidando algo')" class="estado-btn" style="padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">🛡️ Cuidando algo</button>
-        <button onclick="selEstado(this,'🚨 Fuera de juego')" class="estado-btn" style="padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">🚨 Fuera de juego</button>
+        <button onclick="selEstado(this,'💪 Sin molestias')" class="opt estado-btn">💪 Sin molestias</button>
+        <button onclick="selEstado(this,'⚠️ Molestia leve')" class="opt estado-btn">⚠️ Molestia leve</button>
+        <button onclick="selEstado(this,'🛡️ Cuidando algo')" class="opt estado-btn">🛡️ Cuidando algo</button>
+        <button onclick="selEstado(this,'🚨 Fuera de juego')" class="opt estado-btn">🚨 Fuera de juego</button>
       </div>
     </div>
 
@@ -682,10 +952,10 @@ select.ficha-input option{background:var(--bg2)}
     <div style="margin-bottom:20px">
       <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">Carga percibida de la sesión (RPE)</div>
       <div style="display:flex;gap:8px" id="rpe-btns">
-        <button onclick="selRpe(this,'1-3 Liviana')" class="rpe-btn" style="flex:1;padding:12px 4px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">1–3<div style="font-size:10px;color:var(--muted);font-weight:400;margin-top:3px">Liviana</div></button>
-        <button onclick="selRpe(this,'4-6 Exigente')" class="rpe-btn" style="flex:1;padding:12px 4px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">4–6<div style="font-size:10px;color:var(--muted);font-weight:400;margin-top:3px">Exigente</div></button>
-        <button onclick="selRpe(this,'7-8 Dura')" class="rpe-btn" style="flex:1;padding:12px 4px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">7–8<div style="font-size:10px;color:var(--muted);font-weight:400;margin-top:3px">Dura</div></button>
-        <button onclick="selRpe(this,'9-10 Al límite')" class="rpe-btn" style="flex:1;padding:12px 4px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;text-align:center">9–10<div style="font-size:10px;color:var(--muted);font-weight:400;margin-top:3px">Al límite</div></button>
+        <button onclick="selRpe(this,'1-3 Liviana')" class="opt rpe-btn">1–3<div class="opt-sub">Liviana</div></button>
+        <button onclick="selRpe(this,'4-6 Exigente')" class="opt rpe-btn">4–6<div class="opt-sub">Exigente</div></button>
+        <button onclick="selRpe(this,'7-8 Dura')" class="opt rpe-btn">7–8<div class="opt-sub">Dura</div></button>
+        <button onclick="selRpe(this,'9-10 Al límite')" class="opt rpe-btn">9–10<div class="opt-sub">Al límite</div></button>
       </div>
     </div>
 
@@ -700,7 +970,7 @@ select.ficha-input option{background:var(--bg2)}
 
   <div style="position:fixed;bottom:0;left:0;right:0;padding:14px 20px 28px;background:var(--bg);border-top:1px solid var(--border);display:flex;gap:10px">
     <button onclick="showScreen('s-entreno')" style="flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;font-size:14px;font-weight:600;color:var(--text2);font-family:Inter,sans-serif;cursor:pointer">← Volver</button>
-    <button onclick="guardarSesion()" style="flex:2;background:var(--cel);border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;color:var(--bg);font-family:Inter,sans-serif;cursor:pointer">Confirmar y guardar ✓</button>
+    <button id="btn-confirmar" onclick="guardarSesion()" style="flex:2;background:var(--cel);border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;color:var(--bg);font-family:Inter,sans-serif;cursor:pointer">Confirmar y guardar ✓</button>
   </div>
 </div>
 
@@ -710,6 +980,7 @@ select.ficha-input option{background:var(--bg2)}
   <div class="ok-title">GUARDADO</div>
   <div class="ok-sub" id="ok-msg">Sesión registrada correctamente.</div>
   <div class="ok-muted">Los datos van directo al staff técnico.</div>
+  <div class="ok-pend" id="ok-pend">Sin conexión: quedó guardado en este teléfono y se envía solo apenas vuelva la señal.</div>
   <button class="btn-nuevo" onclick="volver()">← Volver al inicio</button>
 </div>
 
@@ -788,11 +1059,14 @@ const PLAN_TIRO = [
     alerta:'⚡ Semana de Live AB. Máxima coordinación entre entrenador de gym y campo requerida.' },
 ];
 
+// 'YYYY-MM-DD' → fecha a las 00:00 hora local (new Date('YYYY-MM-DD') la toma en UTC: 21 h del día anterior en Argentina)
+function fechaLocal(s) { return new Date(s + 'T00:00:00'); }
+
 // Devuelve la alerta activa si estamos dentro de los 7 días previos a una fase
 function getAlertaTiro() {
   const hoy = new Date();
   for (const fase of PLAN_TIRO) {
-    const fechaFase = new Date(fase.fecha);
+    const fechaFase = fechaLocal(fase.fecha);
     const diasRestantes = Math.ceil((fechaFase - hoy) / (1000*60*60*24));
     if (diasRestantes >= 0 && diasRestantes <= 7) {
       return { ...fase, diasRestantes };
@@ -809,7 +1083,7 @@ function getFaseActual() {
   const hoy = new Date();
   let faseActual = null;
   for (const fase of PLAN_TIRO) {
-    if (new Date(fase.fecha) <= hoy) faseActual = fase;
+    if (fechaLocal(fase.fecha) <= hoy) faseActual = fase;
   }
   return faseActual;
 }
@@ -921,7 +1195,8 @@ const PLAN_SEMANA = {
 let planSemana = { rol:null, variante:null };
 function claveSemana() {
   const d = new Date(); const dow = (d.getDay()+6)%7; d.setDate(d.getDate()-dow);
-  return d.toISOString().slice(0,10); // lunes de esta semana
+  // lunes de esta semana, en hora local (toISOString usa UTC y en Argentina después de las 21 h daba otro día)
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
 }
 function cargarPlanSemana() {
   try {
@@ -970,7 +1245,7 @@ function selDiaExtra(idx, btn) {
   diaActual = idx;
   document.querySelectorAll('#tabs-extra .dia-tab').forEach((t,i) => t.classList.toggle('on', i===idx));
   document.querySelectorAll('[id^="dia-extra-"]').forEach((d,i) => d.classList.toggle('on', i===idx));
-  window.scrollTo(0,0);
+  document.getElementById('dias-extra').scrollTop = 0; // la lista scrollea adentro, no la ventana
 }
 
 function renderDiaExtra(dia) {
@@ -1001,7 +1276,7 @@ function renderDiaExtra(dia) {
 const TESTEOS_FECHA = '2026-08-31'; // ← poné acá la fecha real (YYYY-MM-DD)
 function getAlertaTesteos() {
   const hoy = new Date();
-  const fecha = new Date(TESTEOS_FECHA);
+  const fecha = fechaLocal(TESTEOS_FECHA);
   const dias = Math.ceil((fecha - hoy) / (1000*60*60*24));
   if (dias < -1) return null; // ya pasó hace más de 1 día, dejamos de mostrar el aviso
   if (dias === 0) return { label: '¡LOS TESTEOS SON HOY!', fecha: TESTEOS_FECHA };
@@ -1023,7 +1298,7 @@ const POTENCIA_FASES = [
 ];
 function getFaseMacrociclo() {
   const hoy = new Date();
-  const inicio = new Date(POTENCIA_INICIO);
+  const inicio = fechaLocal(POTENCIA_INICIO);
   const semana = Math.floor((hoy - inicio) / (1000*60*60*24*7)) + 1;
   const mesIdx = semana <= 0 ? -1 : Math.min(3, Math.floor((semana - 1) / 4));
   return { semana, fase: mesIdx >= 0 ? POTENCIA_FASES[mesIdx] : null };
@@ -1031,7 +1306,7 @@ function getFaseMacrociclo() {
 // Aviso para la portada: cuenta regresiva antes del arranque, fase en curso después
 function getAlertaPotencia() {
   const hoy = new Date();
-  const inicio = new Date(POTENCIA_INICIO);
+  const inicio = fechaLocal(POTENCIA_INICIO);
   const diasRestantes = Math.ceil((inicio - hoy) / (1000*60*60*24));
   if (diasRestantes > 0 && diasRestantes <= 14) {
     return {
@@ -1154,7 +1429,7 @@ function selDiaPotencia(idx) {
   diaActual = idx;
   document.querySelectorAll('#tabs-potencia .dia-tab').forEach((t,i) => t.classList.toggle('on', i===idx));
   document.querySelectorAll('[id^="dia-pot-"]').forEach((d,i) => d.classList.toggle('on', i===idx));
-  window.scrollTo(0,0);
+  document.getElementById('dias-potencia').scrollTop = 0; // la lista scrollea adentro, no la ventana
 }
 
 // ── TESTEOS · 11 tests en 3 jornadas ─────────────────────────────────────────
@@ -1269,7 +1544,7 @@ function selDiaTesteos(idx) {
   diaActual = idx;
   document.querySelectorAll('#tabs-testeos .dia-tab').forEach((t,i) => t.classList.toggle('on', i===idx));
   document.querySelectorAll('[id^="dia-test-"]').forEach((d,i) => d.classList.toggle('on', i===idx));
-  window.scrollTo(0,0);
+  document.getElementById('dias-testeos').scrollTop = 0; // la lista scrollea adentro, no la ventana
 }
 
 // ── DETECTAR DÍA AUTOMÁTICO ──────────────────────────────────────────────────
@@ -1687,8 +1962,9 @@ function renderAtletas(lista, query) {
     return;
   }
   el.innerHTML = lista.map(a => `
-    <div class="atleta-item" onclick="entrar('${a.ap}')">
-      <div>
+    <div class="atleta-item" onclick="entrar(${ATLETAS.indexOf(a)})">
+      <div class="ai-av">${(a.ap[0] + (a.nom ? a.nom[0] : '')).toUpperCase()}</div>
+      <div style="flex:1;min-width:0">
         <div class="ai-nombre">${a.nom ? a.ap + ', ' + a.nom : a.ap}</div>
         <div class="ai-sub">Pre-temporada 2026 · Los Gauchos</div>
       </div>
@@ -1807,9 +2083,11 @@ function renderSemanaEn(id, soloFab) {
 }
 
 // ── ENTRAR AL ENTRENAMIENTO ──────────────────────────────────────────────────
-async function entrar(ap) {
-  atletaActual = ATLETAS.find(a => a.ap === ap);
+async function entrar(idx) {
+  // Por índice: hay apellidos repetidos (Cadiz, Mannuk y Cadiz, Zimba)
+  atletaActual = ATLETAS[idx];
   if (!atletaActual) return;
+  const ap = atletaActual.ap;
 
   // Perfil guardado: primero este dispositivo, si no, la ficha en Firebase
   perfilActual = lsGet('fab-perfil-' + ap);
@@ -1893,14 +2171,15 @@ async function cargarEntreno(tipo) {
 // ── SELECCIONAR DÍA ──────────────────────────────────────────────────────────
 function selDia(idx) {
   diaActual = idx;
-  document.querySelectorAll('.dia-tab').forEach((t, i) => t.classList.toggle('on', i === idx));
-  document.querySelectorAll('.dia-content').forEach((d, i) => d.classList.toggle('on', i === idx));
-  window.scrollTo(0, 0);
+  document.querySelectorAll('#tabs-fab .dia-tab').forEach((t, i) => t.classList.toggle('on', i === idx));
+  document.querySelectorAll('#dias-fab .dia-content').forEach((d, i) => d.classList.toggle('on', i === idx));
+  document.getElementById('dias-fab').scrollTop = 0; // la lista scrollea adentro, no la ventana
 }
 
 // ── GUARDAR SESIÓN ────────────────────────────────────────────────────────────
 async function guardarSesion() {
   if (!atletaActual) return;
+  if (document.getElementById('btn-confirmar')?.disabled) return; // evita guardar dos veces con doble toque
 
   const diaNames = ['Día 1 · Empuje', 'Día 2 · Tracción', 'Día 3 · Sarcoplasmática', 'Recovery 1', 'Recovery 2'];
   const fecha = new Date().toLocaleDateString('es-AR');
@@ -1960,8 +2239,12 @@ async function guardarSesion() {
   document.getElementById('ok-msg').textContent =
     `${atletaActual.ap} · ${diaLabel} · ${fecha}`;
 
-  // Guardar en Firebase Firestore (tiempo real)
-  if (window._fbGuardar) await window._fbGuardar('sesiones', datos);
+  // Guardar en Firebase Firestore (tiempo real). Si falla, queda en cola y se reintenta.
+  const btn = document.getElementById('btn-confirmar');
+  if (btn) { btn.disabled = true; btn.textContent = 'Guardando…'; }
+  const ok = await guardarSeguro('sesiones', datos);
+  if (btn) { btn.disabled = false; btn.textContent = 'Confirmar y guardar ✓'; }
+  document.getElementById('ok-pend').style.display = ok ? 'none' : 'block';
 
   // Google Sheets como respaldo
   if (GOOGLE_SCRIPT_URL !== 'TU_GOOGLE_SCRIPT_URL_AQUI') {
@@ -1974,10 +2257,203 @@ async function guardarSesion() {
 
   estadoActual = ''; rpeActual = ''; tipoActual = '';
   if (document.getElementById('nota-libre')) document.getElementById('nota-libre').value = '';
-  document.querySelectorAll('.estado-btn,.rpe-btn,.tipo-btn').forEach(b => {
-    b.style.background='transparent'; b.style.color='var(--text2)'; b.style.borderColor='var(--border)';
-  });
+  document.querySelectorAll('.estado-btn,.rpe-btn,.tipo-btn').forEach(b => b.classList.remove('sel'));
 
+  showScreen('s-ok');
+}
+
+// ── GUARDADO SEGURO · nunca se pierde una sesión ─────────────────────────────
+// Si Firebase falla (sin señal, sin conexión), el registro queda en este dispositivo
+// y se reintenta al volver a abrir la app o al recuperar la conexión.
+const COLA_KEY = 'fab-pendientes';
+function leerCola() { try { return JSON.parse(lsGet(COLA_KEY) || '[]'); } catch(e) { return []; } }
+async function guardarSeguro(coleccion, datos) {
+  const ok = window._fbGuardar ? await window._fbGuardar(coleccion, datos) : false;
+  if (!ok) {
+    const cola = leerCola();
+    cola.push({ coleccion, datos });
+    lsSet(COLA_KEY, JSON.stringify(cola));
+  }
+  return ok;
+}
+let reintentando = false;
+async function reintentarPendientes() {
+  if (reintentando || !window._fbGuardar) return;
+  const cola = leerCola();
+  if (!cola.length) return;
+  reintentando = true;
+  const quedan = [];
+  for (const p of cola) {
+    if (!(await window._fbGuardar(p.coleccion, p.datos))) quedan.push(p);
+  }
+  lsSet(COLA_KEY, JSON.stringify(quedan));
+  reintentando = false;
+}
+window.addEventListener('online', reintentarPendientes);
+// El SDK de Firebase carga como módulo: esperar a que esté listo antes del primer reintento
+(function esperarFirebase(n) {
+  if (window._fbGuardar) reintentarPendientes();
+  else if (n > 0) setTimeout(() => esperarFirebase(n - 1), 500);
+})(20);
+
+// ── CHARLA · HABILIDADES MOTORAS: PRESENTACIÓN + ENCUESTA ────────────────────
+// Las respuestas van a la colección 'encuestas' (separada de sesiones y fichas), una por envío.
+// Las opciones usan los ids de abajo: el panel DT (dt.html) tiene la misma lista para las estadísticas.
+const ENC_ID = 'habilidades-motoras-2026';
+const ENC_NIVELES = [
+  { id:'basicas',        t:'Básicas',        d:'La base de todo deporte: correr, saltar, lanzar, atrapar.' },
+  { id:'especificas',    t:'Específicas',    d:'Nivel de club, incluso primera división: domino el gesto del deporte.' },
+  { id:'especializadas', t:'Especializadas', d:'Profesional o alto rendimiento: el gesto sale automático, con presión y fatiga.' },
+];
+const ENC_PORQUE = [
+  { id:'b1', t:'Estoy dando mis primeros pasos en el gimnasio.' },
+  { id:'b2', t:'Tengo molestias musculares seguido.' },
+  { id:'b3', t:'Me cuesta la movilidad en algunos ejercicios.' },
+  { id:'b4', t:'Todavía no estoy habituado a este estímulo.' },
+  { id:'e1', t:'Levanto cargas altas y progreso.' },
+  { id:'e2', t:'Cumplo con el programa.' },
+  { id:'e3', t:'Entiendo la lógica del entrenamiento.' },
+  { id:'e4', t:'No sé bien qué día me conviene hacer fuerza y cuál recovery.' },
+  { id:'s1', t:'Sé por qué entreno.' },
+  { id:'s2', t:'Escucho lo que me dice el cuerpo.' },
+  { id:'s3', t:'Organizo fuerza, recovery y campo con mi trabajo, estudio y vida.' },
+  { id:'s4', t:'Hago seguimiento de mi estado físico.' },
+];
+const ENC_OBJETIVOS = [
+  { id:'especificas',    t:'Específicas',               d:'Quiero llegar al nivel de club.' },
+  { id:'especializadas', t:'Especializadas',            d:'Quiero llegar al nivel profesional o de alto rendimiento.' },
+  { id:'sostener',       t:'Ya estoy en especializadas', d:'Quiero sostenerme y seguir mejorando en ese nivel.' },
+];
+const ENC_FALTA = [
+  { id:'fuerza', t:'Fuerza y potencia' }, { id:'recovery', t:'Recovery' }, { id:'hibrido', t:'Entrenamiento híbrido' },
+  { id:'campo', t:'Práctica de campo' }, { id:'app', t:'La app de seguimiento' }, { id:'testeos', t:'Los testeos' }, { id:'staff', t:'El staff' },
+];
+const ENC_DIAS = [['lun','Lun'],['mar','Mar'],['mie','Mié'],['jue','Jue'],['vie','Vie'],['sab','Sáb'],['dom','Dom']];
+const ENC_VIDA = ['Trabajo','Estudio','Libre'];
+const ENC_ENTRENO = ['Fuerza','Recovery','Híbrido','Campo','Descanso'];
+
+let encResp = null;
+function encNueva() {
+  const semana = {};
+  ENC_DIAS.forEach(([k]) => semana[k] = { vida:[], entreno:[] });
+  return { idx: ATLETAS.indexOf(atletaActual), posicion: perfilActual || '', nivelHoy:null, porque:[], porqueComent:'', objetivo:null, falta:[], faltaComent:'', semana, porqueSemana:'' };
+}
+
+function abrirCharla() {
+  if (!atletaActual) return;
+  document.getElementById('ch-nombre').textContent = atletaActual.ap.toUpperCase();
+  // Respuestas a medio completar se conservan solo para el mismo atleta (en un celular compartido no se mezclan)
+  if (!encResp || encResp.idx !== ATLETAS.indexOf(atletaActual)) encResp = encNueva();
+  renderEncuesta();
+  chTab(0);
+  showScreen('s-charla');
+  slPintarDots();
+}
+function chTab(i) {
+  document.getElementById('ch-tab-0').classList.toggle('on', i === 0);
+  document.getElementById('ch-tab-1').classList.toggle('on', i === 1);
+  document.getElementById('ch-pres').style.display = i === 0 ? 'flex' : 'none';
+  document.getElementById('ch-enc').style.display = i === 1 ? 'block' : 'none';
+  document.getElementById(i === 0 ? 'ch-pres' : 'ch-enc').scrollTop = 0;
+}
+
+// Carrusel de diapositivas (se desliza con el dedo o con las flechas)
+function slActual() {
+  const tr = document.getElementById('sl-track');
+  return Math.round(tr.scrollLeft / tr.clientWidth);
+}
+function slIr(paso) {
+  const tr = document.getElementById('sl-track');
+  tr.scrollTo({ left: (slActual() + paso) * tr.clientWidth, behavior: 'smooth' });
+}
+function slPintarDots() {
+  const n = document.querySelectorAll('#sl-track .sl').length;
+  document.getElementById('sl-dots').innerHTML = Array.from({ length:n }, (_, i) =>
+    `<span class="sl-dot${i === slActual() ? ' on' : ''}"></span>`).join('') + `<span class="sl-cnt">${slActual() + 1} / ${n}</span>`;
+}
+function slScroll() { slPintarDots(); }
+
+// Encuesta
+function encChip(activo, onclick, texto, desc) {
+  return `<button type="button" class="enc-chip${activo ? ' sel' : ''}" onclick="${onclick}">${texto}${desc ? `<span>${desc}</span>` : ''}</button>`;
+}
+function encPregunta(n, titulo, ayuda, cuerpo) {
+  return `<div class="enc-q" id="enc-q${n}"><div class="enc-qn">${n}</div><div class="enc-qt">${titulo}</div>${ayuda ? `<div class="enc-ayuda">${ayuda}</div>` : ''}${cuerpo}</div>`;
+}
+function renderEncuesta() {
+  const r = encResp;
+  const hoy = new Date().toLocaleDateString('es-AR');
+  document.getElementById('enc-meta').textContent = `${atletaActual.ap}${atletaActual.nom ? ', ' + atletaActual.nom : ''} · ${hoy}`;
+  let h = `<div class="enc-q"><div class="enc-qt">Posición</div><div class="enc-grid2">
+    ${encChip(r.posicion === 'pitcher', "encSet('posicion','pitcher')", 'Pitcher')}
+    ${encChip(r.posicion === 'posicion', "encSet('posicion','posicion')", 'Jugador de posición')}</div></div>`;
+  h += encPregunta(1, 'Hoy, ¿en qué tipo de habilidad motora considero que estoy?', 'Elegí una.',
+    `<div class="enc-col">${ENC_NIVELES.map(o => encChip(r.nivelHoy === o.id, `encSet('nivelHoy','${o.id}')`, o.t, o.d)).join('')}</div>`);
+  h += encPregunta(2, '¿Por qué me ubico en ese nivel?', 'Marcá todas las que te pasan.',
+    `<div class="enc-col">${ENC_PORQUE.map(o => encChip(r.porque.includes(o.id), `encToggle('porque','${o.id}')`, o.t)).join('')}</div>
+     <textarea class="enc-txt" placeholder="Contá algo concreto de tu juego o de tu entrenamiento (opcional)" oninput="encResp.porqueComent=this.value">${r.porqueComent}</textarea>`);
+  h += encPregunta(3, '¿Cuál es mi objetivo para esta temporada?', 'Elegí una.',
+    `<div class="enc-col">${ENC_OBJETIVOS.map(o => encChip(r.objetivo === o.id, `encSet('objetivo','${o.id}')`, o.t, o.d)).join('')}</div>`);
+  h += encPregunta(4, 'Con las herramientas que tenemos, ¿qué me falta para llegar a ese nivel o para sostenerme en él?', 'Marcá todas las que necesitás.',
+    `<div class="enc-grid2">${ENC_FALTA.map(o => encChip(r.falta.includes(o.id), `encToggle('falta','${o.id}')`, o.t)).join('')}</div>
+     <textarea class="enc-txt" placeholder="Comentario (opcional)" oninput="encResp.faltaComent=this.value">${r.faltaComent}</textarea>`);
+  h += encPregunta(5, 'Con las herramientas que tenemos, ¿cómo organizarías tu semana de entrenamiento según tu vida para llegar a ese nivel o sostenerte en él?',
+    'Tené en cuenta tu trabajo, estudio y horarios. Usá las herramientas de la pregunta 4 y el descanso.',
+    ENC_DIAS.map(([k, nom]) => `<div class="enc-dia" id="enc-dia-${k}"><div class="enc-dia-n">${nom}</div>
+      <div class="enc-fila"><span>Mi vida</span>${ENC_VIDA.map(v => encChip(r.semana[k].vida.includes(v), `encDia('${k}','vida','${v}')`, v)).join('')}</div>
+      <div class="enc-fila"><span>Entrenamiento</span>${ENC_ENTRENO.map(v => encChip(r.semana[k].entreno.includes(v), `encDia('${k}','entreno','${v}')`, v)).join('')}</div></div>`).join('') +
+    `<div class="enc-qt" style="margin-top:14px">¿Por qué la organizarías así?</div>
+     <textarea class="enc-txt" placeholder="(opcional)" oninput="encResp.porqueSemana=this.value">${r.porqueSemana}</textarea>`);
+  const y = document.getElementById('ch-enc').scrollTop;
+  document.getElementById('enc-form').innerHTML = h;
+  document.getElementById('ch-enc').scrollTop = y; // re-render sin saltar arriba
+}
+function encSet(campo, val)    { encResp[campo] = val; renderEncuesta(); }
+function encToggle(campo, id)  { const a = encResp[campo]; a.includes(id) ? a.splice(a.indexOf(id), 1) : a.push(id); renderEncuesta(); }
+function encDia(dia, fila, v) {
+  const a = encResp.semana[dia][fila];
+  if (a.includes(v)) a.splice(a.indexOf(v), 1);
+  else if (v === 'Descanso') a.splice(0, a.length, v);            // Descanso excluye entrenar ese día
+  else { if (a.includes('Descanso')) a.splice(a.indexOf('Descanso'), 1); a.push(v); }
+  renderEncuesta();
+}
+
+async function enviarEncuesta() {
+  const r = encResp, falta = [];
+  if (!r.posicion) falta.push(['Posición', null]);
+  if (!r.nivelHoy) falta.push(['Pregunta 1', 'enc-q1']);
+  if (!r.porque.length) falta.push(['Pregunta 2', 'enc-q2']);
+  if (!r.objetivo) falta.push(['Pregunta 3', 'enc-q3']);
+  if (!r.falta.length) falta.push(['Pregunta 4', 'enc-q4']);
+  const diasSin = ENC_DIAS.filter(([k]) => !r.semana[k].entreno.length);
+  if (diasSin.length) falta.push([`Pregunta 5 (entrenamiento o descanso: ${diasSin.map(d => d[1]).join(', ')})`, 'enc-dia-' + diasSin[0][0]]);
+  const err = document.getElementById('enc-error');
+  if (falta.length) {
+    err.innerHTML = 'Te falta completar: ' + falta.map(f => f[0]).join(' · ');
+    err.style.display = 'block';
+    const primero = falta.find(f => f[1]);
+    if (primero) document.getElementById(primero[1]).scrollIntoView({ behavior:'smooth', block:'center' });
+    return;
+  }
+  err.style.display = 'none';
+  const btn = document.getElementById('btn-enc');
+  if (btn.disabled) return;
+  btn.disabled = true; btn.textContent = 'Enviando…';
+  const datos = {
+    tipo:'ENCUESTA', encuesta:ENC_ID,
+    atleta: atletaActual.nom ? atletaActual.ap + ', ' + atletaActual.nom : atletaActual.ap,
+    apellido: atletaActual.ap,
+    fecha: new Date().toLocaleDateString('es-AR'),
+    hora: new Date().toLocaleTimeString('es-AR', { hour:'2-digit', minute:'2-digit' }),
+    posicion: r.posicion, nivelHoy: r.nivelHoy, porque: r.porque.slice(), porqueComent: r.porqueComent.trim(),
+    objetivo: r.objetivo, falta: r.falta.slice(), faltaComent: r.faltaComent.trim(),
+    semana: JSON.parse(JSON.stringify(r.semana)), porqueSemana: r.porqueSemana.trim(),
+  };
+  const ok = await guardarSeguro('encuestas', datos);
+  btn.disabled = false; btn.textContent = 'Enviar encuesta ✓';
+  encResp = null;
+  document.getElementById('ok-msg').textContent = `Encuesta de ${atletaActual.ap} enviada. ¡Gracias!`;
+  document.getElementById('ok-pend').style.display = ok ? 'none' : 'block';
   showScreen('s-ok');
 }
 
@@ -2022,41 +2498,14 @@ let estadoActual = '';
 let rpeActual = '';
 let tipoActual = '';
 
-function selEstado(btn, val) {
-  estadoActual = val;
-  document.querySelectorAll('.estado-btn').forEach(b => {
-    b.style.background = 'transparent';
-    b.style.color = 'var(--text2)';
-    b.style.borderColor = 'var(--border)';
-  });
-  btn.style.background = 'var(--green-bg)';
-  btn.style.color = 'var(--green)';
-  btn.style.borderColor = 'var(--green)';
+// Marca un botón como elegido dentro de su grupo (los colores van en el CSS: .estado-btn.sel, etc.)
+function marcarOpcion(grupo, btn) {
+  document.querySelectorAll(grupo).forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
 }
-
-function selRpe(btn, val) {
-  rpeActual = val;
-  document.querySelectorAll('.rpe-btn').forEach(b => {
-    b.style.background = 'transparent';
-    b.style.color = 'var(--text2)';
-    b.style.borderColor = 'var(--border)';
-  });
-  btn.style.background = 'var(--amber-bg)';
-  btn.style.color = 'var(--amber)';
-  btn.style.borderColor = 'var(--amber)';
-}
-
-function selTipo(btn, val) {
-  tipoActual = val;
-  document.querySelectorAll('.tipo-btn').forEach(b => {
-    b.style.background = 'transparent';
-    b.style.color = 'var(--text2)';
-    b.style.borderColor = 'var(--border)';
-  });
-  btn.style.background = 'var(--cel-dim)';
-  btn.style.color = 'var(--cel)';
-  btn.style.borderColor = 'var(--cel)';
-}
+function selEstado(btn, val) { estadoActual = val; marcarOpcion('.estado-btn', btn); }
+function selRpe(btn, val)    { rpeActual = val;    marcarOpcion('.rpe-btn', btn); }
+function selTipo(btn, val)   { tipoActual = val;   marcarOpcion('.tipo-btn', btn); }
 
 
 async function guardarFicha() {
@@ -2087,8 +2536,9 @@ async function guardarFicha() {
 
   document.getElementById('ok-msg').textContent = `Ficha de ${nombre} enviada al staff técnico.`;
 
-  // Guardar en Firebase
-  if (window._fbGuardar) await window._fbGuardar('fichas', datos);
+  // Guardar en Firebase (con cola de reintento si falla)
+  const ok = await guardarSeguro('fichas', datos);
+  document.getElementById('ok-pend').style.display = ok ? 'none' : 'block';
 
   // Google Sheets como respaldo
   if (GOOGLE_SCRIPT_URL !== 'TU_GOOGLE_SCRIPT_URL_AQUI') {
