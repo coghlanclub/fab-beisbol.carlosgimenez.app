@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FAB · Federación Argentina de Béisbol</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 :root{
   --bg:#0A1628;--bg2:#111f38;--bg3:#192d4e;--bg4:#1e3560;
@@ -330,6 +331,87 @@ tbody tr:nth-child(even) td{background:rgba(255,255,255,0.012)}
   .sb-logo img{max-width:100%;height:auto}
 }
 
+
+
+/* ── RESUMEN POR ATLETA ── */
+.rs-leyenda{font-size:12px;color:var(--muted);margin:-6px 0 14px}
+.rs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.rs-item{background:linear-gradient(180deg,var(--bg2),rgba(17,31,56,0.7));border:1px solid var(--border);border-radius:12px;padding:12px 14px;cursor:pointer;transition:border-color .15s,transform .15s}
+.rs-item:hover{border-color:var(--cel);transform:translateY(-1px)}
+.rs-item.env{opacity:.6}
+.rs-item-n{font-weight:600;color:var(--white);font-size:14px;margin-bottom:6px}
+.rs-item-tags{display:flex;gap:5px;flex-wrap:wrap}
+.rs-layout{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:start}
+.rs-col-ctrl{display:flex;flex-direction:column;gap:14px;min-width:0}
+.rs-box{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px 16px}
+.rs-box-t{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+.rs-dias{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.rs-dia{border:1px solid var(--border);border-radius:9px;padding:8px 2px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--sans)}
+.rs-dia span{display:block;font-size:10px;font-weight:600;opacity:.75;margin-bottom:2px}
+.rs-dia.F,#rs-tarjeta .F{background:rgba(107,184,245,.22);color:var(--cel)}
+.rs-dia.R,#rs-tarjeta .R{background:rgba(34,201,138,.2);color:var(--green)}
+.rs-dia.H,#rs-tarjeta .H{background:rgba(245,166,35,.2);color:var(--amber)}
+.rs-dia.C,#rs-tarjeta .C{background:rgba(180,140,245,.2);color:#B48CF5}
+.rs-dia.D,#rs-tarjeta .D{background:rgba(122,143,168,.15);color:var(--muted)}
+#rs-msg,#rs-reco-txt{font-size:13px;line-height:1.5;resize:vertical}
+.rs-btns{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.rs-btns .btn{flex:1;min-width:170px;padding:11px;font-size:13px}
+.rs-wa{background:#25D366;color:#06261a}.rs-wa:hover{background:#1ebe5a}.rs-wa:disabled{opacity:.6;cursor:wait}
+.rs-enviado{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:var(--text2);cursor:pointer}
+.rs-nota{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.5}
+/* La tarjeta (se convierte en imagen) */
+#rs-tarjeta{width:540px;background:radial-gradient(120% 50% at 50% -5%,#173562 0%,var(--bg) 60%);border-radius:22px;padding:24px 24px 18px;border:1px solid var(--border);color:var(--white);font-family:var(--sans)}
+#rs-tarjeta .t-head{display:flex;justify-content:space-between;align-items:flex-start}
+#rs-tarjeta .t-marca{font-family:var(--display);font-size:16px;letter-spacing:3px;color:var(--cel)}
+#rs-tarjeta .t-fecha{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;text-align:right}
+#rs-tarjeta .t-nombre{font-family:var(--display);font-size:44px;letter-spacing:2px;line-height:1;margin-top:8px}
+#rs-tarjeta .t-sub{font-size:12px;color:var(--text2);margin-top:4px}
+#rs-tarjeta .t-sub b{color:var(--cel)}
+#rs-tarjeta .t-sec{margin-top:14px;background:rgba(17,31,56,0.85);border:1px solid var(--border);border-radius:14px;padding:12px 14px}
+#rs-tarjeta .t-sec-t{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between}
+#rs-tarjeta .t-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+#rs-tarjeta .kpi b{display:block;font-family:var(--display);font-size:30px;line-height:1}
+#rs-tarjeta .kpi span{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+#rs-tarjeta .barras{display:flex;align-items:flex-end;gap:5px;height:44px;margin-top:10px}
+#rs-tarjeta .barras div{flex:1;background:var(--cel);border-radius:3px 3px 0 0;min-height:2px}
+#rs-tarjeta .barras div.cero{background:var(--red);opacity:.6;height:2px}
+#rs-tarjeta .barras-l{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-top:3px}
+#rs-tarjeta .prog{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-top:1px solid var(--border)}
+#rs-tarjeta .prog:first-of-type{border-top:none}
+#rs-tarjeta .prog b{font-family:var(--mono);font-size:12px}
+#rs-tarjeta .semana{display:grid;grid-template-columns:52px repeat(7,1fr);gap:3px;font-size:10px;text-align:center}
+#rs-tarjeta .semana .h{color:var(--muted);font-weight:700}
+#rs-tarjeta .semana .l{text-align:left;color:var(--muted);font-size:9px;text-transform:uppercase;align-self:center}
+#rs-tarjeta .chip{border-radius:5px;padding:4px 1px;font-weight:600;font-size:9.5px;line-height:1.2}
+#rs-tarjeta .V{background:rgba(184,204,223,.08);color:var(--text2);font-weight:500}
+#rs-tarjeta .vs{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;text-align:center}
+#rs-tarjeta .vs b{display:block;font-family:var(--display);font-size:34px;line-height:1}
+#rs-tarjeta .vs span{font-size:10px;color:var(--muted)}
+#rs-tarjeta .vs i{font-style:normal;font-size:18px;color:var(--muted)}
+#rs-tarjeta .alerta{margin-top:8px;font-size:11.5px;line-height:1.45;background:rgba(245,82,74,.12);border:1px solid rgba(245,82,74,.35);border-radius:9px;padding:8px 10px}
+#rs-tarjeta .alerta b{color:var(--white)}
+#rs-tarjeta .reco{border-color:rgba(34,201,138,.5);background:linear-gradient(180deg,rgba(34,201,138,.10),rgba(17,31,56,.85))}
+#rs-tarjeta .reco .t-sec-t{color:var(--green)}
+#rs-tarjeta .reco-n{font-size:13px;line-height:1.5;color:var(--text2);margin-top:8px}
+#rs-tarjeta .t-pie{display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:11px;color:var(--muted)}
+#rs-tarjeta .t-pie b{color:var(--white);font-family:var(--display);font-size:17px;letter-spacing:1.5px}
+@media(max-width:1100px){.rs-layout{grid-template-columns:1fr}}
+@media(max-width:768px){.rs-col-img{overflow-x:auto}#rs-tarjeta{zoom:.62}}
+/* ── GUÍA DE USO ── */
+.gd-intro{background:var(--cel-dim);border:1px solid var(--border2);border-radius:14px;padding:16px 18px;font-size:13px;line-height:1.6;color:var(--text2);margin-bottom:8px}
+.gd-intro b{color:var(--white)}
+.gd-sec{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin:22px 0 10px}
+.gd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.gd-card{background:linear-gradient(180deg,var(--bg2),rgba(17,31,56,0.7));border:1px solid var(--border);border-radius:14px;padding:16px 18px}
+.gd-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.gd-ico{width:32px;height:32px;border-radius:9px;background:var(--cel-dim);color:var(--cel);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.gd-tit{flex:1;font-family:var(--display);font-size:22px;letter-spacing:1px;color:var(--white)}
+.gd-card p{font-size:13px;line-height:1.6;color:var(--text2);margin-bottom:6px}
+.gd-card ul{margin:0 0 4px 18px;font-size:13px;line-height:1.7;color:var(--text2)}
+.gd-card b{color:var(--white)}
+.gd-tip{color:var(--amber)!important;font-size:12px!important}
+.gd-faq p{margin-bottom:12px}
+.gd-card code{font-family:var(--mono);font-size:12px;color:var(--cel)}
 /* ── ENCUESTAS ── */
 .enc-toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
 .enc-filtros{display:flex;gap:6px;flex-wrap:wrap}
@@ -447,8 +529,11 @@ window._fbFichas = (callback) => {
     <div class="ni" onclick="goScreen('ficha',this)"><span class="ni-icon">◧</span><span>Ficha del atleta</span></div>
     <div class="ni" onclick="goScreen('tests',this)"><span class="ni-icon">✓</span><span>Tests</span></div>
     <div class="ni" onclick="goScreen('encuestas',this)"><span class="ni-icon">📋</span><span>Encuestas</span></div>
+    <div class="ni" onclick="goScreen('resumen',this)"><span class="ni-icon">📲</span><span>Resumen por atleta</span></div>
     <div class="nav-sec">Vista</div>
     <div class="ni" onclick="goScreen('atleta-view',this)"><span class="ni-icon">◐</span><span>Vista atleta</span></div>
+    <div class="nav-sec">Ayuda</div>
+    <div class="ni" onclick="goScreen('guia',this)"><span class="ni-icon">❓</span><span>Guía de uso</span></div>
   </nav>
   <div class="sb-bot">
     <div class="role-pill" onclick="toggleRole()">
@@ -1189,6 +1274,88 @@ window._fbFichas = (callback) => {
     <div id="enc-dt"><div style="color:var(--muted);font-size:13px">Conectando con Firebase…</div></div>
   </div>
 
+  <div class="screen" id="s-resumen">
+    <div id="rs-lista-wrap">
+      <div class="enc-toolbar">
+        <div class="enc-filtros" id="rs-filtros">
+          <button class="btn btn-ghost btn-sm on" onclick="rsFiltrar('todos',this)">Todos</button>
+          <button class="btn btn-ghost btn-sm" onclick="rsFiltrar('pendientes',this)">Sin enviar</button>
+          <button class="btn btn-ghost btn-sm" onclick="rsFiltrar('alerta',this)">Con alerta</button>
+        </div>
+        <input class="form-input" style="max-width:240px" placeholder="Buscar atleta…" oninput="RS.q=this.value;renderResumenLista()">
+      </div>
+      <div class="rs-leyenda">Tocá un atleta para ver su resumen, ajustar la recomendación y compartirlo. "Enviado" queda guardado en este dispositivo.</div>
+      <div id="rs-lista"><div style="color:var(--muted);font-size:13px">Cargando datos de Firebase…</div></div>
+    </div>
+    <div id="rs-detalle" style="display:none">
+      <button class="btn btn-ghost btn-sm" onclick="rsVolverLista()" style="margin-bottom:14px">← Volver a la lista</button>
+      <div class="rs-layout">
+        <div class="rs-col-img"><div id="rs-tarjeta"></div></div>
+        <div class="rs-col-ctrl">
+          <div class="rs-box">
+            <div class="rs-box-t">Recomendación · tocá un día para cambiarlo</div>
+            <div class="rs-dias" id="rs-dias"></div>
+            <div class="rs-box-t" style="margin-top:12px">Texto de la recomendación</div>
+            <textarea class="form-input" id="rs-reco-txt" rows="3" oninput="rsEditarReco(this.value)"></textarea>
+          </div>
+          <div class="rs-box">
+            <div class="rs-box-t">Mensaje principal</div>
+            <textarea class="form-input" id="rs-msg" rows="9"></textarea>
+            <div class="rs-btns">
+              <button class="btn rs-wa" id="rs-btn-share" onclick="rsCompartir()">Compartir mensaje + imagen</button>
+              <button class="btn btn-ghost" onclick="rsDescargar()">⬇ Descargar imagen</button>
+            </div>
+            <label class="rs-enviado"><input type="checkbox" id="rs-enviado" onchange="rsMarcarEnviado(this.checked)"> Ya se lo mandé</label>
+            <div class="rs-nota">En el celular abre WhatsApp con el texto y la imagen juntos. En la computadora copia el texto, baja la imagen y abre WhatsApp para que la adjuntes.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="s-guia">
+    <div class="gd-intro">
+      <b>Cómo funciona todo:</b> los atletas cargan desde su celular (app de atletas) y cada sesión, ficha y encuesta llega a Firebase.
+      Este panel lee Firebase <b>en vivo</b>: no hay que actualizar nada, los datos aparecen solos. Nada se pisa ni se borra: cada registro queda en el historial.
+    </div>
+    <div class="gd-sec">Principal</div>
+    <div class="gd-grid">
+      <div class="gd-card"><div class="gd-head"><span class="gd-ico">▦</span><div class="gd-tit">Resumen</div><button class="btn btn-ghost btn-sm" onclick="goScreen('dashboard')">Ir →</button></div><p>La foto del día: sesiones de hoy, fichas recibidas, total de sesiones, quién entrenó en los últimos 7 días y quién no.</p><ul><li><b>Alertas</b>: quién entrenó y quién no registró nada.</li><li><b>Asistencia por atleta</b>: verde entrenó, rojo sin registrar.</li><li><b>⬇ Exportar récords</b>: baja una planilla.</li></ul></div>
+      <div class="gd-card"><div class="gd-head"><span class="gd-ico">◉</span><div class="gd-tit">Atletas</div><button class="btn btn-ghost btn-sm" onclick="goScreen('atletas')">Ir →</button></div><p>La nómina completa con sesiones, días entrenados y faltados, último press y sentadilla, estado y última nota. Tocá una tarjeta para abrir la ficha del atleta. Se puede filtrar por provincia.</p></div>
+    </div>
+    <div class="gd-sec">Entrenamiento</div>
+    <div class="gd-grid">
+      <div class="gd-card"><div class="gd-head"><span class="gd-ico">✎</span><div class="gd-tit">Cargar rutina</div><button class="btn btn-ghost btn-sm" onclick="goScreen('carga')">Ir →</button></div><p>Para armar o cambiar la rutina. Elegí <b>Todo el grupo</b> o <b>Override individual</b> (un solo atleta), la fase, y agregá ejercicios con <b>+ ejercicio</b>. Después tocá <b>Guardar rutina</b>.</p></div>
+      <div class="gd-card"><div class="gd-head"><span class="gd-ico">◎</span><div class="gd-tit">Nuevo reporte</div><button class="btn btn-ghost btn-sm" onclick="goScreen('reporte')">Ir →</button></div><p>Resumen de sesiones por día (Día 1, 2, 3, Recovery) y <b>atletas críticos</b> con 0 sesiones. <b>📋 Copiar WhatsApp</b> deja el reporte listo para pegar en el grupo.</p></div>
+    </div>
+    <div class="gd-sec">Análisis</div>
+    <div class="gd-grid">
+      <div class="gd-card"><div class="gd-head"><span class="gd-ico">◉</span><div class="gd-tit">Seguimiento</div><button class="btn btn-ghost btn-sm" onclick="goScreen('seguimiento')">Ir →</button></div><p>En vivo: sesiones de hoy, cuántos están <b>sin molestias, con molestias o lesionados</b>, y la lista de las últimas sesiones con estado, RPE, nota y ejercicios. Abajo están las fichas recibidas.</p><p class='gd-tip'>Revisalo después de cada entrenamiento para ver molestias reportadas.</p></div>
+      <div class="gd-card"><div class="gd-head"><span class="gd-ico">⚡</span><div class="gd-tit">Potencia</div><button class="btn btn-ghost btn-sm" onclick="goScreen('potencia')">Ir →</button></div><p>El macrociclo de Potencia (Contraste Francés): fase actual, sesiones por día, atletas activos y el último press banca y sentadilla al 90% de cada uno.</p></div>
+      <div class="gd-card"><div class="gd-head"><span class="gd-ico">↗</span><div class="gd-tit">Progresión</div><button class="btn btn-ghost btn-sm" onclick="goScreen('progresion')">Ir →</button></div><p>Elegí un atleta y ves su historial completo: todas las sesiones en orden y cómo evolucionó cada ejercicio (primer peso → último y % de mejora).</p></div>
+      <div class="gd-card"><div class="gd-head"><span class="gd-ico">⊙</span><div class="gd-tit">Provincias</div><button class="btn btn-ghost btn-sm" onclick="goScreen('provincias')">Ir →</button></div><p>Atletas por provincia, referente y estado de los reportes semanales de cada sede.</p></div>
+      <div class="gd-card"><div class="gd-head"><span class="gd-ico">◈</span><div class="gd-tit">Calendario</div><button class="btn btn-ghost btn-sm" onclick="goScreen('calendario')">Ir →</button></div><p>Competencias del año con días restantes y sesiones. Con <b>⚙ Ajustar competencias</b> cambiás fechas y estado. También están las fases del plan de tiro.</p></div>
+      <div class="gd-card"><div class="gd-head"><span class="gd-ico">🔍</span><div class="gd-tit">Diagnóstico</div><button class="btn btn-ghost btn-sm" onclick="goScreen('diagnostico')">Ir →</button></div><p>Para revisar datos crudos de Firebase: qué nombres llegaron y si alguno no coincide con la lista oficial (por ejemplo, alguien que escribió mal su apellido). <b>📋 Copiar para Carlos</b> copia todo.</p></div>
+    </div>
+    <div class="gd-sec">Atletas</div>
+    <div class="gd-grid">
+      <div class="gd-card"><div class="gd-head"><span class="gd-ico">◧</span><div class="gd-tit">Ficha del atleta</div><button class="btn btn-ghost btn-sm" onclick="goScreen('ficha')">Ir →</button></div><p>Datos personales y deportivos de cada atleta (número, posición, lateralidad, provincia, DNI, cobertura médica), tests realizados y notas. El <b>perfil</b> (pitcher / jugador de posición) se muestra con su historial.</p></div>
+      <div class="gd-card"><div class="gd-head"><span class="gd-ico">✓</span><div class="gd-tit">Tests</div><button class="btn btn-ghost btn-sm" onclick="goScreen('tests')">Ir →</button></div><p>Qué tests hizo cada atleta: fuerza máxima, test de campo, exit velo, 60 yardas, test físico y apto médico. Filtrá por <b>Realizados</b> o <b>Pendientes</b>.</p></div>
+      <div class="gd-card"><div class="gd-head"><span class="gd-ico">📋</span><div class="gd-tit">Encuestas</div><button class="btn btn-ghost btn-sm" onclick="goScreen('encuestas')">Ir →</button></div><p>Las respuestas de la charla <b>¿En qué parte de mi proceso estoy?</b>, en vivo:</p><ul><li>Quién respondió y <b>quién falta</b>.</li><li>Gráficos de cada pregunta y el cruce <b>nivel hoy → objetivo</b>.</li><li>La semana del plantel: qué eligen para cada día.</li><li>Filtro Pitchers / Jugadores de posición.</li><li>Tocá un atleta para ver todas sus respuestas.</li><li><b>⬇ Exportar respuestas</b>: planilla para Excel, una columna por opción.</li></ul></div>
+    </div>
+    <div class="gd-sec">Vista</div>
+    <div class="gd-grid">
+      <div class="gd-card"><div class="gd-head"><span class="gd-ico">◐</span><div class="gd-tit">Vista atleta</div><button class="btn btn-ghost btn-sm" onclick="goScreen('atleta-view')">Ir →</button></div><p>Muestra la rutina como la ve el atleta, para revisarla antes de mandarla.</p></div>
+      <div class="gd-card"><div class="gd-head"><span class="gd-ico">📱</span><div class="gd-tit">La app de atletas</div></div><p>Es el <b>link alumno</b>. El atleta busca su apellido, elige pitcher o jugador de posición, elige la rutina, carga pesos y guarda con un reporte (estado físico, RPE y nota).</p><ul><li>Si no tiene señal, la sesión queda en su celular y se envía sola después.</li><li>La app tiene su propia guía: botón <b>❓ ¿Cómo se usa la app?</b> en la portada.</li></ul></div>
+    </div>
+    <div class="gd-sec">Preguntas frecuentes</div>
+    <div class="gd-card gd-faq">
+      <p><b>Un atleta dice que guardó pero no aparece.</b> Mirá <i>Diagnóstico</i>: puede haber llegado con otro nombre. Si guardó sin señal, aparece cuando su celular se vuelva a conectar.</p>
+      <p><b>¿Se puede borrar o pisar un registro?</b> No desde el panel. Cada sesión, ficha y encuesta es un registro nuevo; el historial completo queda en Firebase.</p>
+      <p><b>¿Cómo actualizo la app?</b> Se reemplazan los archivos <code>index.html</code> (atletas) y <code>dt.html</code> (este panel) en GitHub, y Vercel publica solo.</p>
+    </div>
+  </div>
+
   <div class="screen" id="s-ficha">
     <div class="ficha-selector" id="ficha-selector"></div>
     <div class="ficha-layout" id="ficha-content" style="display:none">
@@ -1585,6 +1752,8 @@ const TITLES={
   provincias:['PROVINCIAS','Control de reportes y coordinación'],
   calendario:['CALENDARIO','Competencias · Gestiones · Situación actual'],
   seguimiento:['SEGUIMIENTO EN VIVO','Sesiones · reportes · fichas · en tiempo real desde Firebase'],
+  resumen:['RESUMEN POR ATLETA','Entrenamiento real + estilo de vida + tu recomendación · para compartir por WhatsApp'],
+  guia:['GUÍA DE USO','Qué muestra cada pantalla del panel y cómo usarla'],
   encuestas:['ENCUESTAS','Charla habilidades motoras · ¿En qué parte de mi proceso estoy? · en vivo'],
 };
 
@@ -1596,6 +1765,7 @@ function goScreen(id,el){
   else document.querySelectorAll('.ni').forEach(n=>{if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes(`'${id}'`))n.classList.add('on');});
   if(id==='tests') renderTests();
   if(id==='encuestas') renderEncuestasDT();
+  if(id==='resumen') { rsVolverLista(); renderResumenLista(); }
   if(id==='ficha') buildFichaSelector();
   if(id==='calendario') { setTimeout(renderCompetencias,50); setTimeout(renderPlanTiro,100); }
   if(id==='reporte')      setTimeout(generarReporte, 100);
@@ -2232,6 +2402,8 @@ function fk(f) {
   const p = String(f || '').split('/');
   return p.length === 3 ? p[2] + '-' + p[1].padStart(2,'0') + '-' + p[0].padStart(2,'0') : '';
 }
+// Peso escrito por el atleta → número. Acepta coma decimal ("32,5" → 32.5); parseFloat solo cortaba en la coma.
+function num(v) { return parseFloat(String(v ?? '').replace(',', '.')); }
 function porFecha(a, b) { return fk(a.fecha) < fk(b.fecha) ? -1 : fk(a.fecha) > fk(b.fecha) ? 1 : 0; }
 
 function ecColor(e){
@@ -2502,7 +2674,8 @@ function initSeguimiento(){
           porAtletaPot[ap].ultimaFecha = d.fecha||'';
           porAtletaPot[ap].ultimaHora = d.hora||'';
         }
-        Object.assign(porAtletaPot[ap].registros, d.registros||{});
+        // Sesiones de la más nueva a la más vieja: quedarse con el primer valor de cada ejercicio (el último cargado)
+        Object.entries(d.registros||{}).forEach(([k,v]) => { if (!(k in porAtletaPot[ap].registros)) porAtletaPot[ap].registros[k] = v; });
       });
       const atletasBody = document.getElementById('pot-atletas-tbody');
       if (atletasBody) {
@@ -2555,8 +2728,8 @@ function initSeguimiento(){
         const pct = Math.round((dat.total / SESIONES_OBJETIVO) * 100);
 
         // Últimos pesos clave
-        const pb  = dat.pesos['press-banca']?.slice(-1)[0]?.val || '—';
-        const sq  = dat.pesos['sentadilla']?.slice(-1)[0]?.val || dat.pesos['sentadilla-d1']?.slice(-1)[0]?.val || '—';
+        const pb  = dat.pesos['press-banca']?.[0]?.val || '—'; // [0] = más reciente (sesiones vienen de nueva a vieja)
+        const sq  = dat.pesos['sentadilla']?.[0]?.val || dat.pesos['sentadilla-d1']?.[0]?.val || '—';
 
         // Días que SÍ entrenó (fechas reales de sesión en días de entrenamiento)
         const diasEntrenados = [...new Set(
@@ -2627,6 +2800,7 @@ function initSeguimiento(){
 
     // Guardar datos globalmente para usar en otras funciones
     window._fbDatos = { porAtleta, sesiones, hoy, hace7, inactivos };
+    if (document.getElementById('s-resumen')?.classList.contains('on') && !RS.actual) renderResumenLista();
 
     // Actualizar reporte Buenos Aires con datos reales
     actualizarReporteBsAs(porAtleta, sesiones, inactivos, activosSemana);
@@ -2750,8 +2924,8 @@ function renderProgresionFb(ap, porAtletaArg) {
         </tr></thead>
         <tbody>${ejsConDatos.map(([ej, registros]) => {
           const sorted = registros.slice().sort(porFecha);
-          const primero = parseFloat(sorted[0].val);
-          const ultimo  = parseFloat(sorted[sorted.length-1].val);
+          const primero = num(sorted[0].val);
+          const ultimo  = num(sorted[sorted.length-1].val);
           const diff    = !isNaN(primero) && !isNaN(ultimo)
             ? ultimo - primero
             : null;
@@ -2760,7 +2934,7 @@ function renderProgresionFb(ap, porAtletaArg) {
             : diff < 0 ? `<span style="color:var(--red)">↓ ${diff.toFixed(1)}kg</span>`
             : `<span style="color:var(--amber)">→ sin cambio</span>`;
           const hist = sorted.map(r =>
-            `<span style="font-size:10px;font-family:var(--mono);background:var(--bg3);padding:1px 5px;border-radius:3px">${r.fecha.slice(5)} <strong>${r.val}</strong></span>`
+            `<span style="font-size:10px;font-family:var(--mono);background:var(--bg3);padding:1px 5px;border-radius:3px">${String(r.fecha||'').split('/').slice(0,2).join('/')} <strong>${r.val}</strong></span>`
           ).join(' ');
           return `<tr>
             <td class="td-n" style="text-transform:capitalize">${ej.replace(/-/g,' ')}</td>
@@ -2874,10 +3048,10 @@ function abrirFichaModal(ap) {
   const ejsHTML = Object.entries(dat.pesos || {}).filter(([,arr]) => arr?.length).map(([ej, arr]) => {
     const sorted = arr.slice().sort(porFecha);
     const ultimo = sorted[sorted.length-1];
-    const val = parseFloat(ultimo.val);
+    const val = num(ultimo.val);
     const irreal = !isNaN(val) && (val > 400 || val < 0);
     const trend = sorted.length > 1 ? (() => {
-      const p = parseFloat(sorted[0].val), u = parseFloat(ultimo.val);
+      const p = num(sorted[0].val), u = num(ultimo.val);
       if (isNaN(p)||isNaN(u)) return '';
       const d = u-p;
       return d > 0 ? `<span style="color:var(--green)">↑ +${d.toFixed(1)}</span>`
@@ -3421,6 +3595,240 @@ function exportarEncuestas() {
   a.href = url; a.download = 'FAB_encuesta_habilidades_' + new Date().toISOString().slice(0, 10) + '.csv';
   a.click(); URL.revokeObjectURL(url);
 }
+
+
+// ── RESUMEN POR ATLETA · imagen para compartir + recomendación ──────────────
+// Junta lo que el atleta cargó en la app (sesiones) con su estilo de vida (encuesta) y propone
+// una semana posible. La propuesta es una sugerencia para Carlos: los días y los textos se editan antes de compartir.
+const RS = { filtro:'todos', q:'', actual:null, plan:null, reco:'' };
+const RS_DIAS = [['lun','Lun'],['mar','Mar'],['mie','Mié'],['jue','Jue'],['vie','Vie'],['sab','Sáb'],['dom','Dom']];
+const RS_CICLO = ['—','Fuerza','Recovery','Híbrido','Campo','Descanso'];
+const RS_CLASE = { Fuerza:'F', Recovery:'R', 'Híbrido':'H', Campo:'C', Descanso:'D', '—':'D' };
+const RS_LESION = /lesi[oó]n|dolor|molest|distensi|contractur|desgarr|tendin|esguin|inflama|lastim/i;
+const RS_LIFTS = [ ['Sentadilla', ['sentadilla','pot-sentadilla']], ['Press banca', ['press-banca','pot-press-banca']], ['Peso muerto', ['peso-muerto','pot-pm-trapbar']] ];
+
+function rsEnviados() { try { return JSON.parse(localStorage.getItem('fab-rs-enviados') || '{}'); } catch(e) { return {}; } }
+function rsMarcarEnviado(v) {
+  const e = rsEnviados(); const k = RS.actual.clave;
+  if (v) e[k] = new Date().toLocaleDateString('es-AR'); else delete e[k];
+  try { localStorage.setItem('fab-rs-enviados', JSON.stringify(e)); } catch(err) {}
+}
+function rsFmt(n) { return (Math.round(n * 10) / 10).toString().replace('.', ','); }
+function rsDiaSemana(d) { return RS_DIAS[(new Date(d.timestamp.seconds * 1000).getDay() + 6) % 7][0]; }
+
+// Todo lo que sabemos de un atleta
+function rsDatos(a) {
+  const clave = `${a.ap}, ${a.nom}`;
+  const S = (window._fbDatos && window._fbDatos.sesiones) || [];
+  const ses = S.filter(d => (d.tipo === 'SESION' || !d.tipo) && d.atleta === clave && d.timestamp).sort((x, y) => x.timestamp.seconds - y.timestamp.seconds);
+  const ahora = Date.now() / 1000, SEM = 7 * 86400;
+  const porSemana = [...Array(8)].map((_, i) => ses.filter(d => d.timestamp.seconds > ahora - (8 - i) * SEM && d.timestamp.seconds <= ahora - (7 - i) * SEM).length);
+  const real = porSemana.slice(2).reduce((x, y) => x + y, 0) / 6; // promedio de las últimas 6 semanas
+  const prom8 = porSemana.reduce((x, y) => x + y, 0) / 8;
+  const recientes = ses.filter(d => d.timestamp.seconds > ahora - 8 * SEM);
+  const frecDia = {}; recientes.forEach(d => { const k = rsDiaSemana(d); frecDia[k] = (frecDia[k] || 0) + 1; });
+  const diasTop = Object.entries(frecDia).sort((x, y) => y[1] - x[1]).map(x => x[0]);
+  // Progreso de cada ejercicio dentro de UNA rutina (pretemporada 3×10 y Potencia 90% no son comparables):
+  // se usa la que tenga el registro más reciente y al menos 2 valores
+  const lifts = RS_LIFTS.map(([nombre, ids]) => {
+    const series = ids.map(id => ses.filter(d => d.registros && num(d.registros[id]) > 0).map(d => ({ v: num(d.registros[id]), t: d.timestamp.seconds })))
+      .filter(v => v.length >= 2).sort((x, y) => y[y.length - 1].t - x[x.length - 1].t);
+    const v = series[0];
+    return v ? { nombre, primero: v[0].v, ultimo: v[v.length - 1].v } : null;
+  }).filter(Boolean).slice(0, 2);
+  // "sin molestias" / "sin dolor" no cuentan como molestia
+  const lesionNotas = recientes.filter(d => RS_LESION.test(String(d.reporte?.nota || '').replace(/sin\s+(molestias?|dolor(es)?)/gi, '')));
+  const conMolestia = recientes.filter(d => /leve|Cuidando|Fuera/i.test(d.reporte?.estado || ''));
+  const enc = (window.ENCUESTAS || []).filter(e => e.atleta === clave).sort((x, y) => encTs(y) - encTs(x))[0] || null;
+  const planeadas = enc ? RS_DIAS.reduce((n, [k]) => n + (enc.semana?.[k]?.entreno || []).filter(e => e !== 'Descanso').length, 0) : null;
+  const perfil = (window.PERFILES && window.PERFILES[a.ap] && window.PERFILES[a.ap].actual) || ses.at(-1)?.perfil || enc?.posicion || '';
+  return { a, clave, ses, porSemana, real, prom8, diasTop, lifts, lesionNotas, conMolestia, enc, planeadas, perfil,
+    alerta: lesionNotas.length > 0 || conMolestia.length > 0 };
+}
+
+// Semana recomendada: lo real + 1 (mínimo 2, máximo 5), en los días que ya entrena y después en los libres
+function rsRecomendar(D) {
+  const n = Math.max(2, Math.min(5, Math.round(D.real) + 1));
+  const fuerza = n >= 4 ? 3 : 2, recovery = n - fuerza;
+  const enc = D.enc;
+  const libres = enc ? RS_DIAS.filter(([k]) => (enc.semana?.[k]?.vida || []).includes('Libre')).map(x => x[0]) : [];
+  const planeados = enc ? RS_DIAS.filter(([k]) => (enc.semana?.[k]?.entreno || []).some(e => e !== 'Descanso' && e !== 'Campo')).map(x => x[0]) : [];
+  const orden = [...new Set([...D.diasTop, ...libres, ...planeados, 'mar', 'jue', 'lun', 'mie', 'vie', 'sab', 'dom'])];
+  const idx = k => RS_DIAS.findIndex(x => x[0] === k);
+  const plan = Object.fromEntries(RS_DIAS.map(([k]) => [k, '—']));
+  const elegidos = [];
+  // Fuerza: evitar dos días seguidos cuando se puede
+  for (const k of orden) { if (elegidos.length >= fuerza) break; if (!elegidos.some(e => Math.abs(idx(e) - idx(k)) === 1)) elegidos.push(k); }
+  for (const k of orden) { if (elegidos.length >= fuerza) break; if (!elegidos.includes(k)) elegidos.push(k); }
+  elegidos.forEach(k => plan[k] = 'Fuerza');
+  let rec = 0; for (const k of orden) { if (rec >= recovery) break; if (plan[k] === '—') { plan[k] = 'Recovery'; rec++; } }
+  if (enc) RS_DIAS.forEach(([k]) => { if (plan[k] === '—' && (enc.semana?.[k]?.entreno || []).includes('Campo')) plan[k] = 'Campo'; });
+  RS_DIAS.forEach(([k]) => { if (plan[k] === '—') plan[k] = 'Descanso'; });
+  return plan;
+}
+function rsTextoReco(D, plan) {
+  const c = o => RS_DIAS.filter(([k]) => plan[k] === o).length;
+  const gym = c('Fuerza') + c('Recovery') + c('Híbrido');
+  const partes = [`${c('Fuerza')} de fuerza`]; if (c('Recovery')) partes.push(`${c('Recovery')} recovery`); if (c('Híbrido')) partes.push(`${c('Híbrido')} híbrido`);
+  let t = `${gym} sesiones de gym por semana (${partes.join(' + ')})` + (D.diasTop.length ? ' en los días que ya entrenás.' : '.');
+  if (D.alerta) t += ' Adaptamos lo que te molesta hasta que esté bien.';
+  t += ' Si lo sostenés 4 semanas, sumamos.';
+  return t;
+}
+function rsMensaje(D) {
+  const nombre = D.a.nom.split(' ')[0];
+  if (!D.ses.length) return `Hola ${nombre}, ¿cómo estás? Estoy armando una planificación que se pueda cumplir de verdad, adaptada a la vida de cada uno.\n\nNo tengo registros tuyos en la app y quiero saber cómo venís entrenando. ¿Cuándo podemos hablar esta semana?`;
+  let m = `Hola ${nombre}, ¿cómo estás? Estuve revisando todo lo que cargaste en la app${D.enc ? ' y en la encuesta' : ''}.\n\n`;
+  if (D.real === 0) m += `Hace más de un mes que no veo sesiones tuyas en la app y quiero que armemos una rutina que puedas sostener` + (D.enc ? `: en la encuesta planificaste ${D.planeadas} sesiones por semana, busquemos algo posible.` : '.');
+  else if (D.enc) m += `Quiero que ajustemos la rutina a tu realidad: planificaste ${D.planeadas} sesiones por semana y hoy estás haciendo ${rsFmt(D.real)}. No está mal, es información.`;
+  else m += `Quiero que ajustemos la rutina a tu realidad: hoy estás haciendo ${rsFmt(D.real)} sesiones por semana.`;
+  if (D.alerta) m += ` Además vi que reportaste molestias y quiero que lo veamos.`;
+  if (!D.enc) m += `\n\nSi podés, contestá la encuesta de la charla en la app (botón 🎤 Charla): me sirve para saber cómo es tu semana.`;
+  m += `\n\nTe paso tu resumen. ¿Cuándo podemos hablar esta semana?`;
+  return m;
+}
+
+function rsFiltrar(f, btn) {
+  RS.filtro = f;
+  document.querySelectorAll('#rs-filtros .btn').forEach(b => b.classList.toggle('on', b === btn));
+  renderResumenLista();
+}
+function renderResumenLista() {
+  const el = document.getElementById('rs-lista'); if (!el) return;
+  if (!window._fbDatos) { el.innerHTML = '<div style="color:var(--muted);font-size:13px">Cargando datos de Firebase…</div>'; return; }
+  const env = rsEnviados();
+  const q = String(RS.q || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  let lista = ATLETAS.filter(a => !/\(/.test(a.nom)).map(rsDatos); // sin staff (DT / PC)
+  if (q) lista = lista.filter(D => D.clave.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().includes(q));
+  if (RS.filtro === 'pendientes') lista = lista.filter(D => !env[D.clave]);
+  if (RS.filtro === 'alerta') lista = lista.filter(D => D.alerta);
+  lista.sort((x, y) => (!!env[x.clave] - !!env[y.clave]) || (y.ses.length - x.ses.length));
+  el.innerHTML = `<div class="rs-grid">${lista.map(D => {
+    const i = ATLETAS.indexOf(D.a);
+    return `<div class="rs-item${env[D.clave] ? ' env' : ''}" onclick="abrirResumen(${i})">
+      <div class="rs-item-n">${encEsc(D.clave)}</div>
+      <div class="rs-item-tags">
+        <span class="badge ${D.ses.length ? 'bc' : 'br'}">${D.ses.length ? rsFmt(D.real) + '/sem' : 'Sin sesiones'}</span>
+        <span class="badge ${D.enc ? 'bg' : 'bx'}">${D.enc ? 'Encuesta ✓' : 'Sin encuesta'}</span>
+        ${D.alerta ? '<span class="badge br">⚠ Molestias</span>' : ''}
+        ${env[D.clave] ? `<span class="badge bg">Enviado ${env[D.clave]}</span>` : ''}
+      </div></div>`;
+  }).join('') || '<div style="color:var(--muted);font-size:13px">No hay atletas con este filtro.</div>'}</div>`;
+}
+
+function rsVolverLista() {
+  RS.actual = null;
+  document.getElementById('rs-lista-wrap').style.display = 'block';
+  document.getElementById('rs-detalle').style.display = 'none';
+  renderResumenLista();
+}
+function abrirResumen(i) {
+  const D = rsDatos(ATLETAS[i]);
+  RS.actual = D; RS.plan = rsRecomendar(D); RS.reco = rsTextoReco(D, RS.plan);
+  document.getElementById('rs-lista-wrap').style.display = 'none';
+  document.getElementById('rs-detalle').style.display = 'block';
+  document.getElementById('rs-msg').value = rsMensaje(D);
+  document.getElementById('rs-reco-txt').value = RS.reco;
+  document.getElementById('rs-enviado').checked = !!rsEnviados()[D.clave];
+  rsPintar();
+  document.querySelector('.main')?.scrollTo?.(0, 0); window.scrollTo(0, 0);
+}
+function rsCambiarDia(k) {
+  RS.plan[k] = RS_CICLO[(RS_CICLO.indexOf(RS.plan[k]) + 1) % RS_CICLO.length];
+  RS.reco = rsTextoReco(RS.actual, RS.plan);
+  document.getElementById('rs-reco-txt').value = RS.reco;
+  rsPintar();
+}
+function rsEditarReco(v) { RS.reco = v; rsPintarTarjeta(); }
+function rsPintar() {
+  document.getElementById('rs-dias').innerHTML = RS_DIAS.map(([k, n]) =>
+    `<button class="rs-dia ${RS_CLASE[RS.plan[k]]}" onclick="rsCambiarDia('${k}')"><span>${n}</span>${RS.plan[k]}</button>`).join('');
+  rsPintarTarjeta();
+}
+
+function rsPintarTarjeta() {
+  const D = RS.actual, enc = D.enc;
+  const max = Math.max(1, ...D.porSemana);
+  const nivel = enc ? `Hoy: <b>${ENC_NIVELES_DT[enc.nivelHoy] || '—'}</b> → Objetivo: <b>${ENC_OBJ_DT[enc.objetivo] || '—'}</b>` : 'Encuesta sin responder';
+  const pos = D.perfil === 'pitcher' ? 'Pitcher' : D.perfil === 'posicion' ? 'Jugador de posición' : '';
+  const fila = (etq, fn) => `<div class="l">${etq}</div>` + RS_DIAS.map(([k]) => fn(k)).join('');
+  const chips = arr => arr.length ? arr.map(e => e).join('<br>+ ') : '—';
+  let h = `<div class="t-head"><div class="t-marca">FAB · LOS GAUCHOS</div><div class="t-fecha">Resumen personal<br>${new Date().toLocaleDateString('es-AR', { month:'long', year:'numeric' })}</div></div>
+    <div class="t-nombre">${encEsc((D.a.nom.split(' ')[0] + ' ' + D.a.ap).toUpperCase())}</div>
+    <div class="t-sub">${pos ? pos + ' · ' : ''}${nivel}</div>`;
+  if (D.ses.length) {
+    h += `<div class="t-sec"><div class="t-sec-t"><span>Tu entrenamiento en la app</span><span>desde ${encEsc(D.ses[0].fecha)}</span></div>
+      <div class="t-kpis">
+        <div class="kpi"><b>${D.ses.length}</b><span>Sesiones</span></div>
+        <div class="kpi"><b style="color:var(--amber)">${rsFmt(D.real)}</b><span>Por semana<br>(últ. 6 sem.)</span></div>
+        <div class="kpi"><b style="color:var(--cel)">${D.diasTop.length ? D.diasTop.slice(0, 2).map(k => RS_DIAS.find(x => x[0] === k)[1].toUpperCase()).join(' · ') : '—'}</b><span>Días que<br>más entrenás</span></div>
+      </div>
+      <div class="barras">${D.porSemana.map(n => n ? `<div style="height:${Math.round(n / max * 100)}%"></div>` : '<div class="cero"></div>').join('')}</div>
+      <div class="barras-l"><span>hace 8 semanas</span><span>esta semana</span></div>
+      ${D.lifts.length ? '<div style="margin-top:8px">' + D.lifts.map(l => { const d = l.ultimo - l.primero; return `<div class="prog"><span>${l.nombre}</span><b style="color:${d >= 0 ? 'var(--green)' : 'var(--red)'}">${rsFmt(l.primero)} → ${rsFmt(l.ultimo)} kg · ${d >= 0 ? '+' : ''}${rsFmt(d)}</b></div>`; }).join('') + '</div>' : ''}
+    </div>`;
+  } else {
+    h += `<div class="t-sec"><div class="t-sec-t"><span>Tu entrenamiento en la app</span></div><div class="reco-n">Todavía no hay sesiones tuyas cargadas en la app.</div></div>`;
+  }
+  if (enc) {
+    h += `<div class="t-sec"><div class="t-sec-t"><span>La semana que planificaste (encuesta)</span></div>
+      <div class="semana"><div></div>${RS_DIAS.map(x => `<div class="h">${x[1].toUpperCase()}</div>`).join('')}
+        ${fila('Vida', k => `<div class="chip V">${chips(enc.semana?.[k]?.vida || [])}</div>`)}
+        ${fila('Entreno', k => { const e = enc.semana?.[k]?.entreno || []; return `<div class="chip ${RS_CLASE[e[0]] || 'D'}">${chips(e)}</div>`; })}
+      </div></div>`;
+  }
+  if (D.ses.length && enc) {
+    h += `<div class="t-sec"><div class="t-sec-t"><span>Lo que planificaste vs. lo que hacés</span></div>
+      <div class="vs"><div><b style="color:var(--amber)">${D.planeadas}</b><span>sesiones planificadas<br>por semana</span></div><i>vs</i>
+      <div><b style="color:var(--cel)">${rsFmt(D.real)}</b><span>sesiones reales<br>por semana</span></div></div>`;
+  } else if (D.alerta) h += `<div class="t-sec">`;
+  if (D.alerta) {
+    const zonas = D.lesionNotas.length ? `En tus notas aparecen <b>molestias o lesión</b> (${D.lesionNotas.length} sesión${D.lesionNotas.length > 1 ? 'es' : ''})` : `Reportaste <b>molestias</b> en ${D.conMolestia.length} sesión${D.conMolestia.length > 1 ? 'es' : ''}`;
+    const inc = D.lesionNotas.length && !D.conMolestia.length ? ', pero el estado físico quedó como "Sin molestias"' : '';
+    h += `<div class="alerta">⚠️ ${zonas}${inc}.</div>`;
+  }
+  if ((D.ses.length && enc) || D.alerta) h += `</div>`;
+  h += `<div class="t-sec reco"><div class="t-sec-t"><span>Lo que te recomiendo</span><span>4 semanas</span></div>
+    <div class="semana"><div></div>${RS_DIAS.map(x => `<div class="h">${x[1].toUpperCase()}</div>`).join('')}
+      ${fila('Plan', k => `<div class="chip ${RS_CLASE[RS.plan[k]]}">${RS.plan[k] === '—' ? '—' : RS.plan[k]}</div>`)}</div>
+    <div class="reco-n">${encEsc(RS.reco)}</div></div>
+    <div class="t-pie"><span>Hablemos esta semana 👊</span><b>CARLOS GIMENEZ</b></div>`;
+  document.getElementById('rs-tarjeta').innerHTML = h;
+}
+
+async function rsImagen() {
+  if (!window.html2canvas) { alert('No se pudo cargar el generador de imágenes. Revisá la conexión a internet.'); return null; }
+  const t = document.getElementById('rs-tarjeta');
+  t.style.zoom = '1'; // en celular la tarjeta se ve achicada; la imagen sale siempre a tamaño completo
+  try {
+    const c = await html2canvas(t, { scale: 2, backgroundColor: '#0A1628', useCORS: true });
+    return await new Promise(r => c.toBlob(r, 'image/png'));
+  } finally { t.style.zoom = ''; }
+}
+function rsArchivo() { return 'resumen-' + RS.actual.a.ap.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-') + '.png'; }
+function rsBajar(blob) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = rsArchivo(); a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+async function rsCompartir() {
+  const btn = document.getElementById('rs-btn-share'); btn.disabled = true; btn.textContent = 'Preparando imagen…';
+  try {
+    const texto = document.getElementById('rs-msg').value;
+    const blob = await rsImagen(); if (!blob) return;
+    const file = new File([blob], rsArchivo(), { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ text: texto, files: [file] }); rsOfrecerEnviado(); } catch (e) {}
+      return;
+    }
+    // Computadora: copiar mensaje, bajar imagen y abrir WhatsApp con el texto escrito
+    try { await navigator.clipboard.writeText(texto); } catch (e) {}
+    rsBajar(blob);
+    window.open('https://wa.me/?text=' + encodeURIComponent(texto), '_blank');
+    rsOfrecerEnviado();
+  } finally { btn.disabled = false; btn.textContent = 'Compartir mensaje + imagen'; }
+}
+function rsOfrecerEnviado() {
+  const ch = document.getElementById('rs-enviado');
+  if (!ch.checked && confirm('¿Lo marco como enviado?')) { ch.checked = true; rsMarcarEnviado(true); }
+}
+async function rsDescargar() { const b = await rsImagen(); if (b) rsBajar(b); }
 
 setTimeout(initEncuestasDT, 800);
 
