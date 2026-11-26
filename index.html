@@ -383,6 +383,22 @@ button{font-family:'Inter',sans-serif}
 .enc-error{display:none;margin:4px 16px 10px;padding:12px 14px;border-radius:10px;background:var(--red-bg);border:1px solid rgba(245,82,74,0.4);color:var(--red);font-size:13px;line-height:1.5}
 .enc-nota{text-align:center;font-size:12px;color:var(--muted);padding:6px 24px 14px}
 #btn-enc:disabled{opacity:.6;cursor:wait}
+
+/* ── GUÍA DE USO ── */
+#s-guia{height:100vh;height:100dvh}
+.guia-link{background:transparent;border:1px solid var(--border2);color:var(--cel);border-radius:99px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer}
+.guia-link:active{background:var(--cel-dim)}
+.gu-paso{display:flex;gap:12px;margin:0 16px 12px;padding:16px;background:var(--bg2);border:1px solid var(--border);border-radius:14px}
+.gu-n{flex-shrink:0;width:30px;height:30px;border-radius:50%;background:var(--cel);color:var(--bg);font-family:var(--display);font-size:18px;display:flex;align-items:center;justify-content:center}
+.gu-c{flex:1;min-width:0}
+.gu-t{font-size:16px;font-weight:700;color:var(--white);margin:4px 0 6px}
+.gu-c p{font-size:14px;line-height:1.55;color:var(--text2);margin-bottom:8px}
+.gu-c b{color:var(--white)}
+.gu-ul{margin:0 0 8px 18px;font-size:14px;line-height:1.6;color:var(--text2)}
+.gu-demo{margin:8px 0 10px;pointer-events:none}
+.gu-so{background:var(--bg3);border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.5;color:var(--text2);margin-bottom:8px}
+.gu-so > b:first-child{display:block;color:var(--cel);margin-bottom:2px}
+.gu-fin{text-align:center;font-size:13px;color:var(--muted);padding:10px 24px 16px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -492,6 +508,10 @@ button{font-family:'Inter',sans-serif}
         oninput="filtrarAtletas(this.value)"
         autocomplete="off" autocorrect="off" spellcheck="false">
     </div>
+  </div>
+
+  <div style="padding:0 24px 6px;text-align:center">
+    <button class="guia-link" onclick="showScreen('s-guia')">❓ ¿Cómo se usa la app?</button>
   </div>
 
   <!-- LISTA (vacía por defecto, se llena al escribir) -->
@@ -911,6 +931,78 @@ button{font-family:'Inter',sans-serif}
     <div style="padding:6px 20px 120px">
       <button class="btn-guardar" id="btn-enc" style="width:100%" onclick="enviarEncuesta()">Enviar encuesta ✓</button>
     </div>
+  </div>
+</div>
+
+<!-- ── PANTALLA GUÍA DE USO ── -->
+<div class="screen" id="s-guia">
+  <div class="ch-head">
+    <div class="header-top">
+      <button class="btn-back" onclick="showScreen('s-inicio')">←</button>
+      <div class="header-nombre">CÓMO SE USA</div>
+      <div style="width:30px"></div>
+    </div>
+    <div class="header-fase">Guía de la app · Los Gauchos</div>
+  </div>
+  <div class="ch-body" style="padding:16px 0 40px">
+
+    <div class="gu-paso"><div class="gu-n">1</div><div class="gu-c">
+      <div class="gu-t">Buscá tu apellido</div>
+      <p>En la pantalla principal escribí tu apellido (o tu nombre) y tocá tu nombre en la lista. No hace falta poner tildes.</p>
+      <div class="gu-demo"><div class="atleta-item" style="margin:0;cursor:default"><div class="ai-av">KA</div><div style="flex:1"><div class="ai-nombre">Kramer, Agustín</div><div class="ai-sub">Pre-temporada 2026 · Los Gauchos</div></div><div class="ai-arrow">›</div></div></div>
+    </div></div>
+
+    <div class="gu-paso"><div class="gu-n">2</div><div class="gu-c">
+      <div class="gu-t">Elegí qué sos</div>
+      <p>La primera vez te pregunta si sos <b>pitcher</b> o <b>jugador de posición</b>. Queda guardado en tu ficha; lo podés cambiar cuando quieras con "cambiar".</p>
+    </div></div>
+
+    <div class="gu-paso"><div class="gu-n">3</div><div class="gu-c">
+      <div class="gu-t">Elegí tu semana y tu rutina</div>
+      <p>Arriba marcá cómo es tu semana (Abridor / Relevista, o cuántos partidos jugás) y la app te muestra la <b>planificación sugerida por Carlos</b>: qué día es Completo, Híbrido o Recovery.</p>
+      <p>Después tocá la rutina que vas a hacer:</p>
+      <ul class="gu-ul"><li><b>FAB · Pre-temporada</b>: el plan del plantel (Día 1, 2, 3 y Recovery).</li><li><b>Mi entrenador</b>: si tenés rutina personalizada.</li><li><b>Macrociclo Potencia</b>: bloque Contraste Francés.</li><li><b>Testeos</b>: para cargar los resultados de las jornadas de test.</li><li><b>Charla</b>: presentación y encuesta.</li></ul>
+    </div></div>
+
+    <div class="gu-paso"><div class="gu-n">4</div><div class="gu-c">
+      <div class="gu-t">Cargá tus pesos</div>
+      <p>Elegí el día en las pestañas de arriba. En cada ejercicio escribí los <b>kg</b>, las <b>reps</b> o un <b>✓</b> si lo hiciste. La flechita verde te muestra <b>lo último que cargaste</b>.</p>
+      <div class="gu-demo"><div class="ej-row" style="padding:10px 12px;border:1px solid var(--border);border-radius:10px"><div class="ej-info"><div class="ej-nombre">Press banca</div><div class="ej-meta">3 × 10</div></div><div class="ej-input-wrap"><div class="ej-input" style="display:flex;align-items:center;justify-content:center;height:38px">60</div><div class="ej-input-lbl">kg</div><div style="font-size:10px;color:var(--green);font-family:var(--mono)">↑ 57.5</div></div></div></div>
+    </div></div>
+
+    <div class="gu-paso"><div class="gu-n">5</div><div class="gu-c">
+      <div class="gu-t">Guardá la sesión y contá cómo te fue</div>
+      <p>Al terminar tocá <b>Guardar sesión →</b>. Antes de confirmar marcá:</p>
+      <ul class="gu-ul"><li>Qué tipo de entrenamiento hiciste (Híbrido, Recovery o Completo).</li><li>Tu estado físico. <b>Si tenés una molestia, reportala</b>: el staff la ve en el momento.</li><li>Qué tan dura fue la sesión (RPE).</li><li>Un comentario si querés.</li></ul>
+      <p>Tocá <b>Confirmar y guardar ✓</b> y listo: aparece <b style="color:var(--green)">GUARDADO</b>.</p>
+    </div></div>
+
+    <div class="gu-paso"><div class="gu-n">6</div><div class="gu-c">
+      <div class="gu-t">¿Sin señal? No pasa nada</div>
+      <p>Si no hay internet, la sesión <b>queda guardada en tu celular</b> y se envía sola apenas vuelve la señal. Vas a ver este aviso:</p>
+      <div class="gu-demo"><div class="ok-pend" style="display:block;margin:0;max-width:none">Sin conexión: quedó guardado en este teléfono y se envía solo apenas vuelva la señal.</div></div>
+      <p>No borres los datos del navegador hasta tener señal de nuevo.</p>
+    </div></div>
+
+    <div class="gu-paso"><div class="gu-n">7</div><div class="gu-c">
+      <div class="gu-t">Mi ficha</div>
+      <p>Desde el entrenamiento, arriba a la derecha, tocá <b>📋 Mi ficha</b> para cargar tus datos: DNI, teléfono, posición, peso, altura, cobertura médica y lesiones previas.</p>
+    </div></div>
+
+    <div class="gu-paso"><div class="gu-n">8</div><div class="gu-c">
+      <div class="gu-t">Charla y encuesta</div>
+      <p>En <b>🎤 Charla</b> podés ver la presentación (deslizá con el dedo) y contestar la encuesta. Es para vos: no hay respuestas correctas ni incorrectas.</p>
+    </div></div>
+
+    <div class="gu-paso"><div class="gu-n">9</div><div class="gu-c">
+      <div class="gu-t">Tenela a mano como una app</div>
+      <div class="gu-so"><b>iPhone (Safari)</b>Tocá el botón <b>Compartir</b> (el cuadrado con la flecha para arriba) → <b>Agregar a inicio</b> → <b>Agregar</b>.</div>
+      <div class="gu-so"><b>Android (Chrome)</b>Tocá los <b>tres puntitos ⋮</b> arriba a la derecha → <b>Agregar a la pantalla principal</b> (o <b>Instalar app</b>).</div>
+      <p>Te queda el ícono en el celular y entrás directo.</p>
+    </div></div>
+
+    <div class="gu-fin">¿Dudas o algo no funciona? Hablalo con Carlos.</div>
+    <div style="padding:0 20px"><button class="btn-guardar" style="width:100%" onclick="showScreen('s-inicio')">Entendido, empezar →</button></div>
   </div>
 </div>
 
@@ -2040,6 +2132,9 @@ function abrirSelector() {
   document.getElementById('sel-perfil').textContent = nombrePerfil(perfilActual);
   document.getElementById('sel-nombre').textContent = atletaActual.ap.toUpperCase() + (atletaActual.nom ? ', ' + atletaActual.nom : '');
   document.getElementById('sel-profe').textContent = ATLETAS_EXTRA[atletaActual.ap] ? ATLETAS_EXTRA[atletaActual.ap].profe : 'Rutina personalizada';
+  // "Mi entrenador" solo si el atleta tiene rutina personal (antes 35 de 40 entraban a una pantalla vacía)
+  const extra = document.querySelector('#s-selector .card-btn[onclick="cargarEntreno(\'extra\')"]');
+  if (extra) extra.style.display = (RUTINAS_EXTRA[atletaActual.ap] || []).length ? 'block' : 'none';
   document.getElementById('btn-sel-potencia').style.display = 'block';
   document.getElementById('btn-sel-testeos').style.display = 'block';
   renderSemanaTipo();
@@ -2197,10 +2292,12 @@ async function guardarSesion() {
     diaEl = document.getElementById('dia-' + diaActual);
   }
   const inputs = diaEl ? diaEl.querySelectorAll('.ej-input') : [];
+  if (!inputs.length) { alert('Esta rutina no tiene ejercicios para guardar.'); return; }
   const registros = {};
   inputs.forEach(inp => {
     const val = inp.value.trim();
-    if (val) registros[inp.dataset.ej] = val;
+    // Solo valores con algún número, letra o ✓: un "." o "," suelto es un toque sin querer
+    if (/[0-9a-zA-Z✓]/.test(val)) registros[inp.dataset.ej] = val;
   });
 
   const notaLibre = document.getElementById('nota-libre')?.value?.trim() || '';
@@ -2360,7 +2457,7 @@ function chTab(i) {
 // Carrusel de diapositivas (se desliza con el dedo o con las flechas)
 function slActual() {
   const tr = document.getElementById('sl-track');
-  return Math.round(tr.scrollLeft / tr.clientWidth);
+  return tr.clientWidth ? Math.round(tr.scrollLeft / tr.clientWidth) : 0;
 }
 function slIr(paso) {
   const tr = document.getElementById('sl-track');
